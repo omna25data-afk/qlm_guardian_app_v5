@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
-
 import '../../../../features/admin/data/models/admin_guardian_model.dart';
 import '../../../../features/admin/presentation/providers/admin_guardians_provider.dart';
+import '../../../../features/admin/presentation/widgets/licenses_list_tab.dart';
+import '../../../../features/admin/presentation/widgets/cards_list_tab.dart';
+import '../../../../features/admin/presentation/widgets/areas_list_tab.dart';
+import '../../../../features/admin/presentation/widgets/assignments_list_tab.dart';
+import '../../../../features/admin/presentation/screens/guardian_details_screen.dart';
+import '../../../../features/admin/presentation/screens/add_edit_guardian_screen.dart';
 
 class GuardiansTab extends ConsumerStatefulWidget {
   const GuardiansTab({super.key});
@@ -33,73 +38,86 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // 1. Search Bar
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: TextField(
-            controller: _searchController,
-            onChanged: (value) {
-              ref.read(adminGuardiansProvider.notifier).onSearchChanged(value);
-            },
-            decoration: InputDecoration(
-              hintText: 'بحث عن أمين (الاسم، السجل، رقم الهوية...)',
-              hintStyle: GoogleFonts.tajawal(color: Colors.grey),
-              prefixIcon: const Icon(Icons.search, color: AppColors.primary),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Column(
+        children: [
+          // 1. Search Bar
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                ref
+                    .read(adminGuardiansProvider.notifier)
+                    .onSearchChanged(value);
+              },
+              decoration: InputDecoration(
+                hintText: 'بحث عن أمين (الاسم، السجل، رقم الهوية...)',
+                hintStyle: GoogleFonts.tajawal(color: Colors.grey),
+                prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 14),
             ),
           ),
-        ),
 
-        // 2. Tabs
-        Container(
-          color: Colors.white,
-          child: TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: AppColors.primary,
-            tabAlignment: TabAlignment.start,
-            labelStyle: GoogleFonts.tajawal(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
+          // 2. Tabs
+          Container(
+            color: Colors.white,
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: AppColors.primary,
+              tabAlignment: TabAlignment.start,
+              labelStyle: GoogleFonts.tajawal(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+              unselectedLabelStyle: GoogleFonts.tajawal(
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+              ),
+              tabs: const [
+                Tab(text: 'الأمناء'),
+                Tab(text: 'تجديد الرخص'),
+                Tab(text: 'تجديد البطاقات'),
+                Tab(text: 'المناطق'),
+                Tab(text: 'التكليفات'),
+              ],
             ),
-            unselectedLabelStyle: GoogleFonts.tajawal(
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
-            ),
-            tabs: const [
-              Tab(text: 'الأمناء'),
-              Tab(text: 'تجديد الرخص'),
-              Tab(text: 'تجديد البطاقات'),
-              Tab(text: 'المناطق'),
-              Tab(text: 'التكليفات'),
-            ],
           ),
-        ),
 
-        // 3. Content
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              _buildGuardiansList(),
-              const Center(child: Text('قريباً: تجديد الرخص')),
-              const Center(child: Text('قريباً: تجديد البطاقات')),
-              const Center(child: Text('قريباً: المناطق')),
-              const Center(child: Text('قريباً: التكليفات')),
-            ],
+          // 3. Content
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildGuardiansList(),
+                const LicensesListTab(),
+                const CardsListTab(),
+                const AreasListTab(),
+                const AssignmentsListTab(),
+              ],
+            ),
           ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AddEditGuardianScreen()),
         ),
-      ],
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 
@@ -130,7 +148,8 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
           padding: const EdgeInsets.all(16),
           itemCount: guardians.length,
           itemBuilder: (context, index) {
-            return _buildGuardianCard(guardians[index]);
+            final guardian = guardians[index];
+            return _buildGuardianCard(guardian);
           },
         );
       },
@@ -138,73 +157,83 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
   }
 
   Widget _buildGuardianCard(AdminGuardianModel guardian) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                  backgroundImage: guardian.photoUrl != null
-                      ? NetworkImage(guardian.photoUrl!)
-                      : null,
-                  child: guardian.photoUrl == null
-                      ? const Icon(Icons.person, color: AppColors.primary)
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        guardian.name,
-                        style: GoogleFonts.tajawal(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        'سجل رقم: ${guardian.serialNumber}',
-                        style: GoogleFonts.tajawal(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GuardianDetailsScreen(guardian: guardian),
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                    backgroundImage: guardian.photoUrl != null
+                        ? NetworkImage(guardian.photoUrl!)
+                        : null,
+                    child: guardian.photoUrl == null
+                        ? const Icon(Icons.person, color: AppColors.primary)
+                        : null,
                   ),
-                ),
-                _buildStatusBadge(
-                  guardian.employmentStatus ?? 'غير محدد',
-                  _parseColor(guardian.employmentStatusColor),
-                ),
-              ],
-            ),
-            const Divider(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildInfoItem(
-                  Icons.card_membership,
-                  'الترخيص',
-                  guardian.licenseStatus ?? '-',
-                  guardian.licenseStatusColor,
-                ),
-                _buildInfoItem(
-                  Icons.badge,
-                  'المزاولة',
-                  guardian.cardStatus ?? '-',
-                  guardian.cardStatusColor,
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          guardian.name,
+                          style: GoogleFonts.tajawal(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'سجل رقم: ${guardian.serialNumber}',
+                          style: GoogleFonts.tajawal(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _buildStatusBadge(
+                    guardian.employmentStatus ?? 'غير محدد',
+                    _parseColor(guardian.employmentStatusColor),
+                  ),
+                ],
+              ),
+              const Divider(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildInfoItem(
+                    Icons.card_membership,
+                    'الترخيص',
+                    guardian.licenseStatus ?? '-',
+                    guardian.licenseStatusColor,
+                  ),
+                  _buildInfoItem(
+                    Icons.badge,
+                    'المزاولة',
+                    guardian.cardStatus ?? '-',
+                    guardian.cardStatusColor,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -237,19 +266,19 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
   ) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey),
-        const SizedBox(width: 4),
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label,
-              style: GoogleFonts.tajawal(fontSize: 10, color: Colors.grey),
+              style: GoogleFonts.tajawal(fontSize: 10, color: Colors.grey[600]),
             ),
             Text(
               value,
               style: GoogleFonts.tajawal(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
@@ -261,7 +290,8 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
   }
 
   Color _parseColor(String? colorName) {
-    switch (colorName?.toLowerCase()) {
+    if (colorName == null) return Colors.grey;
+    switch (colorName.toLowerCase()) {
       case 'red':
       case 'danger':
         return AppColors.error;

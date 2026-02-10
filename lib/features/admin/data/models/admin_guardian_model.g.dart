@@ -23,6 +23,7 @@ AdminGuardianModel _$AdminGuardianModelFromJson(Map<String, dynamic> json) =>
       fatherName: json['father_name'] as String?,
       grandfatherName: json['grandfather_name'] as String?,
       familyName: json['family_name'] as String?,
+      greatGrandfatherName: json['great_grandfather_name'] as String?,
       birthDate: json['birth_date'] as String?,
       birthPlace: json['birth_place'] as String?,
       homePhone: json['home_phone'] as String?,
@@ -48,6 +49,12 @@ AdminGuardianModel _$AdminGuardianModelFromJson(Map<String, dynamic> json) =>
       stopDate: json['stop_date'] as String?,
       stopReason: json['stop_reason'] as String?,
       notes: json['notes'] as String?,
+      licenseRenewals: (json['license_renewals'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList(),
+      cardRenewals: (json['card_renewals'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList(),
     );
 
 Map<String, dynamic> _$AdminGuardianModelToJson(AdminGuardianModel instance) =>
@@ -67,6 +74,7 @@ Map<String, dynamic> _$AdminGuardianModelToJson(AdminGuardianModel instance) =>
       'father_name': instance.fatherName,
       'grandfather_name': instance.grandfatherName,
       'family_name': instance.familyName,
+      'great_grandfather_name': instance.greatGrandfatherName,
       'birth_date': instance.birthDate,
       'birth_place': instance.birthPlace,
       'home_phone': instance.homePhone,
@@ -92,4 +100,6 @@ Map<String, dynamic> _$AdminGuardianModelToJson(AdminGuardianModel instance) =>
       'stop_date': instance.stopDate,
       'stop_reason': instance.stopReason,
       'notes': instance.notes,
+      'license_renewals': instance.licenseRenewals,
+      'card_renewals': instance.cardRenewals,
     };

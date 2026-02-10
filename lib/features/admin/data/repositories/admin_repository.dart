@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
 import '../models/admin_area_model.dart';
 import '../models/admin_assignment_model.dart';
@@ -35,13 +36,50 @@ class AdminRepository {
   }
 
   /// Create a new guardian
-  Future<void> createGuardian(Map<String, dynamic> data) async {
-    await _apiClient.post('/v1/admin/guardians', data: data);
+  Future<void> createGuardian(
+    Map<String, dynamic> data, {
+    String? imagePath,
+  }) async {
+    dynamic body = data;
+
+    if (imagePath != null) {
+      body = FormData.fromMap({
+        ...data,
+        'photo': await MultipartFile.fromFile(
+          imagePath,
+          filename: imagePath.split('/').last,
+        ),
+      });
+    }
+
+    await _apiClient.post('/v1/admin/guardians', data: body);
   }
 
   /// Update an existing guardian
-  Future<void> updateGuardian(int id, Map<String, dynamic> data) async {
-    await _apiClient.put('/v1/admin/guardians/$id', data: data);
+  Future<void> updateGuardian(
+    int id,
+    Map<String, dynamic> data, {
+    String? imagePath,
+  }) async {
+    dynamic body = data;
+
+    if (imagePath != null) {
+      body = FormData.fromMap({
+        ...data,
+        'photo': await MultipartFile.fromFile(
+          imagePath,
+          filename: imagePath.split('/').last,
+        ),
+      });
+    }
+
+    // Using POST with _method=PUT to support multipart with PUT in Laravel
+    if (imagePath != null) {
+      (body as FormData).fields.add(const MapEntry('_method', 'PUT'));
+      await _apiClient.post('/v1/admin/guardians/$id', data: body);
+    } else {
+      await _apiClient.put('/v1/admin/guardians/$id', data: body);
+    }
   }
 
   // ─── Dashboard ───────────────────────────────────────────
@@ -145,35 +183,41 @@ class AdminRepository {
   // ─── Cards ───────────────────────────────────────────────
 
   /// Fetch profession cards
-  Future<List<Map<String, dynamic>>> getCards({int page = 1}) async {
+  Future<List<AdminRenewalModel>> getCards({int page = 1}) async {
     final response = await _apiClient.get(
       '/admin/cards',
       queryParameters: {'page': page},
     );
-    final data = response.data['data'] ?? response.data;
-    return (data as List).map((e) => e as Map<String, dynamic>).toList();
+    return (response.data['data'] as List?)
+            ?.map((e) => AdminRenewalModel.fromJson(e))
+            .toList() ??
+        [];
   }
 
   /// Fetch card renewals
-  Future<List<Map<String, dynamic>>> getCardRenewals({int page = 1}) async {
+  Future<List<AdminRenewalModel>> getCardRenewals({int page = 1}) async {
     final response = await _apiClient.get(
       '/admin/electronic-card-renewals',
       queryParameters: {'page': page},
     );
-    final data = response.data['data'] ?? response.data;
-    return (data as List).map((e) => e as Map<String, dynamic>).toList();
+    return (response.data['data'] as List?)
+            ?.map((e) => AdminRenewalModel.fromJson(e))
+            .toList() ??
+        [];
   }
 
   // ─── Licenses ────────────────────────────────────────────
 
   /// Fetch licenses
-  Future<List<Map<String, dynamic>>> getLicenses({int page = 1}) async {
+  Future<List<AdminRenewalModel>> getLicenses({int page = 1}) async {
     final response = await _apiClient.get(
       '/admin/licenses',
       queryParameters: {'page': page},
     );
-    final data = response.data['data'] ?? response.data;
-    return (data as List).map((e) => e as Map<String, dynamic>).toList();
+    return (response.data['data'] as List?)
+            ?.map((e) => AdminRenewalModel.fromJson(e))
+            .toList() ??
+        [];
   }
 
   /// Get license details
@@ -183,6 +227,28 @@ class AdminRepository {
   }
 
   // ─── Renewals ────────────────────────────────────────────
+
+  /// Submit license renewal for a guardian
+  Future<void> submitLicenseRenewal(
+    int guardianId,
+    Map<String, dynamic> data,
+  ) async {
+    await _apiClient.post(
+      '/v1/admin/guardians/$guardianId/renew-license',
+      data: data,
+    );
+  }
+
+  /// Submit profession card renewal for a guardian
+  Future<void> submitCardRenewal(
+    int guardianId,
+    Map<String, dynamic> data,
+  ) async {
+    await _apiClient.post(
+      '/v1/admin/guardians/$guardianId/renew-card',
+      data: data,
+    );
+  }
 
   /// Fetch guardian renewals
   Future<List<AdminRenewalModel>> getRenewals({int page = 1}) async {

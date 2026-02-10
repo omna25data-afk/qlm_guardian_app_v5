@@ -39,6 +39,8 @@ class AdminGuardianModel {
   final String? grandfatherName;
   @JsonKey(name: 'family_name')
   final String? familyName;
+  @JsonKey(name: 'great_grandfather_name')
+  final String? greatGrandfatherName;
 
   @JsonKey(name: 'birth_date')
   final String? birthDate;
@@ -100,6 +102,11 @@ class AdminGuardianModel {
   final String? stopReason;
   final String? notes;
 
+  @JsonKey(name: 'license_renewals')
+  final List<Map<String, dynamic>>? licenseRenewals;
+  @JsonKey(name: 'card_renewals')
+  final List<Map<String, dynamic>>? cardRenewals;
+
   AdminGuardianModel({
     required this.id,
     required this.name,
@@ -116,6 +123,7 @@ class AdminGuardianModel {
     this.fatherName,
     this.grandfatherName,
     this.familyName,
+    this.greatGrandfatherName,
     this.birthDate,
     this.birthPlace,
     this.homePhone,
@@ -141,6 +149,8 @@ class AdminGuardianModel {
     this.stopDate,
     this.stopReason,
     this.notes,
+    this.licenseRenewals,
+    this.cardRenewals,
   });
 
   factory AdminGuardianModel.fromJson(Map<String, dynamic> json) =>
