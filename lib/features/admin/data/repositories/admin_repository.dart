@@ -1,0 +1,261 @@
+import '../../../../core/network/api_client.dart';
+import '../models/admin_area_model.dart';
+import '../models/admin_assignment_model.dart';
+import '../models/admin_dashboard_data.dart';
+import '../models/admin_guardian_model.dart';
+import '../models/admin_renewal_model.dart';
+
+class AdminRepository {
+  final ApiClient _apiClient;
+
+  AdminRepository(this._apiClient);
+
+  // ─── Guardians ───────────────────────────────────────────
+
+  /// Fetch guardians list with optional search query
+  Future<List<AdminGuardianModel>> getGuardians({String? query}) async {
+    try {
+      final response = await _apiClient.get(
+        '/v1/admin/guardians',
+        queryParameters: query != null ? {'search': query} : null,
+      );
+      return (response.data['data'] as List?)
+              ?.map((e) => AdminGuardianModel.fromJson(e))
+              .toList() ??
+          [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Fetch guardian details by ID
+  Future<AdminGuardianModel> getGuardianDetails(int id) async {
+    final response = await _apiClient.get('/v1/admin/guardians/$id');
+    return AdminGuardianModel.fromJson(response.data['data'] ?? response.data);
+  }
+
+  /// Create a new guardian
+  Future<void> createGuardian(Map<String, dynamic> data) async {
+    await _apiClient.post('/v1/admin/guardians', data: data);
+  }
+
+  /// Update an existing guardian
+  Future<void> updateGuardian(int id, Map<String, dynamic> data) async {
+    await _apiClient.put('/v1/admin/guardians/$id', data: data);
+  }
+
+  // ─── Dashboard ───────────────────────────────────────────
+
+  /// Fetch dashboard data
+  Future<AdminDashboardData> getDashboardData() async {
+    try {
+      final response = await _apiClient.get('/v1/admin/dashboard');
+      return AdminDashboardData.fromJson(response.data['data'] ?? {});
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Get urgent actions
+  Future<List<UrgentAction>> getUrgentActions() async {
+    try {
+      final response = await _apiClient.get('/v1/admin/urgent-actions');
+      return (response.data['data'] as List?)
+              ?.map((e) => UrgentAction.fromJson(e))
+              .toList() ??
+          [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // ─── Areas ───────────────────────────────────────────────
+
+  /// Fetch areas with pagination and filters
+  Future<List<AdminAreaModel>> getAreas({
+    int page = 1,
+    String? searchQuery,
+    String? type,
+    String? parentId,
+  }) async {
+    final params = <String, dynamic>{'page': page, 'filter[is_active]': '1'};
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      params['filter[name]'] = searchQuery;
+    }
+    if (type != null) params['filter[type]'] = type;
+    if (parentId != null) params['filter[parent_id]'] = parentId;
+
+    final response = await _apiClient.get(
+      '/geographic-areas',
+      queryParameters: params,
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => AdminAreaModel.fromJson(e))
+            .toList() ??
+        [];
+  }
+
+  Future<List<AdminAreaModel>> getDistricts({String? query}) =>
+      getAreas(searchQuery: query, type: 'عزلة');
+
+  Future<List<AdminAreaModel>> getVillages({String? query, String? parentId}) =>
+      getAreas(searchQuery: query, type: 'قرية', parentId: parentId);
+
+  Future<List<AdminAreaModel>> getLocalities({
+    String? query,
+    String? parentId,
+  }) => getAreas(searchQuery: query, type: 'محل', parentId: parentId);
+
+  /// Create a new area
+  Future<void> createArea(Map<String, dynamic> data) async {
+    await _apiClient.post('/admin/areas', data: data);
+  }
+
+  // ─── Assignments ─────────────────────────────────────────
+
+  /// Fetch assignments with pagination and filters
+  Future<List<AdminAssignmentModel>> getAssignments({
+    int page = 1,
+    String? searchQuery,
+    String? status,
+    String? type,
+  }) async {
+    final params = <String, dynamic>{'page': page};
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      params['filter[serial_number]'] = searchQuery;
+    }
+    if (status != null && status != 'all') params['status'] = status;
+    if (type != null && type != 'all') params['type'] = type;
+
+    final response = await _apiClient.get(
+      '/guardian-assignments',
+      queryParameters: params,
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => AdminAssignmentModel.fromJson(e))
+            .toList() ??
+        [];
+  }
+
+  /// Create a new assignment
+  Future<void> createAssignment(Map<String, dynamic> data) async {
+    await _apiClient.post('/admin/assignments', data: data);
+  }
+
+  // ─── Cards ───────────────────────────────────────────────
+
+  /// Fetch profession cards
+  Future<List<Map<String, dynamic>>> getCards({int page = 1}) async {
+    final response = await _apiClient.get(
+      '/admin/cards',
+      queryParameters: {'page': page},
+    );
+    final data = response.data['data'] ?? response.data;
+    return (data as List).map((e) => e as Map<String, dynamic>).toList();
+  }
+
+  /// Fetch card renewals
+  Future<List<Map<String, dynamic>>> getCardRenewals({int page = 1}) async {
+    final response = await _apiClient.get(
+      '/admin/electronic-card-renewals',
+      queryParameters: {'page': page},
+    );
+    final data = response.data['data'] ?? response.data;
+    return (data as List).map((e) => e as Map<String, dynamic>).toList();
+  }
+
+  // ─── Licenses ────────────────────────────────────────────
+
+  /// Fetch licenses
+  Future<List<Map<String, dynamic>>> getLicenses({int page = 1}) async {
+    final response = await _apiClient.get(
+      '/admin/licenses',
+      queryParameters: {'page': page},
+    );
+    final data = response.data['data'] ?? response.data;
+    return (data as List).map((e) => e as Map<String, dynamic>).toList();
+  }
+
+  /// Get license details
+  Future<Map<String, dynamic>> getLicenseDetails(int id) async {
+    final response = await _apiClient.get('/license-managements/$id');
+    return response.data;
+  }
+
+  // ─── Renewals ────────────────────────────────────────────
+
+  /// Fetch guardian renewals
+  Future<List<AdminRenewalModel>> getRenewals({int page = 1}) async {
+    final response = await _apiClient.get(
+      '/admin/renewals',
+      queryParameters: {'page': page},
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => AdminRenewalModel.fromJson(e))
+            .toList() ??
+        [];
+  }
+
+  // ─── Reports ─────────────────────────────────────────────
+
+  /// Get available report years
+  Future<List<int>> getAvailableYears() async {
+    final response = await _apiClient.get('/reports/years');
+    final data = response.data is List ? response.data : response.data['data'];
+    return (data as List).map((e) => e as int).toList();
+  }
+
+  /// Guardian statistics for reports
+  Future<Map<String, dynamic>> getGuardianStatistics({
+    int? year,
+    String? periodType,
+    String? periodValue,
+  }) async {
+    final params = <String, dynamic>{};
+    if (year != null) params['year'] = year;
+    if (periodType != null) params['period_type'] = periodType;
+    if (periodValue != null) params['period_value'] = periodValue;
+
+    final response = await _apiClient.get(
+      '/reports/guardian-statistics',
+      queryParameters: params.isNotEmpty ? params : null,
+    );
+    return response.data;
+  }
+
+  /// Entries statistics for reports
+  Future<Map<String, dynamic>> getEntriesStatistics({
+    int? year,
+    String? periodType,
+    String? periodValue,
+  }) async {
+    final params = <String, dynamic>{};
+    if (year != null) params['year'] = year;
+    if (periodType != null) params['period_type'] = periodType;
+    if (periodValue != null) params['period_value'] = periodValue;
+
+    final response = await _apiClient.get(
+      '/reports/entries-statistics',
+      queryParameters: params.isNotEmpty ? params : null,
+    );
+    return response.data;
+  }
+
+  /// Contract types summary for reports
+  Future<Map<String, dynamic>> getContractTypesSummary({
+    int? year,
+    String? periodType,
+    String? periodValue,
+  }) async {
+    final params = <String, dynamic>{};
+    if (year != null) params['year'] = year;
+    if (periodType != null) params['period_type'] = periodType;
+    if (periodValue != null) params['period_value'] = periodValue;
+
+    final response = await _apiClient.get(
+      '/reports/contract-types-summary',
+      queryParameters: params.isNotEmpty ? params : null,
+    );
+    return response.data;
+  }
+}
