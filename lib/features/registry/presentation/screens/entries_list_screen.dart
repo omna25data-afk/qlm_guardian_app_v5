@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../providers/registry_provider.dart';
+import 'add_registry_entry_screen.dart';
 import 'entry_details_screen.dart';
 
 class EntriesListScreen extends ConsumerWidget {
@@ -63,7 +64,10 @@ class EntriesListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to add entry screen
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddRegistryEntryScreen()),
+          );
         },
         child: const Icon(Icons.add),
       ),

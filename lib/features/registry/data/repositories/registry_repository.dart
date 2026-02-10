@@ -2,6 +2,8 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/network/network_info.dart';
 import '../datasources/registry_local_datasource.dart';
 import '../datasources/registry_remote_datasource.dart';
+import '../models/contract_type_model.dart';
+import '../models/form_field_model.dart';
 import '../models/registry_entry_model.dart';
 import 'package:flutter/foundation.dart';
 
@@ -38,23 +40,51 @@ class RegistryRepository {
     return _localDataSource.getAllEntries();
   }
 
+  Future<List<ContractTypeModel>> getContractTypes() async {
+    if (await _networkInfo.isConnected) {
+      return _remoteDataSource.getContractTypes();
+    }
+    // Fallback to local cache if implemented later
+    return [];
+  }
+
+  Future<List<FormFieldModel>> getFormFields(int typeId) async {
+    if (await _networkInfo.isConnected) {
+      return _remoteDataSource.getFormFields(typeId);
+    }
+    return [];
+  }
+
   /// Create new entry (offline-first)
-  Future<RegistryEntryModel> createEntry(RegistryEntryModel entry) async {
+  Future<RegistryEntryModel> createEntry(
+    RegistryEntryModel entry, {
+    String? attachmentPath,
+  }) async {
     // 1. Generate UUID if not present
     final uuid = entry.uuid.isEmpty ? const Uuid().v4() : entry.uuid;
     final entryWithUuid = entry.copyWith(uuid: uuid, status: 'draft');
 
-    // 2. Save locally
+    // 2. Save locally (Basic info only, extras/file might be lost if offline)
     await _localDataSource.insertEntry(entryWithUuid);
 
     // 3. Try to sync if online
     if (await _networkInfo.isConnected) {
       try {
-        await _remoteDataSource.createEntry(entryWithUuid);
-        // Update sync status locally if needed
+        final created = await _remoteDataSource.createEntry(
+          entryWithUuid,
+          attachmentPath: attachmentPath,
+        );
+        // Update local with remote ID/Extras if returned
+        await _localDataSource.updateEntry(created);
+        return created;
       } catch (e) {
         // Queue for later (handled by SyncService)
         debugPrint('Online creation failed, queued: $e');
+        if (attachmentPath != null) {
+          debugPrint(
+            'WARNING: Attachment will not be synced by standard sync service!',
+          );
+        }
       }
     }
 

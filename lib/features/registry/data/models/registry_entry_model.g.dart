@@ -12,6 +12,8 @@ RegistryEntryModel _$RegistryEntryModelFromJson(Map<String, dynamic> json) =>
       uuid: json['uuid'] as String,
       remoteId: (json['remote_id'] as num?)?.toInt(),
       guardianId: (json['guardian_id'] as num?)?.toInt(),
+      recordBookId: (json['record_book_id'] as num?)?.toInt(),
+      contractTypeId: (json['contract_type_id'] as num?)?.toInt(),
       status: json['status'] as String? ?? 'draft',
       serialNumber: (json['serial_number'] as num?)?.toInt(),
       registerNumber: json['register_number'] as String?,
@@ -27,6 +29,7 @@ RegistryEntryModel _$RegistryEntryModelFromJson(Map<String, dynamic> json) =>
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
+      extraAttributes: json['extra_attributes'] as Map<String, dynamic>?,
     );
 
 Map<String, dynamic> _$RegistryEntryModelToJson(RegistryEntryModel instance) =>
@@ -35,6 +38,8 @@ Map<String, dynamic> _$RegistryEntryModelToJson(RegistryEntryModel instance) =>
       'uuid': instance.uuid,
       'remote_id': instance.remoteId,
       'guardian_id': instance.guardianId,
+      'record_book_id': instance.recordBookId,
+      'contract_type_id': instance.contractTypeId,
       'status': instance.status,
       'serial_number': instance.serialNumber,
       'register_number': instance.registerNumber,
@@ -46,4 +51,5 @@ Map<String, dynamic> _$RegistryEntryModelToJson(RegistryEntryModel instance) =>
       'total_amount': instance.totalAmount,
       'paid_amount': instance.paidAmount,
       'created_at': instance.createdAt?.toIso8601String(),
+      'extra_attributes': instance.extraAttributes,
     };
