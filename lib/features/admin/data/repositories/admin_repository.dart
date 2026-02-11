@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/network/api_endpoints.dart';
 import '../models/admin_area_model.dart';
 import '../models/admin_assignment_model.dart';
 import '../models/admin_dashboard_data.dart';
@@ -17,7 +18,7 @@ class AdminRepository {
   Future<List<AdminGuardianModel>> getGuardians({String? query}) async {
     try {
       final response = await _apiClient.get(
-        '/v1/admin/guardians',
+        ApiEndpoints.adminGuardians,
         queryParameters: query != null ? {'search': query} : null,
       );
       return (response.data['data'] as List?)
@@ -31,7 +32,7 @@ class AdminRepository {
 
   /// Fetch guardian details by ID
   Future<AdminGuardianModel> getGuardianDetails(int id) async {
-    final response = await _apiClient.get('/v1/admin/guardians/$id');
+    final response = await _apiClient.get('${ApiEndpoints.adminGuardians}/$id');
     return AdminGuardianModel.fromJson(response.data['data'] ?? response.data);
   }
 
@@ -52,7 +53,7 @@ class AdminRepository {
       });
     }
 
-    await _apiClient.post('/v1/admin/guardians', data: body);
+    await _apiClient.post(ApiEndpoints.adminGuardians, data: body);
   }
 
   /// Update an existing guardian
@@ -76,9 +77,9 @@ class AdminRepository {
     // Using POST with _method=PUT to support multipart with PUT in Laravel
     if (imagePath != null) {
       (body as FormData).fields.add(const MapEntry('_method', 'PUT'));
-      await _apiClient.post('/v1/admin/guardians/$id', data: body);
+      await _apiClient.post('${ApiEndpoints.adminGuardians}/$id', data: body);
     } else {
-      await _apiClient.put('/v1/admin/guardians/$id', data: body);
+      await _apiClient.put('${ApiEndpoints.adminGuardians}/$id', data: body);
     }
   }
 
@@ -87,8 +88,8 @@ class AdminRepository {
   /// Fetch dashboard data
   Future<AdminDashboardData> getDashboardData() async {
     try {
-      final response = await _apiClient.get('/v1/admin/dashboard');
-      return AdminDashboardData.fromJson(response.data['data'] ?? {});
+      final response = await _apiClient.get(ApiEndpoints.adminDashboard);
+      return AdminDashboardData.fromJson(response.data ?? {});
     } catch (e) {
       rethrow;
     }
@@ -97,7 +98,9 @@ class AdminRepository {
   /// Get urgent actions
   Future<List<UrgentAction>> getUrgentActions() async {
     try {
-      final response = await _apiClient.get('/v1/admin/urgent-actions');
+      final response = await _apiClient.get(
+        '${ApiEndpoints.adminDashboard}/urgent-actions',
+      );
       return (response.data['data'] as List?)
               ?.map((e) => UrgentAction.fromJson(e))
               .toList() ??
@@ -124,7 +127,7 @@ class AdminRepository {
     if (parentId != null) params['filter[parent_id]'] = parentId;
 
     final response = await _apiClient.get(
-      '/geographic-areas',
+      ApiEndpoints.adminAreas,
       queryParameters: params,
     );
     return (response.data['data'] as List?)
@@ -146,7 +149,7 @@ class AdminRepository {
 
   /// Create a new area
   Future<void> createArea(Map<String, dynamic> data) async {
-    await _apiClient.post('/admin/areas', data: data);
+    await _apiClient.post(ApiEndpoints.adminAreas, data: data);
   }
 
   // ─── Assignments ─────────────────────────────────────────
@@ -166,7 +169,7 @@ class AdminRepository {
     if (type != null && type != 'all') params['type'] = type;
 
     final response = await _apiClient.get(
-      '/guardian-assignments',
+      ApiEndpoints.adminAssignments,
       queryParameters: params,
     );
     return (response.data['data'] as List?)
@@ -177,7 +180,7 @@ class AdminRepository {
 
   /// Create a new assignment
   Future<void> createAssignment(Map<String, dynamic> data) async {
-    await _apiClient.post('/admin/assignments', data: data);
+    await _apiClient.post(ApiEndpoints.adminAssignments, data: data);
   }
 
   // ─── Cards ───────────────────────────────────────────────
@@ -185,7 +188,7 @@ class AdminRepository {
   /// Fetch profession cards
   Future<List<AdminRenewalModel>> getCards({int page = 1}) async {
     final response = await _apiClient.get(
-      '/admin/cards',
+      ApiEndpoints.adminCards,
       queryParameters: {'page': page},
     );
     return (response.data['data'] as List?)
@@ -197,7 +200,7 @@ class AdminRepository {
   /// Fetch card renewals
   Future<List<AdminRenewalModel>> getCardRenewals({int page = 1}) async {
     final response = await _apiClient.get(
-      '/admin/electronic-card-renewals',
+      ApiEndpoints.adminElectronicCardRenewals,
       queryParameters: {'page': page},
     );
     return (response.data['data'] as List?)
@@ -211,7 +214,7 @@ class AdminRepository {
   /// Fetch licenses
   Future<List<AdminRenewalModel>> getLicenses({int page = 1}) async {
     final response = await _apiClient.get(
-      '/admin/licenses',
+      ApiEndpoints.adminLicenses,
       queryParameters: {'page': page},
     );
     return (response.data['data'] as List?)
@@ -222,7 +225,9 @@ class AdminRepository {
 
   /// Get license details
   Future<Map<String, dynamic>> getLicenseDetails(int id) async {
-    final response = await _apiClient.get('/license-managements/$id');
+    final response = await _apiClient.get(
+      '${ApiEndpoints.licenseManagements}/$id',
+    );
     return response.data;
   }
 
@@ -234,7 +239,7 @@ class AdminRepository {
     Map<String, dynamic> data,
   ) async {
     await _apiClient.post(
-      '/v1/admin/guardians/$guardianId/renew-license',
+      '${ApiEndpoints.adminGuardians}/$guardianId/renew-license',
       data: data,
     );
   }
@@ -245,7 +250,7 @@ class AdminRepository {
     Map<String, dynamic> data,
   ) async {
     await _apiClient.post(
-      '/v1/admin/guardians/$guardianId/renew-card',
+      '${ApiEndpoints.adminGuardians}/$guardianId/renew-card',
       data: data,
     );
   }
@@ -253,7 +258,7 @@ class AdminRepository {
   /// Fetch guardian renewals
   Future<List<AdminRenewalModel>> getRenewals({int page = 1}) async {
     final response = await _apiClient.get(
-      '/admin/renewals',
+      ApiEndpoints.adminRenewals,
       queryParameters: {'page': page},
     );
     return (response.data['data'] as List?)
@@ -266,7 +271,7 @@ class AdminRepository {
 
   /// Get available report years
   Future<List<int>> getAvailableYears() async {
-    final response = await _apiClient.get('/reports/years');
+    final response = await _apiClient.get(ApiEndpoints.reportsYears);
     final data = response.data is List ? response.data : response.data['data'];
     return (data as List).map((e) => e as int).toList();
   }
@@ -283,7 +288,7 @@ class AdminRepository {
     if (periodValue != null) params['period_value'] = periodValue;
 
     final response = await _apiClient.get(
-      '/reports/guardian-statistics',
+      ApiEndpoints.guardiansStatistics,
       queryParameters: params.isNotEmpty ? params : null,
     );
     return response.data;
@@ -301,7 +306,7 @@ class AdminRepository {
     if (periodValue != null) params['period_value'] = periodValue;
 
     final response = await _apiClient.get(
-      '/reports/entries-statistics',
+      ApiEndpoints.entriesStatistics,
       queryParameters: params.isNotEmpty ? params : null,
     );
     return response.data;
@@ -319,7 +324,7 @@ class AdminRepository {
     if (periodValue != null) params['period_value'] = periodValue;
 
     final response = await _apiClient.get(
-      '/reports/contract-types-summary',
+      ApiEndpoints.contractTypesSummary,
       queryParameters: params.isNotEmpty ? params : null,
     );
     return response.data;

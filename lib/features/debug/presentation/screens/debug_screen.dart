@@ -59,8 +59,8 @@ class _DebugScreenState extends State<DebugScreen> {
         _addLog('RECORDS ERROR: $e');
       }
 
-      // Test 3: Dashboard
-      _addLog('--- Testing /dashboard ---');
+      // Test 3: Dashboard (Guardians Only)
+      _addLog('--- Testing /dashboard (Guardians Only) ---');
       try {
         final dashResponse = await _apiClient.get('/dashboard');
         _addLog('Status: ${dashResponse.statusCode}');
