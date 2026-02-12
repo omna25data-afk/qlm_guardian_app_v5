@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 
 /// Local data source for auth - stores token and user cache
@@ -53,5 +54,41 @@ class AuthLocalDataSource {
   Future<bool> isLoggedIn() async {
     final token = await getToken();
     return token != null && token.isNotEmpty;
+  }
+
+  // ─── Remember Me ───
+
+  static const String _rememberMeKey = 'remember_me';
+  static const String _lastIdentifierKey = 'last_identifier';
+
+  /// Save remember-me preference
+  Future<void> saveRememberMe(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_rememberMeKey, value);
+  }
+
+  /// Get remember-me preference
+  Future<bool> getRememberMe() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_rememberMeKey) ?? false;
+  }
+
+  /// Save last used login identifier
+  Future<void> saveLastIdentifier(String identifier) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_lastIdentifierKey, identifier);
+  }
+
+  /// Get last used login identifier
+  Future<String?> getLastIdentifier() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_lastIdentifierKey);
+  }
+
+  /// Clear remember-me data
+  Future<void> clearRememberMe() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_rememberMeKey);
+    await prefs.remove(_lastIdentifierKey);
   }
 }

@@ -3,119 +3,328 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
+import '../../../features/dashboard/data/models/dashboard_data.dart';
+import '../../../features/dashboard/presentation/providers/dashboard_provider.dart';
 
-/// لوحة الأمين الشرعي — إحصائياتي + حالة الترخيص/البطاقة
+/// لوحة الرئيسية للأمين الشرعي — مربوطة بـ API
 class GuardianDashboardTab extends ConsumerWidget {
   const GuardianDashboardTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authProvider).user;
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
+    final dashboardState = ref.watch(dashboardProvider);
 
     return RefreshIndicator(
-      onRefresh: () async {
-        // TODO: Refresh guardian dashboard data from API
-      },
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Welcome Card
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
+      onRefresh: () => ref.read(dashboardProvider.notifier).fetchDashboard(),
+      child: dashboardState.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => _buildErrorView(ref, error),
+        data: (dashboard) => ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            _buildWelcomeCard(
+              user?.guardian?.fullName ?? user?.name ?? 'الأمين الشرعي',
+              dashboard,
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'مرحباً، ${user?.guardian?.fullName ?? user?.name ?? "الأمين"}',
-                    style: GoogleFonts.tajawal(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF006400),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (user?.guardian?.specializationArea != null)
-                    Text(
-                      'منطقة الاختصاص: ${user!.guardian!.specializationArea}',
-                      style: GoogleFonts.tajawal(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                ],
-              ),
+            const SizedBox(height: 20),
+            _buildSectionHeader('إحصائياتي', Icons.bar_chart),
+            const SizedBox(height: 12),
+            _buildStatsGrid(dashboard.stats),
+            const SizedBox(height: 20),
+            _buildSectionHeader('حالة الترخيص والبطاقة', Icons.verified_user),
+            const SizedBox(height: 12),
+            _buildStatusCard(
+              'حالة الترخيص',
+              Icons.card_membership,
+              dashboard.licenseStatus,
             ),
-          ),
-          const SizedBox(height: 20),
+            const SizedBox(height: 12),
+            _buildStatusCard(
+              'حالة البطاقة',
+              Icons.credit_card,
+              dashboard.cardStatus,
+            ),
+            if (dashboard.recentActivities.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              _buildSectionHeader('آخر النشاطات', Icons.history),
+              const SizedBox(height: 12),
+              ...dashboard.recentActivities
+                  .take(5)
+                  .map((entry) => _buildActivityItem(entry)),
+            ],
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
 
-          // Stats Section
+  Widget _buildErrorView(WidgetRef ref, Object error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+          const SizedBox(height: 16),
+          Text(
+            'خطأ في تحميل البيانات',
+            style: GoogleFonts.tajawal(fontSize: 16),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error.toString(),
+            style: GoogleFonts.tajawal(fontSize: 12, color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () =>
+                ref.read(dashboardProvider.notifier).fetchDashboard(),
+            icon: const Icon(Icons.refresh),
+            label: Text('إعادة المحاولة', style: GoogleFonts.tajawal()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWelcomeCard(String name, DashboardData dashboard) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF006400), Color(0xFF228B22)],
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF006400).withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'إحصائياتي',
-                style: GoogleFonts.tajawal(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              const Icon(Icons.mosque, color: Colors.white70, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  dashboard.welcomeMessage.isNotEmpty
+                      ? dashboard.welcomeMessage
+                      : 'مرحباً بك',
+                  style: GoogleFonts.tajawal(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-
-          // Stats Grid
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 2.2,
-            children: const [
-              _StatCard(
-                title: 'إجمالي القيود',
-                value: '—',
-                icon: Icons.all_inbox_outlined,
-                color: Colors.blue,
-              ),
-              _StatCard(
-                title: 'موثق',
-                value: '—',
-                icon: Icons.check_circle_outline,
-                color: Colors.green,
-              ),
-              _StatCard(
-                title: 'بانتظار التوثيق',
-                value: '—',
-                icon: Icons.access_time_outlined,
-                color: Colors.orange,
-              ),
-              _StatCard(
-                title: 'المسودات',
-                value: '—',
-                icon: Icons.drafts_outlined,
-                color: Colors.grey,
-              ),
-            ],
+          const SizedBox(height: 8),
+          Text(
+            name,
+            style: GoogleFonts.tajawal(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
-          const SizedBox(height: 24),
-
-          // License Status
-          _StatusCard(
-            title: 'حالة الترخيص',
-            status: user?.guardian?.licenseStatus ?? 'غير محدد',
-          ),
-          const SizedBox(height: 12),
-          _StatusCard(
-            title: 'حالة البطاقة',
-            status: user?.guardian?.cardStatus ?? 'غير محدد',
-          ),
+          if (dashboard.dateHijri.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              '${dashboard.dateHijri}  •  ${dashboard.dateGregorian}',
+              style: GoogleFonts.tajawal(fontSize: 12, color: Colors.white60),
+            ),
+          ],
+          if (dashboard.unreadNotifications > 0) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.notifications,
+                    color: Colors.amber,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${dashboard.unreadNotifications} إشعار جديد',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 12,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: AppColors.primary),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: GoogleFonts.tajawal(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsGrid(DashboardStats stats) {
+    return GridView.count(
+      crossAxisCount: 2,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      childAspectRatio: 1.6,
+      children: [
+        _StatCard(
+          title: 'إجمالي القيود',
+          value: '${stats.totalEntries}',
+          icon: Icons.description,
+          color: AppColors.statBlue,
+        ),
+        _StatCard(
+          title: 'الموثقة',
+          value: '${stats.documentedEntries}',
+          icon: Icons.check_circle,
+          color: AppColors.statGreen,
+        ),
+        _StatCard(
+          title: 'بانتظار التوثيق',
+          value: '${stats.pendingDocumentationEntries}',
+          icon: Icons.hourglass_empty,
+          color: AppColors.statAmber,
+        ),
+        _StatCard(
+          title: 'هذا الشهر',
+          value: '${stats.thisMonthEntries}',
+          icon: Icons.calendar_month,
+          color: AppColors.statIndigo,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusCard(String title, IconData icon, RenewalStatus status) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: status.color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: status.color, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    status.label,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: status.color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (status.daysRemaining != null)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: status.color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${status.daysRemaining} يوم',
+                  style: GoogleFonts.tajawal(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: status.color,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActivityItem(dynamic entry) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(
+            Icons.description,
+            color: AppColors.primary,
+            size: 20,
+          ),
+        ),
+        title: Text(
+          entry.subject ?? 'قيد',
+          style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          entry.contractTypeName ?? '',
+          style: GoogleFonts.tajawal(fontSize: 12, color: Colors.grey),
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          size: 14,
+          color: Colors.grey[400],
+        ),
       ),
     );
   }
@@ -136,80 +345,50 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Icon(icon, color: color, size: 22),
-                Text(
-                  value,
-                  style: GoogleFonts.tajawal(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
-            Text(
-              title,
-              style: GoogleFonts.tajawal(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-    );
-  }
-}
-
-class _StatusCard extends StatelessWidget {
-  final String title;
-  final String status;
-
-  const _StatusCard({required this.title, required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: GoogleFonts.tajawal(fontWeight: FontWeight.w600),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                status,
-                style: GoogleFonts.tajawal(
-                  color: AppColors.success,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  title,
+                  style: GoogleFonts.tajawal(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: GoogleFonts.tajawal(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: color,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

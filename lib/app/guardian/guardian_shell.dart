@@ -4,6 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/registry/presentation/screens/add_registry_entry_screen.dart';
+import '../../features/sync/presentation/sync_status_widget.dart';
+import '../../features/notifications/presentation/widgets/notification_icon.dart';
 
 import 'tabs/guardian_dashboard_tab.dart';
 import 'tabs/my_records_tab.dart';
@@ -50,12 +53,9 @@ class _GuardianShellState extends ConsumerState<GuardianShell> {
   }
 
   void _openAddEntry() {
-    // TODO: Navigate to AddEntryScreen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('إضافة قيد جديد', style: GoogleFonts.tajawal()),
-        backgroundColor: AppColors.success,
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AddRegistryEntryScreen()),
     );
   }
 
@@ -78,13 +78,11 @@ class _GuardianShellState extends ConsumerState<GuardianShell> {
         automaticallyImplyLeading: false,
         actions: [
           // Sync indicator
-          IconButton(
-            icon: const Icon(Icons.sync, color: Colors.white70),
-            onPressed: () {
-              // TODO: Trigger sync
-            },
-            tooltip: 'مزامنة',
-          ),
+          // Sync indicator
+          // Sync indicator
+          const SyncStatusWidget(),
+          // Notifications
+          const NotificationIcon(),
           // Profile menu
           PopupMenuButton<String>(
             offset: const Offset(0, 50),

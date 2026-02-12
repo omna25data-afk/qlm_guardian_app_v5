@@ -4,170 +4,258 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../features/auth/presentation/screens/login_screen.dart';
+import '../../../features/profile/presentation/screens/profile_screen.dart';
 
-/// حسابي — الملف الشخصي + الإعدادات
+/// تبويب حسابي — واجهة الأمين الشرعي
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authProvider).user;
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
 
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      children: [
-        // Profile Card
-        Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundColor: const Color(
-                    0xFF006400,
-                  ).withValues(alpha: 0.1),
-                  backgroundImage: user?.avatarUrl != null
-                      ? NetworkImage(user!.avatarUrl!)
-                      : null,
-                  child: user?.avatarUrl == null
-                      ? const Icon(
-                          Icons.person,
-                          size: 40,
-                          color: Color(0xFF006400),
-                        )
-                      : null,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  user?.guardian?.fullName ?? user?.name ?? 'الأمين',
-                  style: GoogleFonts.tajawal(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+      child: Column(
+        children: [
+          // Profile Card
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 40,
+                    backgroundColor: const Color(
+                      0xFF006400,
+                    ).withValues(alpha: 0.1),
+                    backgroundImage: user?.avatarUrl != null
+                        ? NetworkImage(user!.avatarUrl!)
+                        : null,
+                    child: user?.avatarUrl == null
+                        ? const Icon(
+                            Icons.person,
+                            size: 40,
+                            color: Color(0xFF006400),
+                          )
+                        : null,
                   ),
-                ),
-                if (user?.guardian?.registerNumber != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
+                  const SizedBox(height: 12),
+                  Text(
+                    user?.guardian?.fullName ?? user?.name ?? 'الأمين الشرعي',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  if (user?.guardian?.registerNumber != null)
+                    Text(
                       'رقم السجل: ${user!.guardian!.registerNumber}',
                       style: GoogleFonts.tajawal(
                         fontSize: 14,
                         color: AppColors.textSecondary,
                       ),
                     ),
-                  ),
-                if (user?.phoneNumber != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      user!.phoneNumber!,
-                      style: GoogleFonts.tajawal(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
+                  if (user?.phoneNumber != null ||
+                      user?.guardian?.phoneNumber != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        user?.phoneNumber ?? user?.guardian?.phoneNumber ?? '',
+                        style: GoogleFonts.tajawal(
+                          fontSize: 13,
+                          color: AppColors.textHint,
+                        ),
                       ),
                     ),
-                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Menu Items
+          Card(
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                _buildMenuItem(
+                  context,
+                  icon: Icons.person_outline,
+                  title: 'الملف الشخصي',
+                  subtitle: 'عرض وتعديل بياناتك الشخصية',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                    );
+                  },
+                ),
+                const Divider(height: 1, indent: 56),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.sync,
+                  title: 'المزامنة',
+                  subtitle: 'مزامنة البيانات مع الخادم',
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'جاري المزامنة...',
+                          style: GoogleFonts.tajawal(),
+                        ),
+                        backgroundColor: AppColors.info,
+                      ),
+                    );
+                  },
+                ),
+                const Divider(height: 1, indent: 56),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.info_outline,
+                  title: 'حول التطبيق',
+                  subtitle: 'معلومات الإصدار',
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AboutDialog(
+                        applicationName: 'بوابة الأمين الشرعي',
+                        applicationVersion: 'الإصدار 5.0.0',
+                        applicationIcon: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFF006400,
+                            ).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.gavel,
+                            color: Color(0xFF006400),
+                            size: 40,
+                          ),
+                        ),
+                        children: [
+                          Text(
+                            'تطبيق إدارة القيود والسجلات والتوثيق للأمناء الشرعيين.',
+                            style: GoogleFonts.tajawal(fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 16),
 
-        // Menu Items
-        _MenuItem(
-          icon: Icons.edit_outlined,
-          title: 'تعديل الملف الشخصي',
-          onTap: () {
-            // TODO: Edit profile
-          },
-        ),
-        _MenuItem(
-          icon: Icons.sync,
-          title: 'المزامنة',
-          subtitle: 'آخر مزامنة: غير محدد',
-          onTap: () {
-            // TODO: Sync
-          },
-        ),
-        _MenuItem(
-          icon: Icons.dark_mode_outlined,
-          title: 'الوضع الليلي',
-          onTap: () {
-            // TODO: Toggle dark mode
-          },
-        ),
-        _MenuItem(
-          icon: Icons.info_outline,
-          title: 'حول التطبيق',
-          onTap: () {
-            // TODO: About
-          },
-        ),
-        const SizedBox(height: 16),
-        _MenuItem(
-          icon: Icons.logout,
-          title: 'تسجيل الخروج',
-          color: AppColors.error,
-          onTap: () async {
-            await ref.read(authProvider.notifier).logout();
-            if (context.mounted) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
-            }
-          },
-        ),
-      ],
+          const SizedBox(height: 16),
+
+          // Logout
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text(
+                      'تسجيل الخروج',
+                      style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                    ),
+                    content: Text(
+                      'هل أنت متأكد من تسجيل الخروج؟',
+                      style: GoogleFonts.tajawal(),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: Text('إلغاء', style: GoogleFonts.tajawal()),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: Text(
+                          'خروج',
+                          style: GoogleFonts.tajawal(color: AppColors.error),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirmed == true) {
+                  await ref.read(authProvider.notifier).logout();
+                  if (context.mounted) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    );
+                  }
+                }
+              },
+              icon: const Icon(Icons.logout, color: AppColors.error),
+              label: Text(
+                'تسجيل الخروج',
+                style: GoogleFonts.tajawal(color: AppColors.error),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.error),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
     );
   }
-}
 
-class _MenuItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final Color? color;
-  final VoidCallback onTap;
-
-  const _MenuItem({
-    required this.icon,
-    required this.title,
-    this.subtitle,
-    this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: Icon(icon, color: color ?? AppColors.textSecondary),
-        title: Text(
-          title,
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.w500, color: color),
+  Widget _buildMenuItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF006400).withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(8),
         ),
-        subtitle: subtitle != null
-            ? Text(
-                subtitle!,
-                style: GoogleFonts.tajawal(
-                  fontSize: 12,
-                  color: AppColors.textHint,
-                ),
-              )
-            : null,
-        trailing: const Icon(
-          Icons.chevron_left,
-          size: 20,
-          color: AppColors.textHint,
-        ),
-        onTap: onTap,
+        child: Icon(icon, color: const Color(0xFF006400), size: 22),
       ),
+      title: Text(
+        title,
+        style: GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w600),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: GoogleFonts.tajawal(
+          fontSize: 12,
+          color: AppColors.textSecondary,
+        ),
+      ),
+      trailing: Icon(
+        Icons.arrow_forward_ios,
+        size: 14,
+        color: Colors.grey[400],
+      ),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     );
   }
 }

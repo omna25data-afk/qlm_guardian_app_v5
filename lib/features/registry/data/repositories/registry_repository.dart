@@ -1,5 +1,7 @@
+import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/network/network_info.dart';
+import '../../../../core/sync/sync_service.dart';
 import '../datasources/registry_local_datasource.dart';
 import '../datasources/registry_remote_datasource.dart';
 import '../models/contract_type_model.dart';
@@ -11,21 +13,26 @@ class RegistryRepository {
   final RegistryLocalDataSource _localDataSource;
   final RegistryRemoteDataSource _remoteDataSource;
   final NetworkInfo _networkInfo;
+  final Box<dynamic> _cacheBox;
+  final SyncService _syncService;
 
   RegistryRepository({
     required RegistryLocalDataSource localDataSource,
     required RegistryRemoteDataSource remoteDataSource,
     required NetworkInfo networkInfo,
+    required Box<dynamic> cacheBox,
+    required SyncService syncService,
   }) : _localDataSource = localDataSource,
        _remoteDataSource = remoteDataSource,
-       _networkInfo = networkInfo;
+       _networkInfo = networkInfo,
+       _cacheBox = cacheBox,
+       _syncService = syncService;
 
   /// Get all entries (offline-first)
   Future<List<RegistryEntryModel>> getEntries() async {
     // 1. Try to sync if online
     if (await _networkInfo.isConnected) {
       try {
-        // TODO: Get lastSyncedAt from preferences
         final remoteEntries = await _remoteDataSource.fetchEntries();
         for (var entry in remoteEntries) {
           await _localDataSource.insertEntry(entry);
@@ -42,15 +49,53 @@ class RegistryRepository {
 
   Future<List<ContractTypeModel>> getContractTypes() async {
     if (await _networkInfo.isConnected) {
-      return _remoteDataSource.getContractTypes();
+      try {
+        final types = await _remoteDataSource.getContractTypes();
+        // Cache types
+        await _cacheBox.put(
+          'contract_types',
+          types.map((t) => t.toJson()).toList(),
+        );
+        return types;
+      } catch (e) {
+        debugPrint('Failed to fetch contract types: $e');
+      }
     }
-    // Fallback to local cache if implemented later
+
+    // Fallback to cache
+    final cached = _cacheBox.get('contract_types') as List<dynamic>?;
+    if (cached != null) {
+      return cached
+          .map(
+            (json) =>
+                ContractTypeModel.fromJson(Map<String, dynamic>.from(json)),
+          )
+          .toList();
+    }
     return [];
   }
 
   Future<List<FormFieldModel>> getFormFields(int typeId) async {
+    final cacheKey = 'form_fields_$typeId';
     if (await _networkInfo.isConnected) {
-      return _remoteDataSource.getFormFields(typeId);
+      try {
+        final fields = await _remoteDataSource.getFormFields(typeId);
+        // Cache fields
+        await _cacheBox.put(cacheKey, fields.map((f) => f.toJson()).toList());
+        return fields;
+      } catch (e) {
+        debugPrint('Failed to fetch form fields: $e');
+      }
+    }
+
+    // Fallback to cache
+    final cached = _cacheBox.get(cacheKey) as List<dynamic>?;
+    if (cached != null) {
+      return cached
+          .map(
+            (json) => FormFieldModel.fromJson(Map<String, dynamic>.from(json)),
+          )
+          .toList();
     }
     return [];
   }
@@ -78,7 +123,6 @@ class RegistryRepository {
         await _localDataSource.updateEntry(created);
         return created;
       } catch (e) {
-        // Queue for later (handled by SyncService)
         debugPrint('Online creation failed, queued: $e');
         if (attachmentPath != null) {
           debugPrint(
@@ -87,6 +131,21 @@ class RegistryRepository {
         }
       }
     }
+
+    // 4. Queue for sync if offline or failed
+    await _syncService.enqueue(
+      SyncOperation(
+        uuid: uuid,
+        entityType: 'registry_entry',
+        operationType: SyncOperationType.create,
+        data: {
+          ...entryWithUuid.toJson(),
+          ...?attachmentPath != null
+              ? {'_local_attachment_path': attachmentPath}
+              : null,
+        },
+      ),
+    );
 
     return entryWithUuid;
   }

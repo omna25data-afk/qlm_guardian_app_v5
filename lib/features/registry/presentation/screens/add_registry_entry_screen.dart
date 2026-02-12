@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../records/data/models/record_book.dart';
+import '../../../records/presentation/providers/records_provider.dart';
 import '../../data/models/form_field_model.dart';
 import '../providers/add_registry_entry_provider.dart';
 
@@ -21,15 +23,17 @@ class AddRegistryEntryScreen extends ConsumerWidget {
           style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
         ),
       ),
-      body: state.isLoading
+      body: state.isLoading && state.currentStep == 0
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 _buildStepper(state.currentStep),
+                if (state.error != null && state.currentStep != 0)
+                  _buildErrorBanner(state.error!, notifier),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: _buildStepContent(context, state, notifier),
+                    child: _buildStepContent(context, ref, state, notifier),
                   ),
                 ),
                 _buildBottomBar(context, state, notifier),
@@ -38,8 +42,28 @@ class AddRegistryEntryScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildErrorBanner(String error, AddRegistryEntryNotifier notifier) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      color: AppColors.errorLight,
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: AppColors.error, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              error,
+              style: GoogleFonts.tajawal(fontSize: 13, color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStepper(int currentStep) {
-    final steps = ['نوع العقد', 'البيانات', 'المرفقات', 'مراجعة'];
+    final steps = ['نوع العقد', 'البيانات', 'المرفقات', 'دفتر السجل', 'مراجعة'];
     return Container(
       padding: const EdgeInsets.all(16),
       color: Colors.grey.shade50,
@@ -60,20 +84,20 @@ class AddRegistryEntryScreen extends ConsumerWidget {
           return Column(
             children: [
               CircleAvatar(
-                radius: 12,
+                radius: 11,
                 backgroundColor: isActive
                     ? AppColors.primary
                     : Colors.grey.shade300,
                 child: Text(
                   '${stepIndex + 1}',
-                  style: const TextStyle(fontSize: 12, color: Colors.white),
+                  style: const TextStyle(fontSize: 10, color: Colors.white),
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 3),
               Text(
                 steps[stepIndex],
                 style: GoogleFonts.tajawal(
-                  fontSize: 10,
+                  fontSize: 9,
                   color: isActive ? AppColors.textPrimary : AppColors.textHint,
                   fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                 ),
@@ -87,13 +111,10 @@ class AddRegistryEntryScreen extends ConsumerWidget {
 
   Widget _buildStepContent(
     BuildContext context,
+    WidgetRef ref,
     AddRegistryEntryState state,
     AddRegistryEntryNotifier notifier,
   ) {
-    if (state.error != null) {
-      return Center(child: Text('خطأ: ${state.error}'));
-    }
-
     switch (state.currentStep) {
       case 0:
         return _buildTypeSelectionStep(state, notifier);
@@ -104,18 +125,33 @@ class AddRegistryEntryScreen extends ConsumerWidget {
       case 2:
         return _buildAttachmentStep(state, notifier);
       case 3:
+        return _buildRecordBookStep(context, ref, state, notifier);
+      case 4:
         return _buildReviewStep(context, state, notifier);
       default:
         return const SizedBox();
     }
   }
 
+  // ─── Step 0: Type Selection ───
   Widget _buildTypeSelectionStep(
     AddRegistryEntryState state,
     AddRegistryEntryNotifier notifier,
   ) {
     if (state.contractTypes.isEmpty) {
-      return const Center(child: Text('جاري تحميل أنواع العقود...'));
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'جاري تحميل أنواع العقود...',
+              style: GoogleFonts.tajawal(color: Colors.grey),
+            ),
+          ],
+        ),
+      );
     }
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -130,6 +166,7 @@ class AddRegistryEntryScreen extends ConsumerWidget {
         final isSelected = state.selectedType?.id == type.id;
         return InkWell(
           onTap: () => notifier.selectContractType(type),
+          borderRadius: BorderRadius.circular(12),
           child: Container(
             decoration: BoxDecoration(
               color: isSelected
@@ -145,21 +182,25 @@ class AddRegistryEntryScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.description_outlined,
+                  _getTypeIcon(type.name),
                   size: 32,
                   color: isSelected
                       ? AppColors.primary
                       : AppColors.textSecondary,
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  type.name,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.tajawal(
-                    fontWeight: FontWeight.bold,
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.textPrimary,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    type.name,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.tajawal(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.textPrimary,
+                    ),
                   ),
                 ),
               ],
@@ -170,6 +211,19 @@ class AddRegistryEntryScreen extends ConsumerWidget {
     );
   }
 
+  IconData _getTypeIcon(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('زواج') || lower.contains('نكاح')) return Icons.favorite;
+    if (lower.contains('طلاق')) return Icons.heart_broken;
+    if (lower.contains('رجعة')) return Icons.replay;
+    if (lower.contains('خلع')) return Icons.gavel;
+    if (lower.contains('إثبات')) return Icons.verified;
+    if (lower.contains('وكالة')) return Icons.assignment_ind;
+    if (lower.contains('وصية')) return Icons.description;
+    return Icons.description_outlined;
+  }
+
+  // ─── Step 1: Form ───
   Widget _buildFormStep(
     AddRegistryEntryState state,
     AddRegistryEntryNotifier notifier,
@@ -178,37 +232,62 @@ class AddRegistryEntryScreen extends ConsumerWidget {
       children: [
         _buildSectionTitle('بيانات أساسية'),
         const SizedBox(height: 12),
-        // Basic fields that are always needed
-        _buildTextField(
-          label: 'رقم السجل (اختياري)',
-          onChanged: (v) => notifier.updateFormData('register_number', v),
-          initialValue: state.formData['register_number'],
-        ),
-        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
               child: _buildTextField(
-                label: 'التاريخ الهجري',
+                label: 'الموضوع *',
+                initialValue:
+                    state.formData['subject'] ?? state.selectedType?.name,
+                onChanged: (v) => notifier.updateFormData('subject', v),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildTextField(
+                label: 'السنة الهجرية',
                 keyboardType: TextInputType.number,
                 onChanged: (v) =>
                     notifier.updateFormData('hijri_year', int.tryParse(v)),
                 initialValue: state.formData['hijri_year']?.toString(),
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildTextField(
-                label: 'الموضوع',
-                initialValue:
-                    state.formData['subject'] ?? state.selectedType?.name,
-                onChanged: (v) => notifier.updateFormData('subject', v),
-              ),
-            ),
           ],
         ),
+        const SizedBox(height: 12),
+        _buildTextField(
+          label: 'رقم السجل (اختياري)',
+          onChanged: (v) => notifier.updateFormData('register_number', v),
+          initialValue: state.formData['register_number'],
+        ),
+
         const SizedBox(height: 24),
+        _buildSectionTitle('الأطراف'),
+        const SizedBox(height: 12),
+        _buildTextField(
+          label: 'اسم الطرف الأول *',
+          initialValue: state.formData['first_party_name'],
+          onChanged: (v) => notifier.updateFormData('first_party_name', v),
+        ),
+        const SizedBox(height: 12),
+        _buildTextField(
+          label: 'اسم الطرف الثاني',
+          initialValue: state.formData['second_party_name'],
+          onChanged: (v) => notifier.updateFormData('second_party_name', v),
+        ),
+
+        const SizedBox(height: 24),
+        _buildSectionTitle('المحتوى'),
+        const SizedBox(height: 12),
+        _buildTextField(
+          label: 'محتوى / ملاحظات (اختياري)',
+          maxLines: 3,
+          initialValue: state.formData['content'],
+          onChanged: (v) => notifier.updateFormData('content', v),
+        ),
+
         if (state.formFields.isNotEmpty) ...[
+          const SizedBox(height: 24),
           _buildSectionTitle('بيانات العقد (${state.selectedType?.name})'),
           const SizedBox(height: 12),
           ...state.formFields.map((field) {
@@ -247,8 +326,7 @@ class AddRegistryEntryScreen extends ConsumerWidget {
         );
       case 'select':
         return DropdownButtonFormField<String>(
-          // ignore: deprecated_member_use
-          value: formData[field.name]?.toString(),
+          initialValue: formData[field.name]?.toString(),
           decoration: InputDecoration(
             labelText: field.label + (field.required ? ' *' : ''),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -262,7 +340,6 @@ class AddRegistryEntryScreen extends ConsumerWidget {
           onChanged: (v) => notifier.updateFormData(field.name, v),
         );
       case 'date':
-        // Simple date field for now
         return _buildTextField(
           label: field.label,
           required: field.required,
@@ -294,6 +371,7 @@ class AddRegistryEntryScreen extends ConsumerWidget {
       decoration: InputDecoration(
         labelText: label + (required ? ' *' : ''),
         hintText: hint,
+        labelStyle: GoogleFonts.tajawal(fontSize: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
@@ -306,113 +384,535 @@ class AddRegistryEntryScreen extends ConsumerWidget {
     );
   }
 
+  // ─── Step 2: Attachments ───
   Widget _buildAttachmentStep(
     AddRegistryEntryState state,
     AddRegistryEntryNotifier notifier,
   ) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (state.attachmentPath != null) ...[
-          const Icon(Icons.check_circle, color: Colors.green, size: 64),
-          const SizedBox(height: 16),
-          Text(
-            'تم اختيار الملف',
-            style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
-          ),
-          Text(
-            state.attachmentPath!.split('/').last,
-            style: GoogleFonts.tajawal(color: Colors.grey),
-          ),
-          const SizedBox(height: 24),
-          OutlinedButton.icon(
-            onPressed: () => notifier.setAttachment(
-              '',
-            ), // Clear (need to handle null/empty in notifier properly, assume empty string removes)
-            icon: const Icon(Icons.delete, color: Colors.red),
-            label: const Text('حذف'),
-            style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
-          ),
-        ] else ...[
-          const Icon(Icons.cloud_upload_outlined, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
-          Text(
-            'يرجى إرفاق صورة العقد أو المستند',
-            style: GoogleFonts.tajawal(color: Colors.grey),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () async {
-              FilePickerResult? result = await FilePicker.platform.pickFiles(
-                type: FileType.custom,
-                allowedExtensions: ['jpg', 'pdf', 'png', 'jpeg'],
-              );
-              if (result != null && result.files.single.path != null) {
-                notifier.setAttachment(result.files.single.path!);
-              }
-            },
-            icon: const Icon(Icons.attach_file),
-            label: const Text('اختيار ملف'),
-          ),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (state.attachmentPath != null &&
+              state.attachmentPath!.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.successLight,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_circle,
+                color: AppColors.success,
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'تم اختيار الملف',
+              style: GoogleFonts.tajawal(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.insert_drive_file,
+                    size: 16,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      state.attachmentPath!.split(RegExp(r'[/\\]')).last,
+                      style: GoogleFonts.tajawal(
+                        color: Colors.grey[700],
+                        fontSize: 13,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    FilePickerResult? result = await FilePicker.platform
+                        .pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['jpg', 'pdf', 'png', 'jpeg'],
+                        );
+                    if (result != null && result.files.single.path != null) {
+                      notifier.setAttachment(result.files.single.path!);
+                    }
+                  },
+                  icon: const Icon(Icons.swap_horiz),
+                  label: Text('تغيير', style: GoogleFonts.tajawal()),
+                ),
+                const SizedBox(width: 12),
+                OutlinedButton.icon(
+                  onPressed: () => notifier.setAttachment(''),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.error,
+                  ),
+                  label: Text(
+                    'حذف',
+                    style: GoogleFonts.tajawal(color: AppColors.error),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.cloud_upload_outlined,
+                size: 48,
+                color: Colors.grey[400],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'إرفاق صورة العقد أو المستند',
+              style: GoogleFonts.tajawal(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'صيغ مدعومة: JPG, PNG, PDF',
+              style: GoogleFonts.tajawal(color: Colors.grey, fontSize: 13),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['jpg', 'pdf', 'png', 'jpeg'],
+                );
+                if (result != null && result.files.single.path != null) {
+                  notifier.setAttachment(result.files.single.path!);
+                }
+              },
+              icon: const Icon(Icons.attach_file),
+              label: Text('اختيار ملف', style: GoogleFonts.tajawal()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'هذه الخطوة اختيارية، يمكنك التخطي',
+              style: GoogleFonts.tajawal(color: Colors.grey[400], fontSize: 12),
+            ),
+          ],
         ],
+      ),
+    );
+  }
+
+  // ─── Step 3: Record Book Selection ───
+  Widget _buildRecordBookStep(
+    BuildContext context,
+    WidgetRef ref,
+    AddRegistryEntryState state,
+    AddRegistryEntryNotifier notifier,
+  ) {
+    final recordBooksAsync = ref.watch(recordBooksProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('ربط بدفتر سجل (اختياري)'),
+        const SizedBox(height: 8),
+        Text(
+          'اختر دفتر السجل الذي تريد ربط القيد به',
+          style: GoogleFonts.tajawal(fontSize: 13, color: Colors.grey),
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: recordBooksAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red[300], size: 40),
+                  const SizedBox(height: 8),
+                  Text(
+                    'خطأ في تحميل دفاتر السجلات',
+                    style: GoogleFonts.tajawal(),
+                  ),
+                  TextButton(
+                    onPressed: () => ref
+                        .read(recordBooksProvider.notifier)
+                        .fetchRecordBooks(),
+                    child: Text('إعادة المحاولة', style: GoogleFonts.tajawal()),
+                  ),
+                ],
+              ),
+            ),
+            data: (books) {
+              if (books.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.book_outlined,
+                        size: 48,
+                        color: Colors.grey[300],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'لا توجد دفاتر سجلات',
+                        style: GoogleFonts.tajawal(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'يمكنك تخطي هذه الخطوة',
+                        style: GoogleFonts.tajawal(
+                          color: Colors.grey[400],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return ListView.builder(
+                itemCount: books.length,
+                itemBuilder: (context, index) {
+                  final book = books[index];
+                  final isSelected = state.selectedRecordBookId == book.id;
+                  return _buildRecordBookCard(book, isSelected, notifier);
+                },
+              );
+            },
+          ),
+        ),
+        if (state.selectedRecordBookId != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: TextButton.icon(
+              onPressed: () => notifier.setRecordBookId(null),
+              icon: const Icon(Icons.clear, size: 16),
+              label: Text('إلغاء الاختيار', style: GoogleFonts.tajawal()),
+            ),
+          ),
       ],
     );
   }
 
+  Widget _buildRecordBookCard(
+    RecordBook book,
+    bool isSelected,
+    AddRegistryEntryNotifier notifier,
+  ) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      elevation: isSelected ? 2 : 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isSelected ? AppColors.primary : Colors.grey.shade200,
+          width: isSelected ? 2 : 1,
+        ),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => notifier.setRecordBookId(book.id),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.primary.withValues(alpha: 0.1)
+                      : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.book,
+                  color: isSelected ? AppColors.primary : Colors.grey,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      book.title.isNotEmpty
+                          ? book.title
+                          : 'دفتر رقم ${book.number}',
+                      style: GoogleFonts.tajawal(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                    if (book.contractType.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        book.contractType,
+                        style: GoogleFonts.tajawal(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (isSelected)
+                const Icon(Icons.check_circle, color: AppColors.primary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Step 4: Review ───
   Widget _buildReviewStep(
     BuildContext context,
     AddRegistryEntryState state,
     AddRegistryEntryNotifier notifier,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return ListView(
       children: [
         _buildSectionTitle('ملخص البيانات'),
         const SizedBox(height: 16),
-        _buildReviewItem('نوع العقد', state.selectedType?.name ?? '-'),
-        _buildReviewItem('الموضوع', state.formData['subject'] ?? '-'),
-        _buildReviewItem(
-          'الملف المرفق',
-          state.attachmentPath != null ? 'نعم' : 'لا',
-        ),
-        const Divider(height: 32),
-        const Spacer(),
-        Center(
-          child: ElevatedButton(
-            onPressed: () async {
-              final success = await notifier.submit();
-              if (success && context.mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('تم إضافة القيد بنجاح')),
-                );
-              }
-            },
+        _buildReviewCard([
+          _ReviewRow('نوع العقد', state.selectedType?.name ?? '-'),
+          _ReviewRow('الموضوع', state.formData['subject']?.toString() ?? '-'),
+          _ReviewRow(
+            'السنة الهجرية',
+            state.formData['hijri_year']?.toString() ?? '-',
+          ),
+          _ReviewRow(
+            'رقم السجل',
+            state.formData['register_number']?.toString() ?? '-',
+          ),
+        ]),
+        const SizedBox(height: 12),
+        _buildReviewCard([
+          _ReviewRow(
+            'الطرف الأول',
+            state.formData['first_party_name']?.toString() ?? '-',
+          ),
+          _ReviewRow(
+            'الطرف الثاني',
+            state.formData['second_party_name']?.toString() ?? '-',
+          ),
+        ]),
+        const SizedBox(height: 12),
+        _buildReviewCard([
+          _ReviewRow(
+            'المرفق',
+            state.attachmentPath != null && state.attachmentPath!.isNotEmpty
+                ? state.attachmentPath!.split(RegExp(r'[/\\]')).last
+                : 'لا يوجد',
+          ),
+          _ReviewRow(
+            'دفتر السجل',
+            state.selectedRecordBookId != null
+                ? 'مربوط (#${state.selectedRecordBookId})'
+                : 'غير مربوط',
+          ),
+        ]),
+        if (state.formData['content'] != null &&
+            state.formData['content'].toString().isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _buildReviewCard([
+            _ReviewRow('الملاحظات', state.formData['content'].toString()),
+          ]),
+        ],
+        const SizedBox(height: 32),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: state.isLoading
+                ? null
+                : () async {
+                    final success = await notifier.submit();
+                    if (success && context.mounted) {
+                      _showSuccessDialog(context);
+                    }
+                  },
+            icon: state.isLoading
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.check_circle_outline),
+            label: Text(
+              state.isLoading ? 'جاري الحفظ...' : 'حفظ وإرسال',
+              style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text('حفظ وإرسال'),
           ),
         ),
-        const Spacer(),
+        const SizedBox(height: 16),
       ],
     );
   }
 
-  Widget _buildReviewItem(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: GoogleFonts.tajawal(color: Colors.grey)),
-          Text(value, style: GoogleFonts.tajawal(fontWeight: FontWeight.bold)),
-        ],
+  Widget _buildReviewCard(List<_ReviewRow> rows) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          children: rows.asMap().entries.map((entry) {
+            final isLast = entry.key == rows.length - 1;
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        entry.value.label,
+                        style: GoogleFonts.tajawal(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Flexible(
+                        child: Text(
+                          entry.value.value,
+                          style: GoogleFonts.tajawal(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                          textAlign: TextAlign.left,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (!isLast) Divider(color: Colors.grey.shade100, height: 1),
+              ],
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  void _showSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.successLight,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_circle,
+                color: AppColors.success,
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'تم بنجاح!',
+              style: GoogleFonts.tajawal(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.success,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'تم إضافة القيد بنجاح وحفظه',
+              style: GoogleFonts.tajawal(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx); // Close dialog
+                  Navigator.pop(context); // Go back
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.success,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text('حسناً', style: GoogleFonts.tajawal()),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -433,11 +933,6 @@ class AddRegistryEntryScreen extends ConsumerWidget {
     AddRegistryEntryState state,
     AddRegistryEntryNotifier notifier,
   ) {
-    // Hide bottom bar in step 0 (Type Selection) as selection auto-advances
-    // Only show back button?
-    // Actually standard Wizard has Back/Next.
-    // My selection step auto-advances.
-
     if (state.currentStep == 0) return const SizedBox();
 
     return Container(
@@ -454,20 +949,31 @@ class AddRegistryEntryScreen extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          if (state.currentStep > 0)
-            TextButton(onPressed: notifier.prevStep, child: const Text('رجوع')),
+          TextButton.icon(
+            onPressed: notifier.prevStep,
+            icon: const Icon(Icons.arrow_back_ios, size: 14),
+            label: Text('رجوع', style: GoogleFonts.tajawal()),
+          ),
           const Spacer(),
-          if (state.currentStep < 3 && state.currentStep > 0)
-            ElevatedButton(
+          // Show next button for steps 1-3 (not on review step 4)
+          if (state.currentStep < 4)
+            ElevatedButton.icon(
               onPressed: notifier.nextStep,
+              icon: Text('التالي', style: GoogleFonts.tajawal()),
+              label: const Icon(Icons.arrow_forward_ios, size: 14),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('التالي'),
             ),
         ],
       ),
     );
   }
+}
+
+class _ReviewRow {
+  final String label;
+  final String value;
+  const _ReviewRow(this.label, this.value);
 }

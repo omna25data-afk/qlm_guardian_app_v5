@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../features/admin/presentation/widgets/areas_list_tab.dart';
+import '../../../features/admin/presentation/widgets/assignments_list_tab.dart';
+import '../../../features/admin/presentation/widgets/cards_list_tab.dart';
+import '../../../features/admin/presentation/widgets/licenses_list_tab.dart';
 import '../../../features/debug/presentation/screens/debug_screen.dart';
 
 /// الأدوات والإعدادات — للمشرف
@@ -25,13 +29,92 @@ class AdminSettingsTab extends StatelessWidget {
             MaterialPageRoute(builder: (_) => const DebugScreen()),
           ),
         ),
+        const SizedBox(height: 24),
+        _buildSectionTitle('إدارة البيانات'),
+        const SizedBox(height: 12),
         _buildSettingsTile(
           context,
-          icon: Icons.storage,
-          title: 'قاعدة البيانات المحلية',
-          subtitle: 'إدارة البيانات المخزنة محلياً',
-          color: AppColors.warning,
-          onTap: () {},
+          icon: Icons.location_on_outlined,
+          title: 'المناطق',
+          subtitle: 'عرض وإدارة مناطق العمل',
+          color: AppColors.statTeal,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => Scaffold(
+                appBar: AppBar(
+                  title: Text(
+                    'المناطق',
+                    style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                body: const AreasListTab(),
+              ),
+            ),
+          ),
+        ),
+        _buildSettingsTile(
+          context,
+          icon: Icons.assignment_ind_outlined,
+          title: 'التكليفات',
+          subtitle: 'عرض تكليفات الأمناء',
+          color: AppColors.statIndigo,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => Scaffold(
+                appBar: AppBar(
+                  title: Text(
+                    'التكليفات',
+                    style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                body: const AssignmentsListTab(),
+              ),
+            ),
+          ),
+        ),
+        _buildSettingsTile(
+          context,
+          icon: Icons.credit_card_outlined,
+          title: 'البطاقات',
+          subtitle: 'عرض وإدارة بطاقات الأمناء',
+          color: AppColors.statAmber,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => Scaffold(
+                appBar: AppBar(
+                  title: Text(
+                    'البطاقات',
+                    style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                body: const CardsListTab(),
+              ),
+            ),
+          ),
+        ),
+        _buildSettingsTile(
+          context,
+          icon: Icons.card_membership_outlined,
+          title: 'التراخيص',
+          subtitle: 'عرض تراخيص الأمناء',
+          color: AppColors.statGreen,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => Scaffold(
+                appBar: AppBar(
+                  title: Text(
+                    'التراخيص',
+                    style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                body: const LicensesListTab(),
+              ),
+            ),
+          ),
         ),
         const SizedBox(height: 24),
         _buildSectionTitle('الإعدادات'),
@@ -42,7 +125,16 @@ class AdminSettingsTab extends StatelessWidget {
           title: 'الإشعارات',
           subtitle: 'إعدادات الإشعارات والتنبيهات',
           color: AppColors.primary,
-          onTap: () {},
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'إعدادات الإشعارات قيد التطوير',
+                  style: GoogleFonts.tajawal(),
+                ),
+              ),
+            );
+          },
         ),
         _buildSettingsTile(
           context,
@@ -50,7 +142,33 @@ class AdminSettingsTab extends StatelessWidget {
           title: 'حول التطبيق',
           subtitle: 'معلومات الإصدار والتطوير',
           color: AppColors.success,
-          onTap: () {},
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (ctx) => AboutDialog(
+                applicationName: 'لوحة إدارة الأمناء الشرعيين',
+                applicationVersion: 'الإصدار 5.0.0',
+                applicationIcon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.admin_panel_settings,
+                    color: AppColors.primary,
+                    size: 40,
+                  ),
+                ),
+                children: [
+                  Text(
+                    'لوحة الإدارة لنظام الأمناء الشرعيين.',
+                    style: GoogleFonts.tajawal(fontSize: 13),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ],
     );

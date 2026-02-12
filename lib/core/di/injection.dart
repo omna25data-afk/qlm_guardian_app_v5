@@ -67,6 +67,8 @@ Future<void> initDependencies() async {
       localDataSource: getIt<RegistryLocalDataSource>(),
       remoteDataSource: getIt<RegistryRemoteDataSource>(),
       networkInfo: getIt<NetworkInfo>(),
+      cacheBox: getIt<Box<dynamic>>(instanceName: 'cacheBox'),
+      syncService: getIt<SyncService>(),
     ),
   );
 

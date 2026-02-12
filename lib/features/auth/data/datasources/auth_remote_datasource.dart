@@ -21,9 +21,18 @@ class AuthRemoteDataSource {
         },
       );
 
-      final data = response.data;
+      final responseData = response.data;
 
-      // Token is at root level, user is nested
+      // Backend wraps responses with ApiResponse trait: {status, code, message, data}
+      // The actual payload (token, user, guardian) is inside the 'data' key
+      final data =
+          responseData is Map<String, dynamic> &&
+              responseData.containsKey('status') &&
+              responseData.containsKey('data')
+          ? responseData['data'] as Map<String, dynamic>? ?? responseData
+          : responseData as Map<String, dynamic>;
+
+      // Token is at root level of payload, user is nested
       final token = data['token'] ?? data['access_token'];
       final userData = data['user'] as Map<String, dynamic>?;
       final guardianData = data['guardian'] as Map<String, dynamic>?;

@@ -5,7 +5,7 @@ import 'core/config/app_config.dart';
 import 'core/config/env_config.dart';
 import 'core/di/injection.dart';
 import 'core/theme/app_theme.dart';
-import 'features/auth/presentation/screens/login_screen.dart';
+import 'features/auth/presentation/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
 
-      home: const LoginScreen(),
+      home: const SplashScreen(),
     );
   }
 }

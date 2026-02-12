@@ -132,7 +132,7 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
   }
 
   void nextStep() {
-    if (state.currentStep < 3) {
+    if (state.currentStep < 4) {
       state = state.copyWith(currentStep: state.currentStep + 1);
     }
   }
@@ -165,34 +165,34 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
 
       // Let's construct a RegistryEntryModel
       // We assume basic fields (date, subject) are in formData with specific keys
-      final subject =
-          state.formData['subject'] ??
-          state.selectedType!.name; // Default subject
+      final subject = state.formData['subject'] ?? state.selectedType!.name;
       final dateStr = state.formData['date'] as String?;
       final date = dateStr != null
           ? DateTime.tryParse(dateStr)
           : DateTime.now();
 
+      // Add structured fields into extraData for backend
+      extraData['contract_type_id'] = state.selectedType!.id;
+      if (state.selectedRecordBookId != null) {
+        extraData['record_book_id'] = state.selectedRecordBookId;
+      }
+
       final entry = RegistryEntryModel(
         uuid: '', // Generated in repo
-        status: 'pending', // or 'documented'
+        status: 'pending',
         subject: subject,
         date: date,
         hijriYear: state.formData['hijri_year'] is int
             ? state.formData['hijri_year']
             : int.tryParse(state.formData['hijri_year']?.toString() ?? ''),
-        contractTypeId:
-            state.selectedType!.id, // Need to add this to model or extra
-        extraAttributes:
-            extraData, // Pass all data as extras, backend filters what it needs
-        // recordBookId: state.selectedRecordBookId, // If added to model
+        contractTypeId: state.selectedType!.id,
+        firstPartyName: state.formData['first_party_name']?.toString(),
+        secondPartyName: state.formData['second_party_name']?.toString(),
+        content: state.formData['content']?.toString(),
+        registerNumber: state.formData['register_number']?.toString(),
+        guardianRecordBookId: state.selectedRecordBookId,
+        extraAttributes: extraData,
       );
-
-      // Note: We are putting contractTypeId in extraAttributes via formData if we add it here
-      extraData['contract_type_id'] = state.selectedType!.id;
-      if (state.selectedRecordBookId != null) {
-        extraData['record_book_id'] = state.selectedRecordBookId;
-      }
 
       await _repository.createEntry(
         entry,
