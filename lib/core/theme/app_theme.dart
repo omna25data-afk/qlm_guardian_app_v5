@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 /// App Theme - Material 3 with Arabic font support
 class AppTheme {
   AppTheme._();
 
+  static const String _fontFamily = 'Tajawal';
+
   static ThemeData get light => ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
+    fontFamily: _fontFamily,
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       brightness: Brightness.light,
@@ -20,58 +22,71 @@ class AppTheme {
     scaffoldBackgroundColor: AppColors.background,
 
     // Typography - Arabic-friendly
-    textTheme: GoogleFonts.cairoTextTheme().copyWith(
-      displayLarge: GoogleFonts.cairo(
+    textTheme: const TextTheme(
+      displayLarge: TextStyle(
         fontSize: 32,
         fontWeight: FontWeight.bold,
         color: AppColors.textPrimary,
+        fontFamily: _fontFamily,
       ),
-      displayMedium: GoogleFonts.cairo(
+      displayMedium: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.bold,
         color: AppColors.textPrimary,
+        fontFamily: _fontFamily,
       ),
-      titleLarge: GoogleFonts.cairo(
+      titleLarge: TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
+        fontFamily: _fontFamily,
       ),
-      titleMedium: GoogleFonts.cairo(
+      titleMedium: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
+        fontFamily: _fontFamily,
       ),
-      titleSmall: GoogleFonts.cairo(
+      titleSmall: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w500,
         color: AppColors.textPrimary,
+        fontFamily: _fontFamily,
       ),
-      bodyLarge: GoogleFonts.cairo(fontSize: 16, color: AppColors.textPrimary),
-      bodyMedium: GoogleFonts.cairo(
+      bodyLarge: TextStyle(
+        fontSize: 16,
+        color: AppColors.textPrimary,
+        fontFamily: _fontFamily,
+      ),
+      bodyMedium: TextStyle(
         fontSize: 14,
         color: AppColors.textSecondary,
+        fontFamily: _fontFamily,
       ),
-      bodySmall: GoogleFonts.cairo(
+      bodySmall: TextStyle(
         fontSize: 12,
         color: AppColors.textSecondary,
+        fontFamily: _fontFamily,
       ),
-      labelLarge: GoogleFonts.cairo(
+      labelLarge: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
+        fontFamily: _fontFamily,
       ),
     ),
 
     // AppBar
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.primary,
       foregroundColor: AppColors.textOnPrimary,
       elevation: 0,
       centerTitle: true,
-      titleTextStyle: GoogleFonts.cairo(
+      titleTextStyle: TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
         color: AppColors.textOnPrimary,
+        fontFamily: _fontFamily,
       ),
     ),
 
@@ -91,7 +106,11 @@ class AppTheme {
         elevation: 2,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        textStyle: GoogleFonts.cairo(fontSize: 16, fontWeight: FontWeight.w600),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          fontFamily: _fontFamily,
+        ),
       ),
     ),
 
@@ -102,7 +121,11 @@ class AppTheme {
         side: const BorderSide(color: AppColors.primary, width: 1.5),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        textStyle: GoogleFonts.cairo(fontSize: 16, fontWeight: FontWeight.w600),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          fontFamily: _fontFamily,
+        ),
       ),
     ),
 
@@ -110,7 +133,11 @@ class AppTheme {
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: AppColors.primary,
-        textStyle: GoogleFonts.cairo(fontSize: 14, fontWeight: FontWeight.w600),
+        textStyle: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          fontFamily: _fontFamily,
+        ),
       ),
     ),
 
@@ -135,8 +162,14 @@ class AppTheme {
         borderSide: const BorderSide(color: AppColors.error),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      labelStyle: GoogleFonts.cairo(color: AppColors.textSecondary),
-      hintStyle: GoogleFonts.cairo(color: AppColors.textHint),
+      labelStyle: const TextStyle(
+        color: AppColors.textSecondary,
+        fontFamily: _fontFamily,
+      ),
+      hintStyle: const TextStyle(
+        color: AppColors.textHint,
+        fontFamily: _fontFamily,
+      ),
     ),
 
     // FloatingActionButton
@@ -147,14 +180,17 @@ class AppTheme {
     ),
 
     // Bottom Navigation
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: AppColors.surface,
       selectedItemColor: AppColors.primary,
       unselectedItemColor: AppColors.textSecondary,
       type: BottomNavigationBarType.fixed,
       elevation: 8,
-      selectedLabelStyle: GoogleFonts.cairo(fontWeight: FontWeight.w600),
-      unselectedLabelStyle: GoogleFonts.cairo(),
+      selectedLabelStyle: TextStyle(
+        fontWeight: FontWeight.w600,
+        fontFamily: _fontFamily,
+      ),
+      unselectedLabelStyle: TextStyle(fontFamily: _fontFamily),
     ),
 
     // Divider
@@ -164,7 +200,7 @@ class AppTheme {
     chipTheme: ChipThemeData(
       backgroundColor: AppColors.surfaceVariant,
       selectedColor: AppColors.primaryLight,
-      labelStyle: GoogleFonts.cairo(fontSize: 12),
+      labelStyle: const TextStyle(fontSize: 12, fontFamily: _fontFamily),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),

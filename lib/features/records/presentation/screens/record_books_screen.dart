@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../data/models/record_book.dart';
 import '../providers/records_provider.dart';
 
@@ -15,7 +14,7 @@ class RecordBooksScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'السجلات',
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
         ),
         centerTitle: true,
       ),
@@ -29,13 +28,16 @@ class RecordBooksScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 'خطأ في تحميل السجلات',
-                style: GoogleFonts.tajawal(fontSize: 16),
+                style: TextStyle(fontSize: 16, fontFamily: 'Tajawal'),
               ),
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () =>
                     ref.read(recordBooksProvider.notifier).fetchRecordBooks(),
-                child: Text('إعادة المحاولة', style: GoogleFonts.tajawal()),
+                child: Text(
+                  'إعادة المحاولة',
+                  style: TextStyle(fontFamily: 'Tajawal'),
+                ),
               ),
             ],
           ),
@@ -50,9 +52,10 @@ class RecordBooksScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     'لا توجد سجلات',
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 18,
                       color: Colors.grey[600],
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                 ],
@@ -141,17 +144,19 @@ class RecordBooksScreen extends ConsumerWidget {
                       children: [
                         Text(
                           type,
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            fontFamily: 'Tajawal',
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '$activeBooks سجل نشط • $totalEntries قيد',
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey[600],
+                            fontFamily: 'Tajawal',
                           ),
                         ),
                       ],
@@ -175,7 +180,10 @@ class RecordBooksScreen extends ConsumerWidget {
                         (b) => Chip(
                           label: Text(
                             '${b.hijriYear} هـ',
-                            style: GoogleFonts.tajawal(fontSize: 12),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontFamily: 'Tajawal',
+                            ),
                           ),
                           backgroundColor: b.isActive
                               ? Colors.green[50]
@@ -256,7 +264,7 @@ class _RecordBookNotebooksScreenState
       appBar: AppBar(
         title: Text(
           widget.contractTypeName,
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
         ),
         centerTitle: true,
       ),
@@ -267,10 +275,13 @@ class _RecordBookNotebooksScreenState
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('خطأ: $_error', style: GoogleFonts.tajawal()),
+                  Text('خطأ: $_error', style: TextStyle(fontFamily: 'Tajawal')),
                   ElevatedButton(
                     onPressed: _fetchNotebooks,
-                    child: Text('إعادة المحاولة', style: GoogleFonts.tajawal()),
+                    child: Text(
+                      'إعادة المحاولة',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
                   ),
                 ],
               ),
@@ -279,7 +290,7 @@ class _RecordBookNotebooksScreenState
           ? Center(
               child: Text(
                 'لا توجد دفاتر لهذا السجل',
-                style: GoogleFonts.tajawal(fontSize: 16),
+                style: TextStyle(fontSize: 16, fontFamily: 'Tajawal'),
               ),
             )
           : RefreshIndicator(
@@ -312,10 +323,11 @@ class _RecordBookNotebooksScreenState
                   ),
                   child: Text(
                     '${book.bookNumber}',
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF006400),
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                 ),
@@ -326,17 +338,19 @@ class _RecordBookNotebooksScreenState
                     children: [
                       Text(
                         'الدفتر رقم ${book.bookNumber}',
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'عدد القيود والمحررات: ${book.entriesCount}',
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[600],
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                     ],
@@ -382,7 +396,7 @@ class _RecordBookNotebooksScreenState
       builder: (ctx) => AlertDialog(
         title: Text(
           'معلومات السجل',
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -425,7 +439,7 @@ class _RecordBookNotebooksScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('إغلاق', style: GoogleFonts.tajawal()),
+            child: Text('إغلاق', style: TextStyle(fontFamily: 'Tajawal')),
           ),
         ],
       ),
@@ -446,16 +460,18 @@ class _RecordBookNotebooksScreenState
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
+                    fontFamily: 'Tajawal',
                   ),
                 ),
                 Text(
                   value,
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Tajawal',
                   ),
                 ),
               ],
@@ -473,14 +489,19 @@ class _RecordBookNotebooksScreenState
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: GoogleFonts.tajawal(fontSize: 13, color: Colors.grey[700]),
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.grey[700],
+            fontFamily: 'Tajawal',
+          ),
         ),
         Expanded(
           child: Text(
             value,
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
+              fontFamily: 'Tajawal',
             ),
           ),
         ),

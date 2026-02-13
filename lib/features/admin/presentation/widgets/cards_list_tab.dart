@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../providers/admin_cards_provider.dart';
 import '../../data/models/admin_renewal_model.dart';
@@ -66,9 +65,10 @@ class _CardsListTabState extends ConsumerState<CardsListTab> {
                       const SizedBox(height: 16),
                       Text(
                         'لا توجد بطاقات',
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 16,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                     ],
@@ -139,10 +139,11 @@ class _CardsListTabState extends ConsumerState<CardsListTab> {
                 Expanded(
                   child: Text(
                     card.guardianName,
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                       color: AppColors.textPrimary,
+                      fontFamily: 'Tajawal',
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -161,9 +162,10 @@ class _CardsListTabState extends ConsumerState<CardsListTab> {
                 const SizedBox(width: 8),
                 Text(
                   'رقم البطاقة: ${card.id}',
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 13,
+                    fontFamily: 'Tajawal',
                   ),
                 ),
                 const Spacer(),
@@ -175,9 +177,10 @@ class _CardsListTabState extends ConsumerState<CardsListTab> {
                 const SizedBox(width: 8),
                 Text(
                   'التاريخ: ${card.renewalDate}',
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 13,
+                    fontFamily: 'Tajawal',
                   ),
                 ),
               ],
@@ -190,9 +193,10 @@ class _CardsListTabState extends ConsumerState<CardsListTab> {
                   const SizedBox(width: 8),
                   Text(
                     card.type,
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 13,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                 ],
@@ -233,10 +237,11 @@ class _CardsListTabState extends ConsumerState<CardsListTab> {
       ),
       child: Text(
         text,
-        style: GoogleFonts.tajawal(
+        style: TextStyle(
           color: color,
           fontSize: 12,
           fontWeight: FontWeight.bold,
+          fontFamily: 'Tajawal',
         ),
       ),
     );

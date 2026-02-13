@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../app/admin/admin_shell.dart';
@@ -215,18 +214,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
                     Text(
                       'إدارة الأمناء',
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'وزارة العدل',
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(
                         fontSize: 14,
                         color: AppColors.accent,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
 
@@ -253,10 +254,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           children: [
                             Text(
                               'تسجيل الدخول',
-                              style: GoogleFonts.cairo(
+                              style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimary,
+                                fontFamily: 'Tajawal',
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -287,9 +289,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     Expanded(
                                       child: Text(
                                         _errorMessage!,
-                                        style: GoogleFonts.cairo(
+                                        style: TextStyle(
                                           fontSize: 13,
                                           color: AppColors.error,
+                                          fontFamily: 'Tajawal',
                                         ),
                                       ),
                                     ),
@@ -423,9 +426,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   ),
                                   child: Text(
                                     'تذكرني',
-                                    style: GoogleFonts.cairo(
+                                    style: TextStyle(
                                       fontSize: 13,
                                       color: AppColors.textSecondary,
+                                      fontFamily: 'Tajawal',
                                     ),
                                   ),
                                 ),
@@ -463,9 +467,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                       )
                                     : Text(
                                         'تسجيل الدخول',
-                                        style: GoogleFonts.cairo(
+                                        style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
+                                          fontFamily: 'Tajawal',
                                         ),
                                       ),
                               ),
@@ -483,9 +488,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     ),
                                     child: Text(
                                       'أو',
-                                      style: GoogleFonts.cairo(
+                                      style: TextStyle(
                                         color: AppColors.textHint,
                                         fontSize: 13,
+                                        fontFamily: 'Tajawal',
                                       ),
                                     ),
                                   ),
@@ -502,9 +508,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   icon: const Icon(Icons.fingerprint, size: 24),
                                   label: Text(
                                     'الدخول بالبصمة',
-                                    style: GoogleFonts.cairo(
+                                    style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w600,
+                                      fontFamily: 'Tajawal',
                                     ),
                                   ),
                                   style: OutlinedButton.styleFrom(
@@ -530,9 +537,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     // Version
                     Text(
                       'الإصدار 5.0.0',
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(
                         fontSize: 12,
                         color: Colors.white54,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                     const SizedBox(height: 16),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
@@ -142,7 +141,7 @@ class _DebugScreenState extends State<DebugScreen> {
       appBar: AppBar(
         title: Text(
           'مصحح الاتصال',
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -171,7 +170,10 @@ class _DebugScreenState extends State<DebugScreen> {
                         : const Icon(Icons.network_check),
                     label: Text(
                       'اختبار عام',
-                      style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Tajawal',
+                      ),
                     ),
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(0, 50),
@@ -190,7 +192,10 @@ class _DebugScreenState extends State<DebugScreen> {
                     icon: const Icon(Icons.admin_panel_settings),
                     label: Text(
                       'اختبار الإدارة',
-                      style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Tajawal',
+                      ),
                     ),
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(0, 50),
@@ -222,10 +227,11 @@ class _DebugScreenState extends State<DebugScreen> {
                 reverse: true,
                 child: SelectableText(
                   _log,
-                  style: GoogleFonts.sourceCodePro(
+                  style: TextStyle(
                     color: Colors.greenAccent,
                     fontSize: 13,
                     height: 1.6,
+                    fontFamily: 'Courier',
                   ),
                 ),
               ),
@@ -241,7 +247,10 @@ class _DebugScreenState extends State<DebugScreen> {
                 icon: const Icon(Icons.clear_all, size: 18),
                 label: Text(
                   'مسح السجل',
-                  style: GoogleFonts.tajawal(fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Tajawal',
+                  ),
                 ),
                 style: TextButton.styleFrom(foregroundColor: AppColors.error),
               ),

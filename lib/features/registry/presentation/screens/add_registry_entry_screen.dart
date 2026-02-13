@@ -1,7 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../records/data/models/record_book.dart';
 import '../../../records/presentation/providers/records_provider.dart';
@@ -20,7 +19,7 @@ class AddRegistryEntryScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'إضافة قيد جديد',
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
         ),
       ),
       body: state.isLoading && state.currentStep == 0
@@ -54,7 +53,11 @@ class AddRegistryEntryScreen extends ConsumerWidget {
           Expanded(
             child: Text(
               error,
-              style: GoogleFonts.tajawal(fontSize: 13, color: AppColors.error),
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.error,
+                fontFamily: 'Tajawal',
+              ),
             ),
           ),
         ],
@@ -96,10 +99,11 @@ class AddRegistryEntryScreen extends ConsumerWidget {
               const SizedBox(height: 3),
               Text(
                 steps[stepIndex],
-                style: GoogleFonts.tajawal(
+                style: TextStyle(
                   fontSize: 9,
                   color: isActive ? AppColors.textPrimary : AppColors.textHint,
                   fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                  fontFamily: 'Tajawal',
                 ),
               ),
             ],
@@ -147,7 +151,7 @@ class AddRegistryEntryScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               'جاري تحميل أنواع العقود...',
-              style: GoogleFonts.tajawal(color: Colors.grey),
+              style: TextStyle(color: Colors.grey, fontFamily: 'Tajawal'),
             ),
           ],
         ),
@@ -194,12 +198,13 @@ class AddRegistryEntryScreen extends ConsumerWidget {
                   child: Text(
                     type.name,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
                       color: isSelected
                           ? AppColors.primary
                           : AppColors.textPrimary,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                 ),
@@ -371,7 +376,7 @@ class AddRegistryEntryScreen extends ConsumerWidget {
       decoration: InputDecoration(
         labelText: label + (required ? ' *' : ''),
         hintText: hint,
-        labelStyle: GoogleFonts.tajawal(fontSize: 14),
+        labelStyle: TextStyle(fontSize: 14, fontFamily: 'Tajawal'),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
@@ -410,9 +415,10 @@ class AddRegistryEntryScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               'تم اختيار الملف',
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
+                fontFamily: 'Tajawal',
               ),
             ),
             const SizedBox(height: 8),
@@ -434,9 +440,10 @@ class AddRegistryEntryScreen extends ConsumerWidget {
                   Flexible(
                     child: Text(
                       state.attachmentPath!.split(RegExp(r'[/\\]')).last,
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         color: Colors.grey[700],
                         fontSize: 13,
+                        fontFamily: 'Tajawal',
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -460,7 +467,7 @@ class AddRegistryEntryScreen extends ConsumerWidget {
                     }
                   },
                   icon: const Icon(Icons.swap_horiz),
-                  label: Text('تغيير', style: GoogleFonts.tajawal()),
+                  label: Text('تغيير', style: TextStyle(fontFamily: 'Tajawal')),
                 ),
                 const SizedBox(width: 12),
                 OutlinedButton.icon(
@@ -471,7 +478,10 @@ class AddRegistryEntryScreen extends ConsumerWidget {
                   ),
                   label: Text(
                     'حذف',
-                    style: GoogleFonts.tajawal(color: AppColors.error),
+                    style: TextStyle(
+                      color: AppColors.error,
+                      fontFamily: 'Tajawal',
+                    ),
                   ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.error,
@@ -495,15 +505,20 @@ class AddRegistryEntryScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             Text(
               'إرفاق صورة العقد أو المستند',
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                fontFamily: 'Tajawal',
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'صيغ مدعومة: JPG, PNG, PDF',
-              style: GoogleFonts.tajawal(color: Colors.grey, fontSize: 13),
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 13,
+                fontFamily: 'Tajawal',
+              ),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -517,7 +532,10 @@ class AddRegistryEntryScreen extends ConsumerWidget {
                 }
               },
               icon: const Icon(Icons.attach_file),
-              label: Text('اختيار ملف', style: GoogleFonts.tajawal()),
+              label: Text(
+                'اختيار ملف',
+                style: TextStyle(fontFamily: 'Tajawal'),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -530,7 +548,11 @@ class AddRegistryEntryScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               'هذه الخطوة اختيارية، يمكنك التخطي',
-              style: GoogleFonts.tajawal(color: Colors.grey[400], fontSize: 12),
+              style: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 12,
+                fontFamily: 'Tajawal',
+              ),
             ),
           ],
         ],
@@ -554,7 +576,11 @@ class AddRegistryEntryScreen extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           'اختر دفتر السجل الذي تريد ربط القيد به',
-          style: GoogleFonts.tajawal(fontSize: 13, color: Colors.grey),
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.grey,
+            fontFamily: 'Tajawal',
+          ),
         ),
         const SizedBox(height: 16),
         Expanded(
@@ -568,13 +594,16 @@ class AddRegistryEntryScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text(
                     'خطأ في تحميل دفاتر السجلات',
-                    style: GoogleFonts.tajawal(),
+                    style: TextStyle(fontFamily: 'Tajawal'),
                   ),
                   TextButton(
                     onPressed: () => ref
                         .read(recordBooksProvider.notifier)
                         .fetchRecordBooks(),
-                    child: Text('إعادة المحاولة', style: GoogleFonts.tajawal()),
+                    child: Text(
+                      'إعادة المحاولة',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
                   ),
                 ],
               ),
@@ -593,14 +622,18 @@ class AddRegistryEntryScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
                       Text(
                         'لا توجد دفاتر سجلات',
-                        style: GoogleFonts.tajawal(color: Colors.grey),
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontFamily: 'Tajawal',
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'يمكنك تخطي هذه الخطوة',
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           color: Colors.grey[400],
                           fontSize: 12,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                     ],
@@ -624,7 +657,10 @@ class AddRegistryEntryScreen extends ConsumerWidget {
             child: TextButton.icon(
               onPressed: () => notifier.setRecordBookId(null),
               icon: const Icon(Icons.clear, size: 16),
-              label: Text('إلغاء الاختيار', style: GoogleFonts.tajawal()),
+              label: Text(
+                'إلغاء الاختيار',
+                style: TextStyle(fontFamily: 'Tajawal'),
+              ),
             ),
           ),
       ],
@@ -676,21 +712,23 @@ class AddRegistryEntryScreen extends ConsumerWidget {
                       book.title.isNotEmpty
                           ? book.title
                           : 'دفتر رقم ${book.number}',
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                         color: isSelected
                             ? AppColors.primary
                             : AppColors.textPrimary,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                     if (book.contractType.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
                         book.contractType,
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                     ],
@@ -785,7 +823,10 @@ class AddRegistryEntryScreen extends ConsumerWidget {
                 : const Icon(Icons.check_circle_outline),
             label: Text(
               state.isLoading ? 'جاري الحفظ...' : 'حفظ وإرسال',
-              style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Tajawal',
+              ),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -823,18 +864,20 @@ class AddRegistryEntryScreen extends ConsumerWidget {
                     children: [
                       Text(
                         entry.value.label,
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 13,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                       const SizedBox(width: 16),
                       Flexible(
                         child: Text(
                           entry.value.value,
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
+                            fontFamily: 'Tajawal',
                           ),
                           textAlign: TextAlign.left,
                           overflow: TextOverflow.ellipsis,
@@ -877,18 +920,20 @@ class AddRegistryEntryScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             Text(
               'تم بنجاح!',
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: AppColors.success,
+                fontFamily: 'Tajawal',
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'تم إضافة القيد بنجاح وحفظه',
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontSize: 14,
                 color: AppColors.textSecondary,
+                fontFamily: 'Tajawal',
               ),
               textAlign: TextAlign.center,
             ),
@@ -908,7 +953,7 @@ class AddRegistryEntryScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text('حسناً', style: GoogleFonts.tajawal()),
+                child: Text('حسناً', style: TextStyle(fontFamily: 'Tajawal')),
               ),
             ),
           ],
@@ -920,10 +965,11 @@ class AddRegistryEntryScreen extends ConsumerWidget {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: GoogleFonts.tajawal(
+      style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
         color: AppColors.primary,
+        fontFamily: 'Tajawal',
       ),
     );
   }
@@ -952,14 +998,14 @@ class AddRegistryEntryScreen extends ConsumerWidget {
           TextButton.icon(
             onPressed: notifier.prevStep,
             icon: const Icon(Icons.arrow_back_ios, size: 14),
-            label: Text('رجوع', style: GoogleFonts.tajawal()),
+            label: Text('رجوع', style: TextStyle(fontFamily: 'Tajawal')),
           ),
           const Spacer(),
           // Show next button for steps 1-3 (not on review step 4)
           if (state.currentStep < 4)
             ElevatedButton.icon(
               onPressed: notifier.nextStep,
-              icon: Text('التالي', style: GoogleFonts.tajawal()),
+              icon: Text('التالي', style: TextStyle(fontFamily: 'Tajawal')),
               label: const Icon(Icons.arrow_forward_ios, size: 14),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,

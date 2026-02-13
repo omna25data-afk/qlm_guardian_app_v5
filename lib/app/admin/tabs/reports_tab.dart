@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../../features/admin/presentation/providers/reports_provider.dart';
@@ -55,7 +55,7 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
           children: [
             const Icon(Icons.error_outline, size: 48, color: AppColors.error),
             const SizedBox(height: 16),
-            Text(state.error!, style: GoogleFonts.tajawal()),
+            Text(state.error!, style: TextStyle(fontFamily: 'Tajawal')),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
@@ -67,7 +67,10 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
               },
               child: Text(
                 'إعادة المحاولة',
-                style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Tajawal',
+                ),
               ),
             ),
           ],
@@ -129,9 +132,10 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
           const SizedBox(width: 10),
           Text(
             'السنة:',
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
+              fontFamily: 'Tajawal',
             ),
           ),
           const SizedBox(width: 12),
@@ -142,17 +146,20 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
               underline: const SizedBox.shrink(),
               hint: Text(
                 'الكل',
-                style: GoogleFonts.tajawal(color: AppColors.textHint),
+                style: TextStyle(
+                  color: AppColors.textHint,
+                  fontFamily: 'Tajawal',
+                ),
               ),
               items: [
                 DropdownMenuItem<int?>(
                   value: null,
-                  child: Text('الكل', style: GoogleFonts.tajawal()),
+                  child: Text('الكل', style: TextStyle(fontFamily: 'Tajawal')),
                 ),
                 ...years.map(
                   (y) => DropdownMenuItem<int?>(
                     value: y,
-                    child: Text('$y', style: GoogleFonts.tajawal()),
+                    child: Text('$y', style: TextStyle(fontFamily: 'Tajawal')),
                   ),
                 ),
               ],
@@ -178,10 +185,11 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
         const SizedBox(width: 10),
         Text(
           title,
-          style: GoogleFonts.tajawal(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
+            fontFamily: 'Tajawal',
           ),
         ),
       ],
@@ -334,18 +342,20 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
                   child: Center(
                     child: Text(
                       '${index + 1}',
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: _getTypeColor(index),
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                   ),
                 ),
                 title: Text(
                   name.toString(),
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
+                    fontFamily: 'Tajawal',
                   ),
                 ),
                 trailing: Row(
@@ -353,10 +363,11 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
                   children: [
                     Text(
                       '$count',
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                         color: AppColors.primary,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                     if (percentage != null) ...[
@@ -372,10 +383,11 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
                         ),
                         child: Text(
                           '$percentage%',
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             fontSize: 11,
                             color: AppColors.info,
                             fontWeight: FontWeight.bold,
+                            fontFamily: 'Tajawal',
                           ),
                         ),
                       ),

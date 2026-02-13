@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/admin_guardian_model.dart';
 
@@ -39,7 +38,7 @@ class _GuardianRenewalsScreenState extends ConsumerState<GuardianRenewalsScreen>
       appBar: AppBar(
         title: Text(
           'سجل التجديدات',
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -50,9 +49,10 @@ class _GuardianRenewalsScreenState extends ConsumerState<GuardianRenewalsScreen>
           labelColor: AppColors.primary,
           unselectedLabelColor: AppColors.textHint,
           indicatorColor: AppColors.primary,
-          labelStyle: GoogleFonts.tajawal(
+          labelStyle: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 14,
+            fontFamily: 'Tajawal',
           ),
           tabs: const [
             Tab(text: 'تجديد الترخيص'),
@@ -87,7 +87,10 @@ class _GuardianRenewalsScreenState extends ConsumerState<GuardianRenewalsScreen>
             const SizedBox(height: 16),
             Text(
               'لا توجد سجلات تجديد',
-              style: GoogleFonts.tajawal(color: AppColors.textHint),
+              style: TextStyle(
+                color: AppColors.textHint,
+                fontFamily: 'Tajawal',
+              ),
             ),
           ],
         ),
@@ -162,17 +165,19 @@ class _GuardianRenewalsScreenState extends ConsumerState<GuardianRenewalsScreen>
                       children: [
                         Text(
                           'التجديد رقم $renewalNumber',
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
+                            fontFamily: 'Tajawal',
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           renewalDate,
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 12,
+                            fontFamily: 'Tajawal',
                           ),
                         ),
                       ],
@@ -190,10 +195,11 @@ class _GuardianRenewalsScreenState extends ConsumerState<GuardianRenewalsScreen>
                   ),
                   child: Text(
                     'مكتمل',
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       color: AppColors.success,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                 ),
@@ -213,9 +219,10 @@ class _GuardianRenewalsScreenState extends ConsumerState<GuardianRenewalsScreen>
               const SizedBox(height: 12),
               Text(
                 'ملاحظات: $notes',
-                style: GoogleFonts.tajawal(
+                style: TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 13,
+                  fontFamily: 'Tajawal',
                 ),
               ),
             ],
@@ -231,12 +238,20 @@ class _GuardianRenewalsScreenState extends ConsumerState<GuardianRenewalsScreen>
       children: [
         Text(
           label,
-          style: GoogleFonts.tajawal(color: AppColors.textHint, fontSize: 11),
+          style: TextStyle(
+            color: AppColors.textHint,
+            fontSize: 11,
+            fontFamily: 'Tajawal',
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.w600, fontSize: 14),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            fontFamily: 'Tajawal',
+          ),
         ),
       ],
     );

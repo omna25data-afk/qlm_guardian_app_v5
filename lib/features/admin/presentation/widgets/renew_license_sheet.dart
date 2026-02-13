@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../data/models/admin_guardian_model.dart';
 import '../providers/admin_dashboard_provider.dart'; // To get adminRepositoryProvider
 
@@ -137,9 +136,10 @@ class _RenewLicenseSheetState extends ConsumerState<RenewLicenseSheet> {
                 children: [
                   Text(
                     'تجديد الترخيص',
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                   IconButton(
@@ -235,9 +235,10 @@ class _RenewLicenseSheetState extends ConsumerState<RenewLicenseSheet> {
                       )
                     : Text(
                         'حفظ التجديد',
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
               ),
@@ -267,15 +268,23 @@ class _RenewLicenseSheetState extends ConsumerState<RenewLicenseSheet> {
       validator: validator,
       keyboardType: keyboardType,
       maxLines: maxLines,
-      style: GoogleFonts.tajawal(fontSize: 14),
+      style: TextStyle(fontSize: 14, fontFamily: 'Tajawal'),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.tajawal(color: Colors.grey, fontSize: 13),
+        labelStyle: TextStyle(
+          color: Colors.grey,
+          fontSize: 13,
+          fontFamily: 'Tajawal',
+        ),
         prefixIcon: icon != null
             ? Icon(icon, color: AppColors.primary, size: 20)
             : null,
         suffixText: suffix,
-        suffixStyle: GoogleFonts.tajawal(color: Colors.grey, fontSize: 12),
+        suffixStyle: TextStyle(
+          color: Colors.grey,
+          fontSize: 12,
+          fontFamily: 'Tajawal',
+        ),
         filled: true,
         fillColor: Colors.grey[50],
         border: OutlineInputBorder(

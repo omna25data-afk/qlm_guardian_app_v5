@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../features/admin/data/models/admin_guardian_model.dart';
 import '../../../../features/admin/presentation/providers/admin_guardians_provider.dart';
@@ -54,7 +54,7 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
               },
               decoration: InputDecoration(
                 hintText: 'بحث عن أمين (الاسم، السجل، رقم الهوية...)',
-                hintStyle: GoogleFonts.tajawal(color: Colors.grey),
+                hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Tajawal'),
                 prefixIcon: const Icon(Icons.search, color: AppColors.primary),
                 filled: true,
                 fillColor: Colors.white,
@@ -77,13 +77,15 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
               unselectedLabelColor: Colors.grey,
               indicatorColor: AppColors.primary,
               tabAlignment: TabAlignment.start,
-              labelStyle: GoogleFonts.tajawal(
+              labelStyle: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
+                fontFamily: 'Tajawal',
               ),
-              unselectedLabelStyle: GoogleFonts.tajawal(
+              unselectedLabelStyle: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
+                fontFamily: 'Tajawal',
               ),
               tabs: const [
                 Tab(text: 'الأمناء'),
@@ -137,7 +139,10 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
                 const SizedBox(height: 16),
                 Text(
                   'لا توجد نتائج',
-                  style: GoogleFonts.tajawal(color: Colors.grey[600]),
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontFamily: 'Tajawal',
+                  ),
                 ),
               ],
             ),
@@ -193,16 +198,18 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
                       children: [
                         Text(
                           guardian.name,
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
+                            fontFamily: 'Tajawal',
                           ),
                         ),
                         Text(
                           'سجل رقم: ${guardian.serialNumber}',
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 12,
+                            fontFamily: 'Tajawal',
                           ),
                         ),
                       ],
@@ -249,10 +256,11 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
       ),
       child: Text(
         text,
-        style: GoogleFonts.tajawal(
+        style: TextStyle(
           color: color,
           fontSize: 12,
           fontWeight: FontWeight.bold,
+          fontFamily: 'Tajawal',
         ),
       ),
     );
@@ -273,14 +281,19 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
           children: [
             Text(
               label,
-              style: GoogleFonts.tajawal(fontSize: 10, color: Colors.grey[600]),
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.grey[600],
+                fontFamily: 'Tajawal',
+              ),
             ),
             Text(
               value,
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
                 color: color,
+                fontFamily: 'Tajawal',
               ),
             ),
           ],

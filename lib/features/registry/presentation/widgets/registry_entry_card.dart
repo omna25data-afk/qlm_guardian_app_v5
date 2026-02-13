@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
 import '../../data/models/registry_entry_model.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -49,9 +48,10 @@ class RegistryEntryCard extends StatelessWidget {
                       children: [
                         Text(
                           entry.subject ?? 'بدون عنوان',
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
+                            fontFamily: 'Tajawal',
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -59,9 +59,10 @@ class RegistryEntryCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           'رقم القيد: ${entry.registerNumber ?? 'غير محدد'}',
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
+                            fontFamily: 'Tajawal',
                           ),
                         ),
                       ],
@@ -81,10 +82,11 @@ class RegistryEntryCard extends StatelessWidget {
                     ),
                     child: Text(
                       statusLabel,
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontSize: 11,
                         color: statusColor,
                         fontWeight: FontWeight.bold,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                   ),
@@ -102,9 +104,10 @@ class RegistryEntryCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       entry.firstPartyName ?? '',
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontSize: 13,
                         color: AppColors.textPrimary,
+                        fontFamily: 'Tajawal',
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -118,9 +121,10 @@ class RegistryEntryCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         entry.secondPartyName!,
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           fontSize: 13,
                           color: AppColors.textPrimary,
+                          fontFamily: 'Tajawal',
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -145,9 +149,10 @@ class RegistryEntryCard extends StatelessWidget {
                             'ar',
                           ).format(entry.createdAt!)
                         : '-',
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                   const Spacer(),

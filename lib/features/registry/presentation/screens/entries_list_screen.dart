@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../providers/entries_provider.dart';
 import '../widgets/registry_entry_card.dart';
@@ -37,7 +36,7 @@ class EntriesListScreen extends ConsumerWidget {
                         horizontal: 16,
                         vertical: 14,
                       ),
-                      hintStyle: GoogleFonts.tajawal(fontSize: 13),
+                      hintStyle: TextStyle(fontSize: 13, fontFamily: 'Tajawal'),
                     ),
                     onChanged: (value) {
                       ref.read(entrySearchQueryProvider.notifier).state = value;
@@ -75,23 +74,38 @@ class EntriesListScreen extends ConsumerWidget {
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     value: null,
-                    child: Text('الكل', style: GoogleFonts.tajawal()),
+                    child: Text(
+                      'الكل',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
                   ),
                   PopupMenuItem(
                     value: 'draft',
-                    child: Text('مسودة', style: GoogleFonts.tajawal()),
+                    child: Text(
+                      'مسودة',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
                   ),
                   PopupMenuItem(
                     value: 'pending',
-                    child: Text('قيد المعالجة', style: GoogleFonts.tajawal()),
+                    child: Text(
+                      'قيد المعالجة',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
                   ),
                   PopupMenuItem(
                     value: 'approved',
-                    child: Text('مكتمل', style: GoogleFonts.tajawal()),
+                    child: Text(
+                      'مكتمل',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
                   ),
                   PopupMenuItem(
                     value: 'rejected',
-                    child: Text('مرفوض', style: GoogleFonts.tajawal()),
+                    child: Text(
+                      'مرفوض',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
                   ),
                 ],
               ),
@@ -111,11 +125,14 @@ class EntriesListScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     'حدث خطأ أثناء تحميل البيانات',
-                    style: GoogleFonts.tajawal(),
+                    style: TextStyle(fontFamily: 'Tajawal'),
                   ),
                   TextButton(
                     onPressed: () => ref.refresh(rawEntriesProvider),
-                    child: Text('إعادة المحاولة', style: GoogleFonts.tajawal()),
+                    child: Text(
+                      'إعادة المحاولة',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
                   ),
                 ],
               ),
@@ -130,9 +147,10 @@ class EntriesListScreen extends ConsumerWidget {
                       const SizedBox(height: 16),
                       Text(
                         'لا توجد قيود تطابق البحث',
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 16,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                     ],

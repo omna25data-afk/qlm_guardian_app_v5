@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/notification_model.dart';
@@ -17,7 +16,7 @@ class NotificationsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'الإشعارات',
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -44,11 +43,14 @@ class NotificationsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 'حدث خطأ أثناء تحميل الإشعارات',
-                style: GoogleFonts.tajawal(),
+                style: TextStyle(fontFamily: 'Tajawal'),
               ),
               TextButton(
                 onPressed: () => ref.refresh(notificationsListProvider),
-                child: Text('إعادة المحاولة', style: GoogleFonts.tajawal()),
+                child: Text(
+                  'إعادة المحاولة',
+                  style: TextStyle(fontFamily: 'Tajawal'),
+                ),
               ),
             ],
           ),
@@ -67,10 +69,11 @@ class NotificationsScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     'لا توجد إشعارات جديدة',
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 18,
                       color: Colors.grey[500],
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                 ],
@@ -142,7 +145,7 @@ class _NotificationCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             notification.title,
-                            style: GoogleFonts.tajawal(
+                            style: TextStyle(
                               fontWeight: notification.isRead
                                   ? FontWeight.w600
                                   : FontWeight.bold,
@@ -150,6 +153,7 @@ class _NotificationCard extends ConsumerWidget {
                               color: notification.isRead
                                   ? AppColors.textPrimary
                                   : Colors.black,
+                              fontFamily: 'Tajawal',
                             ),
                           ),
                         ),
@@ -167,18 +171,20 @@ class _NotificationCard extends ConsumerWidget {
                     const SizedBox(height: 6),
                     Text(
                       notification.body,
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontSize: 14,
                         color: AppColors.textSecondary,
                         height: 1.4,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       _formatTime(notification.createdAt),
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[400],
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                   ],

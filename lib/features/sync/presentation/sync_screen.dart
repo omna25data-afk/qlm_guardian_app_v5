@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/sync/sync_service.dart';
@@ -18,7 +17,7 @@ class SyncScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'المزامنة',
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
         ),
         centerTitle: true,
       ),
@@ -36,10 +35,11 @@ class SyncScreen extends ConsumerWidget {
             // Section Title
             Text(
               'العمليات المعلقة',
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
+                fontFamily: 'Tajawal',
               ),
             ),
             const SizedBox(height: 12),
@@ -58,7 +58,10 @@ class SyncScreen extends ConsumerWidget {
               error: (err, stack) => Center(
                 child: Text(
                   'خطأ: $err',
-                  style: GoogleFonts.tajawal(color: AppColors.error),
+                  style: TextStyle(
+                    color: AppColors.error,
+                    fontFamily: 'Tajawal',
+                  ),
                 ),
               ),
             ),
@@ -73,7 +76,7 @@ class SyncScreen extends ConsumerWidget {
           syncState.status == SyncStatus.syncing
               ? 'جاري المزامنة...'
               : 'مزامنة الآن',
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
         ),
         icon: syncState.status == SyncStatus.syncing
             ? const SizedBox(
@@ -143,27 +146,30 @@ class SyncScreen extends ConsumerWidget {
                             : state.status == SyncStatus.error
                             ? 'فشل المزامنة'
                             : 'المزامنة مكتملة',
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                       if (state.message != null)
                         Text(
                           state.message!,
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             fontSize: 14,
                             color: state.status == SyncStatus.error
                                 ? Colors.red
                                 : Colors.grey[600],
+                            fontFamily: 'Tajawal',
                           ),
                         ),
                       if (state.lastSyncedAt != null)
                         Text(
                           'آخر مزامنة: ${intl.DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(state.lastSyncedAt!))}',
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey,
+                            fontFamily: 'Tajawal',
                           ),
                         ),
                     ],
@@ -207,15 +213,20 @@ class SyncScreen extends ConsumerWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.tajawal(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: color,
+            fontFamily: 'Tajawal',
           ),
         ),
         Text(
           label,
-          style: GoogleFonts.tajawal(fontSize: 12, color: Colors.grey[600]),
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+            fontFamily: 'Tajawal',
+          ),
         ),
       ],
     );
@@ -235,10 +246,11 @@ class SyncScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             'لا توجد عمليات معلقة',
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               fontSize: 16,
               color: Colors.grey[500],
               fontWeight: FontWeight.bold,
+              fontFamily: 'Tajawal',
             ),
           ),
         ],
@@ -261,11 +273,19 @@ class SyncScreen extends ConsumerWidget {
         ),
         title: Text(
           _getOpTitle(op),
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 14),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            fontFamily: 'Tajawal',
+          ),
         ),
         subtitle: Text(
           intl.DateFormat('yyyy-MM-dd HH:mm:ss').format(op.createdAt),
-          style: GoogleFonts.tajawal(fontSize: 12, color: Colors.grey),
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+            fontFamily: 'Tajawal',
+          ),
         ),
         trailing: op.retryCount > 0
             ? Chip(

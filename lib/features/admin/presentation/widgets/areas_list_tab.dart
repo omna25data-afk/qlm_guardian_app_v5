@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../providers/admin_areas_provider.dart';
 import '../../data/models/admin_area_model.dart';
@@ -69,9 +68,10 @@ class _AreasListTabState extends ConsumerState<AreasListTab> {
                       const SizedBox(height: 16),
                       Text(
                         'لا توجد مناطق',
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 16,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                     ],
@@ -162,7 +162,10 @@ class _AreaExpansionTileState extends ConsumerState<_AreaExpansionTile> {
     if (isLeaf) {
       return ListTile(
         leading: Icon(icon, color: color, size: 20),
-        title: Text(widget.area.name, style: GoogleFonts.tajawal(fontSize: 14)),
+        title: Text(
+          widget.area.name,
+          style: TextStyle(fontSize: 14, fontFamily: 'Tajawal'),
+        ),
         dense: true,
       );
     }
@@ -179,7 +182,11 @@ class _AreaExpansionTileState extends ConsumerState<_AreaExpansionTile> {
         leading: Icon(icon, color: color),
         title: Text(
           widget.area.name,
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 15),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            fontFamily: 'Tajawal',
+          ),
         ),
         subtitle: Text(
           'ID: ${widget.area.id}',
@@ -206,9 +213,10 @@ class _AreaExpansionTileState extends ConsumerState<_AreaExpansionTile> {
               padding: const EdgeInsets.all(16),
               child: Text(
                 'لا توجد مناطق تابعة',
-                style: GoogleFonts.tajawal(
+                style: TextStyle(
                   color: AppColors.textHint,
                   fontSize: 12,
+                  fontFamily: 'Tajawal',
                 ),
               ),
             ),

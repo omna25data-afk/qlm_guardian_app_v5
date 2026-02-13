@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -56,18 +56,20 @@ class _AdminShellState extends ConsumerState<AdminShell> {
             children: [
               Text(
                 'مرحباً، ${user?.name ?? "الرئيس"}',
-                style: GoogleFonts.tajawal(
+                style: TextStyle(
                   fontSize: isWide ? 18 : 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   height: 1.2,
+                  fontFamily: 'Tajawal',
                 ),
               ),
               Text(
                 'رئيس قلم التوثيق',
-                style: GoogleFonts.tajawal(
+                style: TextStyle(
                   fontSize: isWide ? 12 : 10,
                   color: Colors.white70,
+                  fontFamily: 'Tajawal',
                 ),
               ),
             ],
@@ -112,7 +114,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
                   leading: const Icon(Icons.person_outline),
                   title: Text(
                     'الملف الشخصي',
-                    style: GoogleFonts.tajawal(fontSize: 14),
+                    style: TextStyle(fontSize: 14, fontFamily: 'Tajawal'),
                   ),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
@@ -124,7 +126,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
                   leading: const Icon(Icons.settings_outlined),
                   title: Text(
                     'الإعدادات',
-                    style: GoogleFonts.tajawal(fontSize: 14),
+                    style: TextStyle(fontSize: 14, fontFamily: 'Tajawal'),
                   ),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
@@ -137,9 +139,10 @@ class _AdminShellState extends ConsumerState<AdminShell> {
                   leading: const Icon(Icons.logout, color: AppColors.error),
                   title: Text(
                     'تسجيل الخروج',
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 14,
                       color: AppColors.error,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                   dense: true,
@@ -285,10 +288,11 @@ class _NavItem extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 label,
-                style: GoogleFonts.tajawal(
+                style: TextStyle(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                   fontSize: isWide ? 13 : 11,
+                  fontFamily: 'Tajawal',
                 ),
               ),
             ],

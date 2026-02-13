@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../features/auth/presentation/screens/login_screen.dart';
@@ -48,18 +48,20 @@ class ProfileTab extends ConsumerWidget {
                   const SizedBox(height: 12),
                   Text(
                     user?.guardian?.fullName ?? user?.name ?? 'الأمين الشرعي',
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                   const SizedBox(height: 4),
                   if (user?.guardian?.registerNumber != null)
                     Text(
                       'رقم السجل: ${user!.guardian!.registerNumber}',
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontSize: 14,
                         color: AppColors.textSecondary,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                   if (user?.phoneNumber != null ||
@@ -68,9 +70,10 @@ class ProfileTab extends ConsumerWidget {
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
                         user?.phoneNumber ?? user?.guardian?.phoneNumber ?? '',
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           fontSize: 13,
                           color: AppColors.textHint,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                     ),
@@ -112,7 +115,7 @@ class ProfileTab extends ConsumerWidget {
                       SnackBar(
                         content: Text(
                           'جاري المزامنة...',
-                          style: GoogleFonts.tajawal(),
+                          style: TextStyle(fontFamily: 'Tajawal'),
                         ),
                         backgroundColor: AppColors.info,
                       ),
@@ -148,7 +151,10 @@ class ProfileTab extends ConsumerWidget {
                         children: [
                           Text(
                             'تطبيق إدارة القيود والسجلات والتوثيق للأمناء الشرعيين.',
-                            style: GoogleFonts.tajawal(fontSize: 13),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontFamily: 'Tajawal',
+                            ),
                           ),
                         ],
                       ),
@@ -171,22 +177,31 @@ class ProfileTab extends ConsumerWidget {
                   builder: (ctx) => AlertDialog(
                     title: Text(
                       'تسجيل الخروج',
-                      style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Tajawal',
+                      ),
                     ),
                     content: Text(
                       'هل أنت متأكد من تسجيل الخروج؟',
-                      style: GoogleFonts.tajawal(),
+                      style: TextStyle(fontFamily: 'Tajawal'),
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(ctx, false),
-                        child: Text('إلغاء', style: GoogleFonts.tajawal()),
+                        child: Text(
+                          'إلغاء',
+                          style: TextStyle(fontFamily: 'Tajawal'),
+                        ),
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(ctx, true),
                         child: Text(
                           'خروج',
-                          style: GoogleFonts.tajawal(color: AppColors.error),
+                          style: TextStyle(
+                            color: AppColors.error,
+                            fontFamily: 'Tajawal',
+                          ),
                         ),
                       ),
                     ],
@@ -205,7 +220,7 @@ class ProfileTab extends ConsumerWidget {
               icon: const Icon(Icons.logout, color: AppColors.error),
               label: Text(
                 'تسجيل الخروج',
-                style: GoogleFonts.tajawal(color: AppColors.error),
+                style: TextStyle(color: AppColors.error, fontFamily: 'Tajawal'),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.error),
@@ -240,13 +255,18 @@ class ProfileTab extends ConsumerWidget {
       ),
       title: Text(
         title,
-        style: GoogleFonts.tajawal(fontSize: 15, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Tajawal',
+        ),
       ),
       subtitle: Text(
         subtitle,
-        style: GoogleFonts.tajawal(
+        style: TextStyle(
           fontSize: 12,
           color: AppColors.textSecondary,
+          fontFamily: 'Tajawal',
         ),
       ),
       trailing: Icon(

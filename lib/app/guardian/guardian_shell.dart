@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -68,9 +68,10 @@ class _GuardianShellState extends ConsumerState<GuardianShell> {
       appBar: AppBar(
         title: Text(
           'بوابة الأمين الشرعي',
-          style: GoogleFonts.tajawal(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
+            fontFamily: 'Tajawal',
           ),
         ),
         backgroundColor: const Color(0xFF006400),
@@ -109,7 +110,7 @@ class _GuardianShellState extends ConsumerState<GuardianShell> {
                   leading: const Icon(Icons.person_outline),
                   title: Text(
                     'حسابي',
-                    style: GoogleFonts.tajawal(fontSize: 14),
+                    style: TextStyle(fontSize: 14, fontFamily: 'Tajawal'),
                   ),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
@@ -122,9 +123,10 @@ class _GuardianShellState extends ConsumerState<GuardianShell> {
                   leading: const Icon(Icons.logout, color: AppColors.error),
                   title: Text(
                     'تسجيل الخروج',
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 14,
                       color: AppColors.error,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                   dense: true,
@@ -154,8 +156,11 @@ class _GuardianShellState extends ConsumerState<GuardianShell> {
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
-        unselectedLabelStyle: GoogleFonts.tajawal(),
+        selectedLabelStyle: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Tajawal',
+        ),
+        unselectedLabelStyle: TextStyle(fontFamily: 'Tajawal'),
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(

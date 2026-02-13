@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../providers/admin_licenses_provider.dart';
 import '../../data/models/admin_renewal_model.dart';
@@ -66,9 +65,10 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
                       const SizedBox(height: 16),
                       Text(
                         'لا توجد رخص',
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 16,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                     ],
@@ -140,10 +140,11 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
                 Expanded(
                   child: Text(
                     license.guardianName,
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                       color: AppColors.textPrimary,
+                      fontFamily: 'Tajawal',
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -162,9 +163,10 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
                 const SizedBox(width: 8),
                 Text(
                   'رقم الرخصة: ${license.id}',
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 13,
+                    fontFamily: 'Tajawal',
                   ),
                 ),
                 const Spacer(),
@@ -176,9 +178,10 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
                 const SizedBox(width: 8),
                 Text(
                   'التاريخ: ${license.renewalDate}',
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 13,
+                    fontFamily: 'Tajawal',
                   ),
                 ),
               ],
@@ -191,9 +194,10 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
                   const SizedBox(width: 8),
                   Text(
                     license.type,
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 13,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                 ],
@@ -234,10 +238,11 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
       ),
       child: Text(
         text,
-        style: GoogleFonts.tajawal(
+        style: TextStyle(
           color: color,
           fontSize: 12,
           fontWeight: FontWeight.bold,
+          fontFamily: 'Tajawal',
         ),
       ),
     );

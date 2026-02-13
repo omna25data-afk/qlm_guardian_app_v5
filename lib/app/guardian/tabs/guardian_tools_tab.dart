@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../features/records/presentation/providers/records_provider.dart';
 import '../../../features/registry/presentation/screens/entries_list_screen.dart';
@@ -20,18 +20,20 @@ class GuardianToolsTab extends ConsumerWidget {
           // Header
           Text(
             'أدوات الأمين',
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
+              fontFamily: 'Tajawal',
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'أدوات سريعة لمساعدتك في أعمالك اليومية',
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               fontSize: 13,
               color: AppColors.textSecondary,
+              fontFamily: 'Tajawal',
             ),
           ),
           const SizedBox(height: 24),
@@ -86,7 +88,7 @@ class GuardianToolsTab extends ConsumerWidget {
                 SnackBar(
                   content: Text(
                     'جاري المزامنة...',
-                    style: GoogleFonts.tajawal(),
+                    style: TextStyle(fontFamily: 'Tajawal'),
                   ),
                   backgroundColor: AppColors.info,
                 ),
@@ -144,10 +146,11 @@ class GuardianToolsTab extends ConsumerWidget {
         const SizedBox(width: 8),
         Text(
           title,
-          style: GoogleFonts.tajawal(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
+            fontFamily: 'Tajawal',
           ),
         ),
       ],
@@ -188,17 +191,19 @@ class GuardianToolsTab extends ConsumerWidget {
                   children: [
                     Text(
                       title,
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                   ],
@@ -240,9 +245,10 @@ class GuardianToolsTab extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               'حاسبة الرسوم',
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                fontFamily: 'Tajawal',
               ),
             ),
             const SizedBox(height: 16),
@@ -254,10 +260,11 @@ class GuardianToolsTab extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               '* الرسوم تقريبية وقد تختلف حسب المنطقة',
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontSize: 11,
                 color: Colors.grey,
                 fontStyle: FontStyle.italic,
+                fontFamily: 'Tajawal',
               ),
             ),
           ],
@@ -272,13 +279,14 @@ class GuardianToolsTab extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: GoogleFonts.tajawal(fontSize: 14)),
+          Text(label, style: TextStyle(fontSize: 14, fontFamily: 'Tajawal')),
           Text(
             fee,
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF006400),
+              fontFamily: 'Tajawal',
             ),
           ),
         ],
@@ -316,9 +324,10 @@ class GuardianToolsTab extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 'دليل الاستخدام',
-                style: GoogleFonts.tajawal(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'Tajawal',
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -371,17 +380,19 @@ class GuardianToolsTab extends ConsumerWidget {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
+                    fontFamily: 'Tajawal',
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey[600],
+                    fontFamily: 'Tajawal',
                   ),
                 ),
               ],
@@ -409,7 +420,7 @@ class GuardianToolsTab extends ConsumerWidget {
         children: [
           Text(
             'تطبيق بوابة الأمين الشرعي لإدارة القيود والسجلات والتوثيق.',
-            style: GoogleFonts.tajawal(fontSize: 13),
+            style: TextStyle(fontSize: 13, fontFamily: 'Tajawal'),
           ),
         ],
       ),

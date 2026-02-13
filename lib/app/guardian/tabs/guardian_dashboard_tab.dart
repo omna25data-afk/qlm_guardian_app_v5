@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../features/dashboard/data/models/dashboard_data.dart';
@@ -70,12 +70,16 @@ class GuardianDashboardTab extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             'خطأ في تحميل البيانات',
-            style: GoogleFonts.tajawal(fontSize: 16),
+            style: TextStyle(fontSize: 16, fontFamily: 'Tajawal'),
           ),
           const SizedBox(height: 8),
           Text(
             error.toString(),
-            style: GoogleFonts.tajawal(fontSize: 12, color: Colors.grey),
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+              fontFamily: 'Tajawal',
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -83,7 +87,10 @@ class GuardianDashboardTab extends ConsumerWidget {
             onPressed: () =>
                 ref.read(dashboardProvider.notifier).fetchDashboard(),
             icon: const Icon(Icons.refresh),
-            label: Text('إعادة المحاولة', style: GoogleFonts.tajawal()),
+            label: Text(
+              'إعادة المحاولة',
+              style: TextStyle(fontFamily: 'Tajawal'),
+            ),
           ),
         ],
       ),
@@ -120,9 +127,10 @@ class GuardianDashboardTab extends ConsumerWidget {
                   dashboard.welcomeMessage.isNotEmpty
                       ? dashboard.welcomeMessage
                       : 'مرحباً بك',
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     fontSize: 14,
                     color: Colors.white70,
+                    fontFamily: 'Tajawal',
                   ),
                 ),
               ),
@@ -131,17 +139,22 @@ class GuardianDashboardTab extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             name,
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.white,
+              fontFamily: 'Tajawal',
             ),
           ),
           if (dashboard.dateHijri.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
               '${dashboard.dateHijri}  •  ${dashboard.dateGregorian}',
-              style: GoogleFonts.tajawal(fontSize: 12, color: Colors.white60),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white60,
+                fontFamily: 'Tajawal',
+              ),
             ),
           ],
           if (dashboard.unreadNotifications > 0) ...[
@@ -163,9 +176,10 @@ class GuardianDashboardTab extends ConsumerWidget {
                   const SizedBox(width: 4),
                   Text(
                     '${dashboard.unreadNotifications} إشعار جديد',
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 12,
                       color: Colors.white,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                 ],
@@ -184,10 +198,11 @@ class GuardianDashboardTab extends ConsumerWidget {
         const SizedBox(width: 8),
         Text(
           title,
-          style: GoogleFonts.tajawal(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
+            fontFamily: 'Tajawal',
           ),
         ),
       ],
@@ -254,18 +269,20 @@ class GuardianDashboardTab extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 13,
                       color: AppColors.textSecondary,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     status.label,
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: status.color,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                 ],
@@ -283,10 +300,11 @@ class GuardianDashboardTab extends ConsumerWidget {
                 ),
                 child: Text(
                   '${status.daysRemaining} يوم',
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: status.color,
+                    fontFamily: 'Tajawal',
                   ),
                 ),
               ),
@@ -314,11 +332,19 @@ class GuardianDashboardTab extends ConsumerWidget {
         ),
         title: Text(
           entry.subject ?? 'قيد',
-          style: GoogleFonts.tajawal(fontSize: 14, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Tajawal',
+          ),
         ),
         subtitle: Text(
           entry.contractTypeName ?? '',
-          style: GoogleFonts.tajawal(fontSize: 12, color: Colors.grey),
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+            fontFamily: 'Tajawal',
+          ),
         ),
         trailing: Icon(
           Icons.arrow_forward_ios,
@@ -370,9 +396,10 @@ class _StatCard extends StatelessWidget {
               Flexible(
                 child: Text(
                   title,
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
+                    fontFamily: 'Tajawal',
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -382,10 +409,11 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: color,
+              fontFamily: 'Tajawal',
             ),
           ),
         ],

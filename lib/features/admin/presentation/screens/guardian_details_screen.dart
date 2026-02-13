@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'add_edit_guardian_screen.dart';
@@ -99,10 +98,11 @@ class GuardianDetailsScreen extends ConsumerWidget {
                       // Name
                       Text(
                         guardian.name,
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
+                          fontFamily: 'Tajawal',
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -122,10 +122,11 @@ class GuardianDetailsScreen extends ConsumerWidget {
                             ),
                             child: Text(
                               guardian.serialNumber,
-                              style: GoogleFonts.tajawal(
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
+                                fontFamily: 'Tajawal',
                               ),
                             ),
                           ),
@@ -143,10 +144,11 @@ class GuardianDetailsScreen extends ConsumerWidget {
                             ),
                             child: Text(
                               isActive ? 'نشط' : 'متوقف',
-                              style: GoogleFonts.tajawal(
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
+                                fontFamily: 'Tajawal',
                               ),
                             ),
                           ),
@@ -392,10 +394,11 @@ class GuardianDetailsScreen extends ConsumerWidget {
               const SizedBox(width: 8),
               Text(
                 label,
-                style: GoogleFonts.tajawal(
+                style: TextStyle(
                   color: color,
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
+                  fontFamily: 'Tajawal',
                 ),
               ),
             ],
@@ -445,10 +448,11 @@ class GuardianDetailsScreen extends ConsumerWidget {
               const SizedBox(width: 12),
               Text(
                 title,
-                style: GoogleFonts.tajawal(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
+                  fontFamily: 'Tajawal',
                 ),
               ),
             ],
@@ -481,10 +485,11 @@ class GuardianDetailsScreen extends ConsumerWidget {
           const SizedBox(width: 10),
           Text(
             label,
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
               color: AppColors.primary,
+              fontFamily: 'Tajawal',
             ),
           ),
           const Spacer(),
@@ -508,10 +513,11 @@ class GuardianDetailsScreen extends ConsumerWidget {
               ),
               label: Text(
                 'تجديد',
-                style: GoogleFonts.tajawal(
+                style: TextStyle(
                   fontSize: 12,
                   color: AppColors.warning,
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'Tajawal',
                 ),
               ),
             ),
@@ -537,19 +543,21 @@ class GuardianDetailsScreen extends ConsumerWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 11,
+              fontFamily: 'Tajawal',
             ),
           ),
           const SizedBox(height: 4),
           SelectableText(
             value,
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               color: color ?? AppColors.textPrimary,
               fontSize: 13,
               fontWeight: makeBold ? FontWeight.bold : FontWeight.w500,
               height: 1.4,
+              fontFamily: 'Tajawal',
             ),
           ),
         ],

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 
 class StatCard extends StatelessWidget {
@@ -45,19 +44,21 @@ class StatCard extends StatelessWidget {
                 children: [
                   Text(
                     count,
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     title,
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                 ],

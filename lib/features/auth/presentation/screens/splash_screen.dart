@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../app/admin/admin_shell.dart';
 import '../../../../app/guardian/guardian_shell.dart';
@@ -193,20 +192,22 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     children: [
                       Text(
                         'إدارة قلم التوثيق',
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           letterSpacing: 1.2,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'وزارة العدل وحقوق الإنسان',
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                           color: AppColors.accent,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                     ],
@@ -239,9 +240,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     const SizedBox(height: 12),
                     Text(
                       'جارٍ التحميل...',
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(
                         fontSize: 13,
                         color: Colors.white70,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                   ],
@@ -253,7 +255,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               // Version
               Text(
                 'الإصدار 5.0.0',
-                style: GoogleFonts.cairo(fontSize: 11, color: Colors.white38),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.white38,
+                  fontFamily: 'Tajawal',
+                ),
               ),
               const SizedBox(height: 16),
             ],

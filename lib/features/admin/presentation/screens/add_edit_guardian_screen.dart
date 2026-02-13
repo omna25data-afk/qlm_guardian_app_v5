@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -356,10 +355,11 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
           const SizedBox(width: 10),
           Text(
             title,
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
+              fontFamily: 'Tajawal',
             ),
           ),
         ],
@@ -381,17 +381,19 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
         controller: c,
         maxLines: maxLines,
         keyboardType: type,
-        style: GoogleFonts.tajawal(
+        style: TextStyle(
           color: Colors.black87,
           fontWeight: FontWeight.w600,
           fontSize: 14,
+          fontFamily: 'Tajawal',
         ),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: GoogleFonts.tajawal(
+          labelStyle: TextStyle(
             color: Colors.grey[600],
             fontWeight: FontWeight.normal,
             fontSize: 13,
+            fontFamily: 'Tajawal',
           ),
           prefixIcon: Icon(icon, color: Colors.grey[600], size: 18),
           border: OutlineInputBorder(
@@ -456,20 +458,22 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
                   children: [
                     Text(
                       label,
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 11,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       date != null ? _formatDate(date) : 'اختر التاريخ',
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: date != null
                             ? FontWeight.bold
                             : FontWeight.normal,
                         color: date != null ? Colors.black87 : Colors.grey[400],
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                   ],
@@ -966,17 +970,19 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
                   children: [
                     Text(
                       title,
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 13,
+                        fontFamily: 'Tajawal',
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1001,7 +1007,11 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
       appBar: AppBar(
         title: Text(
           isEditing ? 'تعديل بيانات الأمين' : 'إضافة أمين جديد',
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            fontFamily: 'Tajawal',
+          ),
         ),
         centerTitle: true,
         backgroundColor: AppColors.primary,
@@ -1056,8 +1066,9 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
                             )
                           : Text(
                               isLastStep ? 'حفظ البيانات' : 'التالي',
-                              style: GoogleFonts.tajawal(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
+                                fontFamily: 'Tajawal',
                               ),
                             ),
                     ),
@@ -1075,7 +1086,10 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
                         ),
                         child: Text(
                           'السابق',
-                          style: GoogleFonts.tajawal(color: Colors.black87),
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontFamily: 'Tajawal',
+                          ),
                         ),
                       ),
                     ),
@@ -1172,9 +1186,10 @@ class _AreaSelectionSheetState extends ConsumerState<_AreaSelectionSheet> {
           const SizedBox(height: 20),
           Text(
             'اختر ${widget.type}',
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
+              fontFamily: 'Tajawal',
             ),
           ),
           const SizedBox(height: 16),
@@ -1223,10 +1238,11 @@ class _AreaSelectionSheetState extends ConsumerState<_AreaSelectionSheet> {
                         ),
                         title: Text(
                           item.name,
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             fontWeight: isSelected
                                 ? FontWeight.bold
                                 : FontWeight.normal,
+                            fontFamily: 'Tajawal',
                           ),
                         ),
                         leading: CircleAvatar(
@@ -1280,7 +1296,10 @@ class _AreaSelectionSheetState extends ConsumerState<_AreaSelectionSheet> {
                   ),
                   child: Text(
                     'تأكيد (${_selected.length})',
-                    style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Tajawal',
+                    ),
                   ),
                 ),
               ),

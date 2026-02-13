@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../features/records/data/models/record_book.dart';
 import '../../../features/records/presentation/providers/records_provider.dart';
@@ -61,13 +60,15 @@ class _MyRecordsTabState extends ConsumerState<MyRecordsTab>
             ),
             indicatorSize: TabBarIndicatorSize.tab,
             labelColor: Colors.white,
-            labelStyle: GoogleFonts.tajawal(
+            labelStyle: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
+              fontFamily: 'Tajawal',
             ),
-            unselectedLabelStyle: GoogleFonts.tajawal(
+            unselectedLabelStyle: TextStyle(
               fontWeight: FontWeight.w500,
               fontSize: 16,
+              fontFamily: 'Tajawal',
             ),
             dividerColor: Colors.transparent,
             padding: const EdgeInsets.all(4),
@@ -101,13 +102,16 @@ class _MyRecordsTabState extends ConsumerState<MyRecordsTab>
             const SizedBox(height: 16),
             Text(
               'خطأ في تحميل السجلات',
-              style: GoogleFonts.tajawal(fontSize: 16),
+              style: TextStyle(fontSize: 16, fontFamily: 'Tajawal'),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () =>
                   ref.read(recordBooksProvider.notifier).fetchRecordBooks(),
-              child: Text('إعادة المحاولة', style: GoogleFonts.tajawal()),
+              child: Text(
+                'إعادة المحاولة',
+                style: TextStyle(fontFamily: 'Tajawal'),
+              ),
             ),
           ],
         ),
@@ -122,9 +126,10 @@ class _MyRecordsTabState extends ConsumerState<MyRecordsTab>
                 const SizedBox(height: 16),
                 Text(
                   'لا توجد سجلات',
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     fontSize: 18,
                     color: AppColors.textSecondary,
+                    fontFamily: 'Tajawal',
                   ),
                 ),
               ],
@@ -159,22 +164,24 @@ class _MyRecordsTabState extends ConsumerState<MyRecordsTab>
           ),
           child: Text(
             '${book.bookNumber}',
-            style: GoogleFonts.tajawal(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF006400),
+              fontFamily: 'Tajawal',
             ),
           ),
         ),
         title: Text(
           'دفتر ${book.contractType}',
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
         ),
         subtitle: Text(
           '${book.entriesCount} قيد • ${book.hijriYear} هـ',
-          style: GoogleFonts.tajawal(
+          style: TextStyle(
             fontSize: 13,
             color: AppColors.textSecondary,
+            fontFamily: 'Tajawal',
           ),
         ),
         trailing: Icon(

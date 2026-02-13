@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 
 /// عنصر في القائمة المنسدلة
@@ -115,10 +114,11 @@ class CustomDropdownMenu extends StatelessWidget {
                   Expanded(
                     child: Text(
                       item.label,
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                         color: textColor,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                   ),
@@ -252,10 +252,11 @@ class CustomDropdownMenuWithHeader extends StatelessWidget {
                   Expanded(
                     child: Text(
                       item.label,
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                         color: textColor,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                   ),
@@ -350,10 +351,11 @@ class CustomBottomSheet extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   title,
-                  style: GoogleFonts.tajawal(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
+                    fontFamily: 'Tajawal',
                   ),
                 ),
                 const Spacer(),
@@ -394,9 +396,10 @@ class CustomBottomSheet extends StatelessWidget {
                   ),
                   child: Text(
                     applyLabel,
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                 ),

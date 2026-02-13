@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// مكون تبويبات موحد بتصميم Segment (متصلة داخل إطار)
 class CustomSegmentedTabBar extends StatelessWidget {
@@ -62,13 +61,15 @@ class CustomSegmentedTabBar extends StatelessWidget {
           dividerColor: Colors.transparent,
           labelColor: Colors.white,
           unselectedLabelColor: inactiveTextColor,
-          labelStyle: GoogleFonts.tajawal(
+          labelStyle: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 13,
+            fontFamily: 'Tajawal',
           ),
-          unselectedLabelStyle: GoogleFonts.tajawal(
+          unselectedLabelStyle: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 13,
+            fontFamily: 'Tajawal',
           ),
           splashFactory: NoSplash.splashFactory,
           overlayColor: WidgetStateProperty.all(Colors.transparent),
@@ -115,13 +116,15 @@ class CustomMiniTabBar extends StatelessWidget {
         dividerColor: Colors.transparent,
         labelColor: Colors.white,
         unselectedLabelColor: Colors.grey[600],
-        labelStyle: GoogleFonts.tajawal(
+        labelStyle: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 12,
+          fontFamily: 'Tajawal',
         ),
-        unselectedLabelStyle: GoogleFonts.tajawal(
+        unselectedLabelStyle: TextStyle(
           fontWeight: FontWeight.w500,
           fontSize: 12,
+          fontFamily: 'Tajawal',
         ),
         splashFactory: NoSplash.splashFactory,
         overlayColor: WidgetStateProperty.all(Colors.transparent),
@@ -154,13 +157,15 @@ class CustomInlineTabBar extends StatelessWidget {
       tabs: tabs.map((t) => Tab(text: t)).toList(),
       labelColor: activeColor,
       unselectedLabelColor: Colors.grey,
-      labelStyle: GoogleFonts.tajawal(
+      labelStyle: TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 14,
+        fontFamily: 'Tajawal',
       ),
-      unselectedLabelStyle: GoogleFonts.tajawal(
+      unselectedLabelStyle: TextStyle(
         fontWeight: FontWeight.w500,
         fontSize: 14,
+        fontFamily: 'Tajawal',
       ),
       indicatorColor: activeColor,
       indicatorWeight: 3,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/custom_tab_bar.dart';
 import '../../../features/admin/data/models/admin_dashboard_data.dart';
@@ -46,17 +45,19 @@ class _AdminDashboardTabState extends ConsumerState<AdminDashboardTab>
             const SizedBox(height: 16),
             Text(
               'حدث خطأ أثناء تحميل البيانات',
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
+                fontFamily: 'Tajawal',
               ),
             ),
             const SizedBox(height: 8),
             Text(
               error.toString(),
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontSize: 12,
                 color: AppColors.textSecondary,
+                fontFamily: 'Tajawal',
               ),
             ),
             const SizedBox(height: 20),
@@ -66,7 +67,10 @@ class _AdminDashboardTabState extends ConsumerState<AdminDashboardTab>
               icon: const Icon(Icons.refresh, size: 18),
               label: Text(
                 'إعادة المحاولة',
-                style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Tajawal',
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -146,18 +150,20 @@ class _AdminDashboardTabState extends ConsumerState<AdminDashboardTab>
           children: [
             Text(
               'مرحباً، ${name ?? "الرئيس"}',
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
+                fontFamily: 'Tajawal',
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'رئيس قلم التوثيق',
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontSize: 14,
                 color: AppColors.textSecondary,
+                fontFamily: 'Tajawal',
               ),
             ),
           ],
@@ -184,10 +190,11 @@ class _AdminDashboardTabState extends ConsumerState<AdminDashboardTab>
         const SizedBox(width: 10),
         Text(
           title,
-          style: GoogleFonts.tajawal(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
+            fontFamily: 'Tajawal',
           ),
         ),
       ],
@@ -223,7 +230,10 @@ class _AdminDashboardTabState extends ConsumerState<AdminDashboardTab>
               const SizedBox(height: 12),
               Text(
                 'مساحة للرسوم البيانية التفاعلية',
-                style: GoogleFonts.tajawal(color: Colors.grey[600]),
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontFamily: 'Tajawal',
+                ),
               ),
             ],
           ),
@@ -264,16 +274,18 @@ class _AdminDashboardTabState extends ConsumerState<AdminDashboardTab>
                   children: [
                     Text(
                       'لا توجد إجراءات عاجلة',
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         color: Colors.green[800],
                         fontWeight: FontWeight.bold,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                     Text(
                       'جميع الأمور تسير بشكل جيد',
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
                         color: Colors.green[600],
                         fontSize: 12,
+                        fontFamily: 'Tajawal',
                       ),
                     ),
                   ],
@@ -319,17 +331,19 @@ class _AdminDashboardTabState extends ConsumerState<AdminDashboardTab>
                         children: [
                           Text(
                             action.title,
-                            style: GoogleFonts.tajawal(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
+                              fontFamily: 'Tajawal',
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             action.subtitle,
-                            style: GoogleFonts.tajawal(
+                            style: TextStyle(
                               color: action.color,
                               fontSize: 12,
+                              fontFamily: 'Tajawal',
                             ),
                           ),
                         ],
@@ -360,10 +374,11 @@ class _AdminDashboardTabState extends ConsumerState<AdminDashboardTab>
                             ),
                             child: Text(
                               action.actionLabel,
-                              style: GoogleFonts.tajawal(
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
+                                fontFamily: 'Tajawal',
                               ),
                             ),
                           ),
@@ -534,18 +549,20 @@ class _AdminDashboardTabState extends ConsumerState<AdminDashboardTab>
               const SizedBox(height: 10),
               Text(
                 item.value,
-                style: GoogleFonts.tajawal(
+                style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
                   color: item.color,
+                  fontFamily: 'Tajawal',
                 ),
               ),
               Text(
                 item.title,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.tajawal(
+                style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey[700],
+                  fontFamily: 'Tajawal',
                 ),
               ),
             ],
@@ -600,7 +617,10 @@ class _AdminDashboardTabState extends ConsumerState<AdminDashboardTab>
         children: [
           Icon(icon, size: 48, color: Colors.grey[300]),
           const SizedBox(height: 12),
-          Text(message, style: GoogleFonts.tajawal(color: Colors.grey[500])),
+          Text(
+            message,
+            style: TextStyle(color: Colors.grey[500], fontFamily: 'Tajawal'),
+          ),
         ],
       ),
     );

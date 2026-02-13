@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../features/admin/presentation/widgets/areas_list_tab.dart';
 import '../../../features/admin/presentation/widgets/assignments_list_tab.dart';
@@ -45,7 +45,10 @@ class AdminSettingsTab extends StatelessWidget {
                 appBar: AppBar(
                   title: Text(
                     'المناطق',
-                    style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Tajawal',
+                    ),
                   ),
                 ),
                 body: const AreasListTab(),
@@ -66,7 +69,10 @@ class AdminSettingsTab extends StatelessWidget {
                 appBar: AppBar(
                   title: Text(
                     'التكليفات',
-                    style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Tajawal',
+                    ),
                   ),
                 ),
                 body: const AssignmentsListTab(),
@@ -87,7 +93,10 @@ class AdminSettingsTab extends StatelessWidget {
                 appBar: AppBar(
                   title: Text(
                     'البطاقات',
-                    style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Tajawal',
+                    ),
                   ),
                 ),
                 body: const CardsListTab(),
@@ -108,7 +117,10 @@ class AdminSettingsTab extends StatelessWidget {
                 appBar: AppBar(
                   title: Text(
                     'التراخيص',
-                    style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Tajawal',
+                    ),
                   ),
                 ),
                 body: const LicensesListTab(),
@@ -130,7 +142,7 @@ class AdminSettingsTab extends StatelessWidget {
               SnackBar(
                 content: Text(
                   'إعدادات الإشعارات قيد التطوير',
-                  style: GoogleFonts.tajawal(),
+                  style: TextStyle(fontFamily: 'Tajawal'),
                 ),
               ),
             );
@@ -163,7 +175,7 @@ class AdminSettingsTab extends StatelessWidget {
                 children: [
                   Text(
                     'لوحة الإدارة لنظام الأمناء الشرعيين.',
-                    style: GoogleFonts.tajawal(fontSize: 13),
+                    style: TextStyle(fontSize: 13, fontFamily: 'Tajawal'),
                   ),
                 ],
               ),
@@ -188,10 +200,11 @@ class AdminSettingsTab extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           title,
-          style: GoogleFonts.tajawal(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
+            fontFamily: 'Tajawal',
           ),
         ),
       ],
@@ -223,11 +236,19 @@ class AdminSettingsTab extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 15),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            fontFamily: 'Tajawal',
+          ),
         ),
         subtitle: Text(
           subtitle,
-          style: GoogleFonts.tajawal(color: AppColors.textHint, fontSize: 12),
+          style: TextStyle(
+            color: AppColors.textHint,
+            fontSize: 12,
+            fontFamily: 'Tajawal',
+          ),
         ),
         trailing: Icon(
           Icons.arrow_forward_ios,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 
@@ -52,10 +51,11 @@ class ProfileScreen extends ConsumerWidget {
                         user?.guardian?.fullName ??
                             user?.name ??
                             'الأمين الشرعي',
-                        style: GoogleFonts.tajawal(
+                        style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
+                          fontFamily: 'Tajawal',
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -63,9 +63,10 @@ class ProfileScreen extends ConsumerWidget {
                       if (user?.guardian?.registerNumber != null)
                         Text(
                           'رقم السجل: ${user!.guardian!.registerNumber}',
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
                             fontSize: 14,
                             color: Colors.white70,
+                            fontFamily: 'Tajawal',
                           ),
                         ),
                     ],
@@ -120,7 +121,10 @@ class ProfileScreen extends ConsumerWidget {
                       icon: const Icon(Icons.logout, color: Colors.red),
                       label: Text(
                         'تسجيل الخروج',
-                        style: GoogleFonts.tajawal(color: Colors.red),
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontFamily: 'Tajawal',
+                        ),
                       ),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.red),
@@ -166,18 +170,20 @@ class ProfileScreen extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[600],
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     status,
-                    style: GoogleFonts.tajawal(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: color,
+                      fontFamily: 'Tajawal',
                     ),
                   ),
                 ],
@@ -201,9 +207,10 @@ class ProfileScreen extends ConsumerWidget {
           children: [
             Text(
               'معلومات الحساب',
-              style: GoogleFonts.tajawal(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
+                fontFamily: 'Tajawal',
               ),
             ),
             const Divider(),
@@ -230,9 +237,18 @@ class ProfileScreen extends ConsumerWidget {
         children: [
           Icon(icon, size: 20, color: Colors.grey[600]),
           const SizedBox(width: 12),
-          Text(label, style: GoogleFonts.tajawal(color: Colors.grey[600])),
+          Text(
+            label,
+            style: TextStyle(color: Colors.grey[600], fontFamily: 'Tajawal'),
+          ),
           const Spacer(),
-          Text(value, style: GoogleFonts.tajawal(fontWeight: FontWeight.w500)),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Tajawal',
+            ),
+          ),
         ],
       ),
     );
