@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'admin_area_model.dart';
 
 part 'admin_guardian_model.g.dart';
 
@@ -9,7 +10,7 @@ class AdminGuardianModel {
   final int id;
   final String name;
   @JsonKey(name: 'serial_number')
-  final String serialNumber;
+  final String? serialNumber;
   final String? phone;
   @JsonKey(name: 'photo_url')
   final String? photoUrl;
@@ -95,6 +96,10 @@ class AdminGuardianModel {
   @JsonKey(name: 'main_district_name')
   final String? mainDistrictName;
 
+  // Geographic Areas (Jurisdiction)
+  final List<AdminAreaModel>? villages;
+  final List<AdminAreaModel>? localities;
+
   // Extra
   @JsonKey(name: 'stop_date')
   final String? stopDate;
@@ -110,7 +115,7 @@ class AdminGuardianModel {
   AdminGuardianModel({
     required this.id,
     required this.name,
-    required this.serialNumber,
+    this.serialNumber,
     this.phone,
     this.photoUrl,
     this.employmentStatus,
@@ -146,6 +151,8 @@ class AdminGuardianModel {
     this.professionCardExpiryDate,
     this.mainDistrictId,
     this.mainDistrictName,
+    this.villages,
+    this.localities,
     this.stopDate,
     this.stopReason,
     this.notes,

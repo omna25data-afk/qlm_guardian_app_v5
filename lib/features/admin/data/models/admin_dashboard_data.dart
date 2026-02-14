@@ -23,7 +23,13 @@ class AdminStats {
   final StatCategory licenses;
   final StatCategory cards;
 
-  AdminStats({
+  static const empty = AdminStats(
+    guardians: StatCategory.empty,
+    licenses: StatCategory.empty,
+    cards: StatCategory.empty,
+  );
+
+  const AdminStats({
     required this.guardians,
     required this.licenses,
     required this.cards,
@@ -41,7 +47,14 @@ class StatCategory {
   final int inactive;
   final int warning;
 
-  StatCategory({
+  static const empty = StatCategory(
+    total: 0,
+    active: 0,
+    inactive: 0,
+    warning: 0,
+  );
+
+  const StatCategory({
     required this.total,
     required this.active,
     required this.inactive,
@@ -80,7 +93,7 @@ class UrgentAction {
       case 'red':
         return AppColors.error;
       case 'orange':
-        return AppColors.warning; // or AppColors.statOrange
+        return AppColors.warning;
       case 'blue':
         return AppColors.info;
       default:

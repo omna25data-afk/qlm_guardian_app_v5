@@ -85,7 +85,7 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
 
   void _loadGuardianData() {
     final g = widget.guardian!;
-    _serialNumberController.text = g.serialNumber;
+    _serialNumberController.text = g.serialNumber ?? '';
     _firstNameController.text = g.firstName ?? '';
     _fatherNameController.text = g.fatherName ?? '';
     _grandfatherNameController.text = g.grandfatherName ?? '';
@@ -137,6 +137,26 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
     }
     _stopReasonController.text = g.stopReason ?? '';
     _notesController.text = g.notes ?? '';
+
+    // Load Geographic Areas
+    if (g.mainDistrictId != null && g.mainDistrictName != null) {
+      _selectedMainDistrict = AdminAreaModel(
+        id: g.mainDistrictId!,
+        name: g.mainDistrictName!,
+        type: 'عزلة',
+        childrenCount: 0,
+        guardiansCount: 0,
+        color: '#808080',
+        icon: '',
+        isActive: true, // Assuming active if assigned
+      );
+    }
+    if (g.villages != null) {
+      _selectedVillages = g.villages!;
+    }
+    if (g.localities != null) {
+      _selectedLocalities = g.localities!;
+    }
   }
 
   @override

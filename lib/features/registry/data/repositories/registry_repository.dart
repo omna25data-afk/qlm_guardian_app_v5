@@ -106,7 +106,9 @@ class RegistryRepository {
     String? attachmentPath,
   }) async {
     // 1. Generate UUID if not present
-    final uuid = entry.uuid.isEmpty ? const Uuid().v4() : entry.uuid;
+    final uuid = (entry.uuid?.isEmpty ?? true)
+        ? const Uuid().v4()
+        : entry.uuid!;
     final entryWithUuid = entry.copyWith(uuid: uuid, status: 'draft');
 
     // 2. Save locally (Basic info only, extras/file might be lost if offline)

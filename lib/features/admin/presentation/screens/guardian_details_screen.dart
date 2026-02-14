@@ -65,7 +65,7 @@ class GuardianDetailsScreen extends ConsumerWidget {
                       const SizedBox(height: 40),
                       // Avatar
                       Hero(
-                        tag: 'guardian_${guardian.id}',
+                        tag: 'guardian_details_${guardian.id}',
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
@@ -121,7 +121,7 @@ class GuardianDetailsScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              guardian.serialNumber,
+                              guardian.serialNumber ?? '---',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -319,6 +319,34 @@ class GuardianDetailsScreen extends ConsumerWidget {
                         ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+
+                  // Geographic Areas (Jurisdiction)
+                  if ((guardian.villages != null &&
+                          guardian.villages!.isNotEmpty) ||
+                      (guardian.localities != null &&
+                          guardian.localities!.isNotEmpty))
+                    _buildSection(
+                      context,
+                      title: 'المناطق الجغرافية (الاختصاص)',
+                      icon: Icons.location_on_outlined,
+                      children: [
+                        if (guardian.villages != null &&
+                            guardian.villages!.isNotEmpty)
+                          _buildAreaGroup(
+                            'القرى',
+                            guardian.villages!.map((e) => e.name).toList(),
+                            AppColors.info,
+                          ),
+                        if (guardian.localities != null &&
+                            guardian.localities!.isNotEmpty)
+                          _buildAreaGroup(
+                            'المحلات',
+                            guardian.localities!.map((e) => e.name).toList(),
+                            AppColors.success,
+                          ),
+                      ],
+                    ),
                   const SizedBox(height: 32),
                 ],
               ),
@@ -560,6 +588,55 @@ class GuardianDetailsScreen extends ConsumerWidget {
               fontFamily: 'Tajawal',
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAreaGroup(String label, List<String> items, Color color) {
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: color,
+              fontFamily: 'Tajawal',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: items
+                .map(
+                  (item) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: color.withValues(alpha: 0.3)),
+                    ),
+                    child: Text(
+                      item,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: color.withValues(alpha: 0.8),
+                        fontFamily: 'Tajawal',
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 12),
         ],
       ),
     );

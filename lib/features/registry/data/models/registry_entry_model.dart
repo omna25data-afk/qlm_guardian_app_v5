@@ -7,7 +7,7 @@ part 'registry_entry_model.g.dart';
 @JsonSerializable()
 class RegistryEntryModel extends Equatable {
   final int? id; // Local ID
-  final String uuid;
+  final String? uuid;
   @JsonKey(name: 'remote_id')
   final int? remoteId;
 
@@ -18,7 +18,7 @@ class RegistryEntryModel extends Equatable {
   final int? contractTypeId;
   @JsonKey(name: 'constraint_type_id')
   final int? constraintTypeId; // New
-  final String status; // draft, pending, documented, etc.
+  final String? status; // draft, pending, documented, etc.
   @JsonKey(name: 'serial_number')
   final int? serialNumber;
   @JsonKey(name: 'register_number')
@@ -121,7 +121,7 @@ class RegistryEntryModel extends Equatable {
 
   const RegistryEntryModel({
     this.id,
-    required this.uuid,
+    this.uuid,
     this.remoteId,
     this.guardianId,
     this.contractTypeId,

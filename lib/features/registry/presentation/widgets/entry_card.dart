@@ -40,7 +40,7 @@ class EntryCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  _buildStatusChip(entry.status),
+                  _buildStatusChip(entry.status ?? 'draft'),
                 ],
               ),
               const SizedBox(height: 8),

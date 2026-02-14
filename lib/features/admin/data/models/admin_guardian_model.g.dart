@@ -10,7 +10,7 @@ AdminGuardianModel _$AdminGuardianModelFromJson(Map<String, dynamic> json) =>
     AdminGuardianModel(
       id: (json['id'] as num).toInt(),
       name: json['name'] as String,
-      serialNumber: json['serial_number'] as String,
+      serialNumber: json['serial_number'] as String?,
       phone: json['phone'] as String?,
       photoUrl: json['photo_url'] as String?,
       employmentStatus: json['employment_status'] as String?,
@@ -46,6 +46,12 @@ AdminGuardianModel _$AdminGuardianModelFromJson(Map<String, dynamic> json) =>
       professionCardExpiryDate: json['profession_card_expiry_date'] as String?,
       mainDistrictId: (json['main_district_id'] as num?)?.toInt(),
       mainDistrictName: json['main_district_name'] as String?,
+      villages: (json['villages'] as List<dynamic>?)
+          ?.map((e) => AdminAreaModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      localities: (json['localities'] as List<dynamic>?)
+          ?.map((e) => AdminAreaModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
       stopDate: json['stop_date'] as String?,
       stopReason: json['stop_reason'] as String?,
       notes: json['notes'] as String?,
@@ -97,6 +103,8 @@ Map<String, dynamic> _$AdminGuardianModelToJson(AdminGuardianModel instance) =>
       'profession_card_expiry_date': instance.professionCardExpiryDate,
       'main_district_id': instance.mainDistrictId,
       'main_district_name': instance.mainDistrictName,
+      'villages': instance.villages,
+      'localities': instance.localities,
       'stop_date': instance.stopDate,
       'stop_reason': instance.stopReason,
       'notes': instance.notes,

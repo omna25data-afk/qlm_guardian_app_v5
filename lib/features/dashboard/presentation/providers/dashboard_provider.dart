@@ -12,20 +12,30 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
 final dashboardProvider =
     StateNotifierProvider<DashboardNotifier, AsyncValue<DashboardData>>((ref) {
       final repository = ref.watch(dashboardRepositoryProvider);
-      return DashboardNotifier(repository);
+      return DashboardNotifier(repository, isAdmin: false);
+    });
+
+final adminDashboardProvider =
+    StateNotifierProvider<DashboardNotifier, AsyncValue<DashboardData>>((ref) {
+      final repository = ref.watch(dashboardRepositoryProvider);
+      return DashboardNotifier(repository, isAdmin: true);
     });
 
 class DashboardNotifier extends StateNotifier<AsyncValue<DashboardData>> {
   final DashboardRepository _repository;
+  final bool isAdmin;
 
-  DashboardNotifier(this._repository) : super(const AsyncValue.loading()) {
+  DashboardNotifier(this._repository, {this.isAdmin = false})
+    : super(const AsyncValue.loading()) {
     fetchDashboard();
   }
 
   Future<void> fetchDashboard() async {
     state = const AsyncValue.loading();
     try {
-      final data = await _repository.getDashboard();
+      final data = isAdmin
+          ? await _repository.getAdminDashboard()
+          : await _repository.getDashboard();
       state = AsyncValue.data(data);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);

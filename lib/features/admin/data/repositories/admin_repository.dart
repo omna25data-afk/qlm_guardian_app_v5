@@ -6,6 +6,8 @@ import '../models/admin_assignment_model.dart';
 import '../models/admin_dashboard_data.dart';
 import '../models/admin_guardian_model.dart';
 import '../models/admin_renewal_model.dart';
+import '../../../records/data/models/record_book.dart';
+import '../../../registry/data/models/registry_entry_model.dart';
 
 class AdminRepository {
   final ApiClient _apiClient;
@@ -15,11 +17,18 @@ class AdminRepository {
   // ─── Guardians ───────────────────────────────────────────
 
   /// Fetch guardians list with optional search query
-  Future<List<AdminGuardianModel>> getGuardians({String? query}) async {
+  Future<List<AdminGuardianModel>> getGuardians({
+    String? query,
+    int page = 1,
+  }) async {
     try {
+      final params = <String, dynamic>{'page': page};
+      if (query != null && query.isNotEmpty) {
+        params['search'] = query;
+      }
       final response = await _apiClient.get(
         ApiEndpoints.adminGuardians,
-        queryParameters: query != null ? {'search': query} : null,
+        queryParameters: params,
       );
       return (response.data['data'] as List?)
               ?.map((e) => AdminGuardianModel.fromJson(e))
@@ -86,10 +95,16 @@ class AdminRepository {
   // ─── Dashboard ───────────────────────────────────────────
 
   /// Fetch dashboard data
+  /// Fetch dashboard data
   Future<AdminDashboardData> getDashboardData() async {
     try {
       final response = await _apiClient.get(ApiEndpoints.adminDashboard);
-      return AdminDashboardData.fromJson(response.data ?? {});
+      final data =
+          response.data is Map<String, dynamic> &&
+              response.data.containsKey('data')
+          ? response.data['data']
+          : response.data;
+      return AdminDashboardData.fromJson(data ?? {});
     } catch (e) {
       rethrow;
     }
@@ -119,12 +134,12 @@ class AdminRepository {
     String? type,
     String? parentId,
   }) async {
-    final params = <String, dynamic>{'page': page, 'filter[is_active]': '1'};
+    final params = <String, dynamic>{'page': page};
     if (searchQuery != null && searchQuery.isNotEmpty) {
-      params['filter[name]'] = searchQuery;
+      params['search'] = searchQuery;
     }
-    if (type != null) params['filter[type]'] = type;
-    if (parentId != null) params['filter[parent_id]'] = parentId;
+    if (type != null) params['type'] = type;
+    if (parentId != null) params['parent_id'] = parentId;
 
     final response = await _apiClient.get(
       ApiEndpoints.adminAreas,
@@ -197,18 +212,6 @@ class AdminRepository {
         [];
   }
 
-  /// Fetch card renewals
-  Future<List<AdminRenewalModel>> getCardRenewals({int page = 1}) async {
-    final response = await _apiClient.get(
-      ApiEndpoints.adminElectronicCardRenewals,
-      queryParameters: {'page': page},
-    );
-    return (response.data['data'] as List?)
-            ?.map((e) => AdminRenewalModel.fromJson(e))
-            .toList() ??
-        [];
-  }
-
   // ─── Licenses ────────────────────────────────────────────
 
   /// Fetch licenses
@@ -255,14 +258,55 @@ class AdminRepository {
     );
   }
 
-  /// Fetch guardian renewals
-  Future<List<AdminRenewalModel>> getRenewals({int page = 1}) async {
+  // ─── Record Books ────────────────────────────────────────
+
+  /// Fetch record books (Admin)
+  Future<List<RecordBook>> getRecordBooks({
+    int page = 1,
+    String? searchQuery,
+    String? status,
+  }) async {
+    final params = <String, dynamic>{'page': page};
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      params['search'] = searchQuery;
+    }
+    if (status != null && status != 'all') params['status'] = status;
+
     final response = await _apiClient.get(
-      ApiEndpoints.adminRenewals,
-      queryParameters: {'page': page},
+      ApiEndpoints.adminRecordBooks,
+      queryParameters: params,
     );
     return (response.data['data'] as List?)
-            ?.map((e) => AdminRenewalModel.fromJson(e))
+            ?.map((e) => RecordBook.fromJson(e))
+            .toList() ??
+        [];
+  }
+
+  // Note: getRenewals() removed — /admin/renewals route does not exist.
+  // Use getLicenses() and getCards() instead.
+
+  // ─── Registry Entries ────────────────────────────────────
+
+  /// Fetch registry entries (Admin)
+  Future<List<RegistryEntryModel>> getRegistryEntries({
+    int page = 1,
+    String? searchQuery,
+    String? status,
+    int? recordBookId,
+  }) async {
+    final params = <String, dynamic>{'page': page};
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      params['search'] = searchQuery;
+    }
+    if (status != null && status != 'all') params['status'] = status;
+    if (recordBookId != null) params['guardian_record_book_id'] = recordBookId;
+
+    final response = await _apiClient.get(
+      ApiEndpoints.adminRegistryEntries,
+      queryParameters: params,
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => RegistryEntryModel.fromJson(e))
             .toList() ??
         [];
   }

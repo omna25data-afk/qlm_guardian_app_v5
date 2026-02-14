@@ -6,6 +6,7 @@ part 'admin_area_model.g.dart';
 class AdminAreaModel {
   final int id;
   final String name;
+  @JsonKey(defaultValue: 'area')
   final String type;
   @JsonKey(name: 'parent_name')
   final String? parentName;
@@ -19,6 +20,10 @@ class AdminAreaModel {
   final String icon;
   @JsonKey(name: 'is_active', defaultValue: false)
   final bool isActive;
+  @JsonKey(defaultValue: [])
+  final List<AdminAreaModel> children;
+  @JsonKey(defaultValue: 0)
+  final int level;
 
   AdminAreaModel({
     required this.id,
@@ -30,6 +35,8 @@ class AdminAreaModel {
     required this.color,
     required this.icon,
     required this.isActive,
+    this.children = const [],
+    this.level = 0,
   });
 
   factory AdminAreaModel.fromJson(Map<String, dynamic> json) =>

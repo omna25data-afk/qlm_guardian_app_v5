@@ -8,7 +8,7 @@ part of 'contract_type_model.dart';
 
 ContractTypeModel _$ContractTypeModelFromJson(Map<String, dynamic> json) =>
     ContractTypeModel(
-      id: (json['id'] as num).toInt(),
+      id: ContractTypeModel._parseInt(json['id']),
       name: json['name'] as String,
       icon: json['icon'] as String?,
       description: json['description'] as String?,

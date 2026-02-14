@@ -10,13 +10,19 @@ AdminAreaModel _$AdminAreaModelFromJson(Map<String, dynamic> json) =>
     AdminAreaModel(
       id: (json['id'] as num).toInt(),
       name: json['name'] as String,
-      type: json['type'] as String,
+      type: json['type'] as String? ?? 'area',
       parentName: json['parent_name'] as String?,
       childrenCount: (json['children_count'] as num?)?.toInt() ?? 0,
       guardiansCount: (json['guardians_count'] as num?)?.toInt() ?? 0,
       color: json['color'] as String? ?? '#808080',
       icon: json['icon'] as String? ?? '',
       isActive: json['is_active'] as bool? ?? false,
+      children:
+          (json['children'] as List<dynamic>?)
+              ?.map((e) => AdminAreaModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      level: (json['level'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$AdminAreaModelToJson(AdminAreaModel instance) =>
@@ -30,4 +36,6 @@ Map<String, dynamic> _$AdminAreaModelToJson(AdminAreaModel instance) =>
       'color': instance.color,
       'icon': instance.icon,
       'is_active': instance.isActive,
+      'children': instance.children,
+      'level': instance.level,
     };

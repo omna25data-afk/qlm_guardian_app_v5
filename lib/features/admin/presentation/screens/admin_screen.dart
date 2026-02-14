@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/geographic_areas_screen.dart';
 
 /// Admin panel home screen — accessible only by رئيس القلم
 class AdminScreen extends StatelessWidget {
@@ -61,6 +62,20 @@ class AdminScreen extends StatelessWidget {
                     subtitle: 'إعدادات النظام',
                     onTap: () {
                       // TODO: Navigate to settings
+                    },
+                  ),
+                  _buildAdminCard(
+                    context,
+                    icon: Icons.map_outlined,
+                    title: 'المناطق الجغرافية',
+                    subtitle: 'إدارة التقسيم الهرمي للمناطق',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GeographicAreasScreen(),
+                        ),
+                      );
                     },
                   ),
                 ],

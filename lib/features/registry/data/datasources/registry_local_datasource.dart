@@ -60,10 +60,10 @@ class RegistryLocalDataSourceImpl implements RegistryLocalDataSource {
 
   RegistryEntriesCompanion _mapToCompanion(RegistryEntryModel entry) {
     return RegistryEntriesCompanion(
-      uuid: Value(entry.uuid),
+      uuid: Value(entry.uuid ?? ''),
       remoteId: Value(entry.remoteId),
       guardianId: Value(entry.guardianId),
-      status: Value(entry.status),
+      status: Value(entry.status ?? 'draft'),
       serialNumber: Value(entry.serialNumber),
       registerNumber: Value(entry.registerNumber),
       date: Value(entry.date),

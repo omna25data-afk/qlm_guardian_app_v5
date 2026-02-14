@@ -9,7 +9,7 @@ part of 'registry_entry_model.dart';
 RegistryEntryModel _$RegistryEntryModelFromJson(Map<String, dynamic> json) =>
     RegistryEntryModel(
       id: (json['id'] as num?)?.toInt(),
-      uuid: json['uuid'] as String,
+      uuid: json['uuid'] as String?,
       remoteId: (json['remote_id'] as num?)?.toInt(),
       guardianId: (json['guardian_id'] as num?)?.toInt(),
       contractTypeId: (json['contract_type_id'] as num?)?.toInt(),

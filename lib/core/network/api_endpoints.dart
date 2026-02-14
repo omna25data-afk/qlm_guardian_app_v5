@@ -53,7 +53,7 @@ class ApiEndpoints {
   static String get adminCards => '$baseUrl/admin/cards';
   static String get adminAreas => '$baseUrl/admin/areas';
   static String get adminAssignments => '$baseUrl/admin/assignments';
-  static String get adminRenewals => '$baseUrl/admin/renewals';
+  // adminRenewals removed — /admin/renewals route does not exist
   static String get adminElectronicCardRenewals =>
       '$baseUrl/electronic-card-renewals';
   static String get licenseManagements => '$baseUrl/license-managements';

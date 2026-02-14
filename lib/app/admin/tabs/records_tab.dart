@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../features/records/data/models/record_book.dart';
-import '../../../features/records/presentation/providers/records_provider.dart';
-import '../../../features/registry/presentation/screens/entries_list_screen.dart';
+import '../../../features/admin/presentation/widgets/admin_entries_list_tab.dart';
+import '../../../features/registry/presentation/screens/add_registry_entry_screen.dart';
+
+import '../../../features/admin/presentation/providers/admin_record_books_provider.dart';
 
 /// السجلات والقيود — عرض شامل لكل السجلات مع فلترة (Admin)
 class RecordsTab extends ConsumerStatefulWidget {
@@ -22,6 +24,10 @@ class _RecordsTabState extends ConsumerState<RecordsTab>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    // Initial Fetch
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(adminRecordBooksProvider.notifier).fetchBooks(refresh: true);
+    });
   }
 
   @override
@@ -32,50 +38,66 @@ class _RecordsTabState extends ConsumerState<RecordsTab>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Sub-tabs
-        Container(
-          color: Colors.white,
-          child: TabBar(
-            controller: _tabController,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.textHint,
-            indicatorColor: AppColors.primary,
-            labelStyle: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              fontFamily: 'Tajawal',
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Column(
+        children: [
+          // Sub-tabs
+          Container(
+            color: Colors.white,
+            child: TabBar(
+              controller: _tabController,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textHint,
+              indicatorColor: AppColors.primary,
+              labelStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                fontFamily: 'Tajawal',
+              ),
+              unselectedLabelStyle: TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+                fontFamily: 'Tajawal',
+              ),
+              tabs: const [
+                Tab(text: 'السجلات', icon: Icon(Icons.menu_book, size: 18)),
+                Tab(text: 'القيود', icon: Icon(Icons.list_alt, size: 18)),
+              ],
             ),
-            unselectedLabelStyle: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
-              fontFamily: 'Tajawal',
-            ),
-            tabs: const [
-              Tab(text: 'السجلات', icon: Icon(Icons.menu_book, size: 18)),
-              Tab(text: 'القيود', icon: Icon(Icons.list_alt, size: 18)),
-            ],
           ),
-        ),
 
-        // Content
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [_buildRecordBooksList(), const EntriesListScreen()],
+          // Content
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [_buildRecordBooksList(), const AdminEntriesListTab()],
+            ),
           ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AddRegistryEntryScreen()),
         ),
-      ],
+        backgroundColor: AppColors.primary,
+        tooltip: 'إضافة قيد جديد',
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 
   Widget _buildRecordBooksList() {
-    final booksAsync = ref.watch(recordBooksProvider);
+    final state = ref.watch(adminRecordBooksProvider);
+    final notifier = ref.read(adminRecordBooksProvider.notifier);
 
-    return booksAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(
+    if (state.isLoading && state.books.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.error != null && state.books.isEmpty) {
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -91,7 +113,7 @@ class _RecordsTabState extends ConsumerState<RecordsTab>
             ),
             const SizedBox(height: 8),
             Text(
-              '$error',
+              state.error!,
               style: TextStyle(
                 color: AppColors.textHint,
                 fontSize: 12,
@@ -101,8 +123,7 @@ class _RecordsTabState extends ConsumerState<RecordsTab>
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () =>
-                  ref.read(recordBooksProvider.notifier).fetchRecordBooks(),
+              onPressed: () => notifier.fetchBooks(refresh: true),
               icon: const Icon(Icons.refresh, size: 18),
               label: Text(
                 'إعادة المحاولة',
@@ -121,42 +142,59 @@ class _RecordsTabState extends ConsumerState<RecordsTab>
             ),
           ],
         ),
-      ),
-      data: (books) {
-        if (books.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.menu_book_outlined,
-                  size: 64,
-                  color: AppColors.textHint.withValues(alpha: 0.4),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'لا توجد سجلات',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 16,
-                    fontFamily: 'Tajawal',
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
+      );
+    }
 
-        return RefreshIndicator(
-          onRefresh: () =>
-              ref.read(recordBooksProvider.notifier).fetchRecordBooks(),
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: books.length,
-            itemBuilder: (context, index) => _buildRecordBookCard(books[index]),
-          ),
-        );
+    if (state.books.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.menu_book_outlined,
+              size: 64,
+              color: AppColors.textHint.withValues(alpha: 0.4),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'لا توجد سجلات',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 16,
+                fontFamily: 'Tajawal',
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (!state.isLoading &&
+            state.hasMore &&
+            scrollInfo.metrics.pixels >=
+                scrollInfo.metrics.maxScrollExtent - 200) {
+          notifier.fetchBooks();
+        }
+        return false;
       },
+      child: RefreshIndicator(
+        onRefresh: () async => notifier.fetchBooks(refresh: true),
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: state.books.length + (state.isLoading ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == state.books.length) {
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            return _buildRecordBookCard(state.books[index]);
+          },
+        ),
+      ),
     );
   }
 

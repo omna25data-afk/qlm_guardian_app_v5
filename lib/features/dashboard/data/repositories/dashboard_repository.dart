@@ -10,8 +10,16 @@ class DashboardRepository {
   /// Fetch guardian dashboard data
   Future<DashboardData> getDashboard() async {
     final response = await _apiClient.get(ApiEndpoints.dashboard);
-    final responseData = response.data;
+    return _parseDashboardResponse(response.data);
+  }
 
+  /// Fetch admin dashboard data
+  Future<DashboardData> getAdminDashboard() async {
+    final response = await _apiClient.get(ApiEndpoints.adminDashboard);
+    return _parseDashboardResponse(response.data);
+  }
+
+  DashboardData _parseDashboardResponse(dynamic responseData) {
     // Backend wraps responses with ApiResponse trait: {status, code, message, data}
     final data =
         responseData is Map<String, dynamic> &&

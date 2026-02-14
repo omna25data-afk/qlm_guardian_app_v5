@@ -191,22 +191,32 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   child: Column(
                     children: [
                       Text(
-                        'إدارة قلم التوثيق',
+                        'وزارة العدل وحقوق الإنسان',
                         style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 1.2,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.accent,
                           fontFamily: 'Tajawal',
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'وزارة العدل وحقوق الإنسان',
+                        'محكمة السياني الإبتدائية (م - إب)',
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.accent,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'Tajawal',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'إدارة قلم التوثيق',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 1.2,
                           fontFamily: 'Tajawal',
                         ),
                       ),

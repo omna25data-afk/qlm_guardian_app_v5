@@ -2,10 +2,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/registry_entry_model.dart';
 import '../../data/repositories/registry_repository.dart';
 import '../../../../core/di/injection.dart';
+import '../../data/models/contract_type_model.dart';
 
 // Repository Provider
 final registryRepositoryProvider = Provider<RegistryRepository>((ref) {
   return getIt<RegistryRepository>();
+});
+
+// Contract Types Provider
+final contractTypesProvider = FutureProvider<List<ContractTypeModel>>((
+  ref,
+) async {
+  final repository = ref.watch(registryRepositoryProvider);
+  return await repository.getContractTypes();
+});
+
+final contractTypeMapProvider = Provider<Map<int, ContractTypeModel>>((ref) {
+  final typesAsync = ref.watch(contractTypesProvider);
+  return typesAsync.maybeWhen(
+    data: (types) => {for (var t in types) t.id: t},
+    orElse: () => {},
+  );
 });
 
 // Search Query Provider

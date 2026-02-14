@@ -124,40 +124,105 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
   }
 
   Widget _buildGuardiansList() {
-    final guardiansAsync = ref.watch(adminGuardiansProvider);
+    final state = ref.watch(adminGuardiansProvider);
+    final notifier = ref.read(adminGuardiansProvider.notifier);
 
-    return guardiansAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('خطأ: $error')),
-      data: (guardians) {
-        if (guardians.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
-                const SizedBox(height: 16),
-                Text(
-                  'لا توجد نتائج',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontFamily: 'Tajawal',
-                  ),
-                ),
-              ],
+    if (state.isLoading && state.guardians.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.error != null && state.guardians.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            const SizedBox(height: 16),
+            Text(
+              'خطأ في تحميل البيانات',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Tajawal',
+              ),
             ),
-          );
-        }
+            const SizedBox(height: 8),
+            Text(
+              state.error!,
+              style: TextStyle(
+                color: AppColors.textHint,
+                fontSize: 12,
+                fontFamily: 'Tajawal',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () => notifier.fetchGuardians(refresh: true),
+              icon: const Icon(Icons.refresh, size: 18),
+              label: Text(
+                'إعادة المحاولة',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Tajawal',
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
-        return ListView.builder(
+    if (state.guardians.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text(
+              'لا توجد نتائج',
+              style: TextStyle(color: Colors.grey[600], fontFamily: 'Tajawal'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (!state.isLoading &&
+            state.hasMore &&
+            scrollInfo.metrics.pixels >=
+                scrollInfo.metrics.maxScrollExtent - 200) {
+          notifier.fetchGuardians();
+        }
+        return false;
+      },
+      child: RefreshIndicator(
+        onRefresh: () async => notifier.fetchGuardians(refresh: true),
+        child: ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: guardians.length,
+          itemCount: state.guardians.length + (state.isLoading ? 1 : 0),
           itemBuilder: (context, index) {
-            final guardian = guardians[index];
+            if (index == state.guardians.length) {
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final guardian = state.guardians[index];
             return _buildGuardianCard(guardian);
           },
-        );
-      },
+        ),
+      ),
     );
   }
 

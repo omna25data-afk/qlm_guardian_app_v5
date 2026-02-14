@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
-import '../../../registry/presentation/screens/entries_list_screen.dart';
+import '../../../admin/presentation/screens/admin_entries_screen.dart';
+import '../providers/dashboard_provider.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
@@ -12,6 +13,8 @@ class AdminDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
+
+    final dashboardState = ref.watch(adminDashboardProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -37,209 +40,235 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ──── Welcome Card ────
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
+      body: dashboardState.when(
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Colors.indigo),
+        ),
+        error: (err, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              const SizedBox(height: 16),
+              Text('حدث خطأ: $err'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () =>
+                    ref.read(adminDashboardProvider.notifier).fetchDashboard(),
+                child: const Text('إعادة المحاولة'),
+              ),
+            ],
+          ),
+        ),
+        data: (data) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ──── Welcome Card ────
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.indigo,
+                          child: Text(
+                            user?.name.substring(0, 1) ?? 'أ',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                data.welcomeMessage.isNotEmpty
+                                    ? data.welcomeMessage
+                                    : 'مرحباً، ${user?.name ?? "المدير"}',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${data.dateHijri} | ${data.dateGregorian}',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // ──── Stats Cards ────
+                Text(
+                  'الإحصائيات العامة',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                GridView.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  childAspectRatio: 1.6,
                   children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Colors.indigo,
-                      child: Text(
-                        user?.name.substring(0, 1) ?? 'أ',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                    _StatCard(
+                      icon: Icons.edit_document,
+                      label: 'القيود',
+                      value: '${data.stats.totalEntries}',
+                      color: AppColors.info,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AdminEntriesScreen(),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    _StatCard(
+                      icon: Icons.book_outlined,
+                      label: 'السجلات',
+                      value: '${data.stats.totalRecordBooks}',
+                      color: AppColors.warning,
+                    ),
+                    const _StatCard(
+                      icon: Icons.people_outline,
+                      label: 'الأمناء',
+                      value:
+                          '—', // Guardian count not in current stats model, needs update if required
+                      color: Colors.teal,
+                    ),
+                    const _StatCard(
+                      icon: Icons.sync,
+                      label: 'قيد المزامنة',
+                      value: '0',
+                      color: AppColors.accent,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // ──── Quick Actions ────
+                Text(
+                  'الإجراءات السريعة',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'مرحباً، ${user?.name ?? "المدير"}',
-                            style: Theme.of(context).textTheme.titleMedium,
+                      child: _QuickAction(
+                        icon: Icons.add_circle_outline,
+                        label: 'إضافة قيد',
+                        color: AppColors.success,
+                        onTap: () {
+                          // TODO: Navigate to add entry
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _QuickAction(
+                        icon: Icons.list_alt,
+                        label: 'عرض القيود',
+                        color: AppColors.info,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AdminEntriesScreen(),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'الدور: ${user?.roleNames?.join(', ') ?? "غير محدد"}',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // ──── Stats Cards ────
-            Text(
-              'الإحصائيات العامة',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            GridView.count(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 1.6,
-              children: [
-                _StatCard(
-                  icon: Icons.edit_document,
-                  label: 'القيود',
-                  value: '—',
-                  color: AppColors.info,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const EntriesListScreen(),
-                    ),
-                  ),
-                ),
-                const _StatCard(
-                  icon: Icons.book_outlined,
-                  label: 'السجلات',
-                  value: '—',
-                  color: AppColors.warning,
-                ),
-                const _StatCard(
-                  icon: Icons.people_outline,
-                  label: 'الأمناء',
-                  value: '—',
-                  color: Colors.teal,
-                ),
-                const _StatCard(
-                  icon: Icons.sync,
-                  label: 'قيد المزامنة',
-                  value: '0',
-                  color: AppColors.accent,
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // ──── Quick Actions ────
-            Text(
-              'الإجراءات السريعة',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _QuickAction(
-                    icon: Icons.add_circle_outline,
-                    label: 'إضافة قيد',
-                    color: AppColors.success,
-                    onTap: () {
-                      // TODO: Navigate to add entry
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _QuickAction(
-                    icon: Icons.list_alt,
-                    label: 'عرض القيود',
-                    color: AppColors.info,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const EntriesListScreen(),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _QuickAction(
+                        icon: Icons.sync,
+                        label: 'مزامنة الآن',
+                        color: AppColors.accent,
+                        onTap: () {
+                          // TODO: Trigger sync
+                        },
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _QuickAction(
+                        icon: Icons.bar_chart,
+                        label: 'التقارير',
+                        color: Colors.deepPurple,
+                        onTap: () {
+                          // TODO: Navigate to reports
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _QuickAction(
-                    icon: Icons.sync,
-                    label: 'مزامنة الآن',
-                    color: AppColors.accent,
-                    onTap: () {
-                      // TODO: Trigger sync
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _QuickAction(
-                    icon: Icons.bar_chart,
-                    label: 'التقارير',
-                    color: Colors.deepPurple,
-                    onTap: () {
-                      // TODO: Navigate to reports
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-            // ──── Management Section ────
-            Text(
-              'الإدارة',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                // ──── Management Section ────
+                Text(
+                  'الإدارة',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _ManagementTile(
+                  icon: Icons.people_outline,
+                  title: 'إدارة الأمناء',
+                  subtitle: 'عرض وتعديل بيانات الأمناء الشرعيين',
+                  onTap: () {
+                    // TODO: Navigate to guardians management
+                  },
+                ),
+                _ManagementTile(
+                  icon: Icons.book_outlined,
+                  title: 'إدارة السجلات',
+                  subtitle: 'تعيين ومراجعة وإصدار السجلات',
+                  onTap: () {
+                    // TODO: Navigate to records management
+                  },
+                ),
+                _ManagementTile(
+                  icon: Icons.verified_outlined,
+                  title: 'مراجعة القيود',
+                  subtitle: 'قيود تنتظر التوثيق والمراجعة',
+                  onTap: () {
+                    // TODO: Navigate to entry review
+                  },
+                ),
+                _ManagementTile(
+                  icon: Icons.settings_outlined,
+                  title: 'إعدادات النظام',
+                  subtitle: 'إعدادات التطبيق والتكوين',
+                  onTap: () {
+                    // TODO: Navigate to settings
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
             ),
-            const SizedBox(height: 12),
-            _ManagementTile(
-              icon: Icons.people_outline,
-              title: 'إدارة الأمناء',
-              subtitle: 'عرض وتعديل بيانات الأمناء الشرعيين',
-              onTap: () {
-                // TODO: Navigate to guardians management
-              },
-            ),
-            _ManagementTile(
-              icon: Icons.book_outlined,
-              title: 'إدارة السجلات',
-              subtitle: 'تعيين ومراجعة وإصدار السجلات',
-              onTap: () {
-                // TODO: Navigate to records management
-              },
-            ),
-            _ManagementTile(
-              icon: Icons.verified_outlined,
-              title: 'مراجعة القيود',
-              subtitle: 'قيود تنتظر التوثيق والمراجعة',
-              onTap: () {
-                // TODO: Navigate to entry review
-              },
-            ),
-            _ManagementTile(
-              icon: Icons.settings_outlined,
-              title: 'إعدادات النظام',
-              subtitle: 'إعدادات التطبيق والتكوين',
-              onTap: () {
-                // TODO: Navigate to settings
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
+          );
+        },
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,

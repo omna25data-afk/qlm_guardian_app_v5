@@ -5,12 +5,18 @@ part 'contract_type_model.g.dart';
 
 @JsonSerializable()
 class ContractTypeModel extends Equatable {
+  @JsonKey(fromJson: _parseInt)
   final int id;
   final String name;
   final String? icon;
   final String? description;
   @JsonKey(name: 'is_active')
   final bool isActive;
+
+  static int _parseInt(dynamic value) {
+    if (value is int) return value;
+    return int.tryParse(value.toString()) ?? 0;
+  }
 
   const ContractTypeModel({
     required this.id,

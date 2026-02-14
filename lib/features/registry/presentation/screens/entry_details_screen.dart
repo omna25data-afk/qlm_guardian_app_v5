@@ -27,7 +27,7 @@ class EntryDetailsScreen extends ConsumerWidget {
                   entry.serialNumber?.toString() ?? '-',
                 ),
                 _buildInfoRow('رقم القيد', entry.registerNumber ?? '-'),
-                _buildInfoRow('الحالة', entry.status),
+                _buildInfoRow('الحالة', entry.status ?? '-'),
                 _buildInfoRow('التاريخ الهجري', entry.hijriDate ?? '-'),
               ],
             ),

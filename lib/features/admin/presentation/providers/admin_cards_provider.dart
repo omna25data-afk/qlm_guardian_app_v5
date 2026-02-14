@@ -51,7 +51,7 @@ class AdminCardsNotifier extends StateNotifier<AdminCardsState> {
 
     try {
       final repository = _ref.read(adminRepositoryProvider);
-      final newItems = await repository.getCardRenewals(page: state.page);
+      final newItems = await repository.getCards(page: state.page);
 
       state = state.copyWith(
         cards: refresh ? newItems : [...state.cards, ...newItems],
