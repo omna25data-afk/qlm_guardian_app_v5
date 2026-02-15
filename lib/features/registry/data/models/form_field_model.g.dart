@@ -16,6 +16,7 @@ FormFieldModel _$FormFieldModelFromJson(Map<String, dynamic> json) =>
           ?.map((e) => e as String)
           .toList(),
       placeholder: json['placeholder'] as String?,
+      helperText: json['helper_text'] as String?,
       defaultValue: json['default_value'],
     );
 
@@ -27,5 +28,6 @@ Map<String, dynamic> _$FormFieldModelToJson(FormFieldModel instance) =>
       'required': instance.required,
       'options': instance.options,
       'placeholder': instance.placeholder,
+      'helper_text': instance.helperText,
       'default_value': instance.defaultValue,
     };

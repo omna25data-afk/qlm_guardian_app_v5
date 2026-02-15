@@ -1,10 +1,10 @@
+// ignore_for_file: deprecated_member_use
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../records/data/models/record_book.dart';
 import '../../../records/presentation/providers/records_provider.dart';
-import '../../data/models/form_field_model.dart';
 import '../providers/add_registry_entry_provider.dart';
 
 class AddRegistryEntryScreen extends ConsumerWidget {
@@ -291,11 +291,11 @@ class AddRegistryEntryScreen extends ConsumerWidget {
           onChanged: (v) => notifier.updateFormData('content', v),
         ),
 
-        if (state.formFields.isNotEmpty) ...[
+        if (state.filteredFields.isNotEmpty) ...[
           const SizedBox(height: 24),
           _buildSectionTitle('بيانات العقد (${state.selectedType?.name})'),
           const SizedBox(height: 12),
-          ...state.formFields.map((field) {
+          ...state.filteredFields.map((field) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: _buildDynamicField(field, state.formData, notifier),
@@ -307,57 +307,68 @@ class AddRegistryEntryScreen extends ConsumerWidget {
   }
 
   Widget _buildDynamicField(
-    FormFieldModel field,
+    Map<String, dynamic> field,
     Map<String, dynamic> formData,
     AddRegistryEntryNotifier notifier,
   ) {
-    switch (field.type) {
+    final type = field['type'];
+    final name = field['name'];
+    final label = field['label'];
+    final required = field['required'] == true;
+    final options = field['options'] as List<dynamic>?;
+
+    switch (type) {
       case 'textarea':
         return _buildTextField(
-          label: field.label,
+          label: label,
           maxLines: 3,
-          required: field.required,
-          initialValue: formData[field.name]?.toString(),
-          onChanged: (v) => notifier.updateFormData(field.name, v),
+          required: required,
+          initialValue: formData[name]?.toString(),
+          onChanged: (v) => notifier.updateFormData(name, v),
         );
       case 'number':
         return _buildTextField(
-          label: field.label,
+          label: label,
           keyboardType: TextInputType.number,
-          required: field.required,
-          initialValue: formData[field.name]?.toString(),
-          onChanged: (v) =>
-              notifier.updateFormData(field.name, num.tryParse(v)),
+          required: required,
+          initialValue: formData[name]?.toString(),
+          onChanged: (v) => notifier.updateFormData(name, num.tryParse(v)),
         );
       case 'select':
         return DropdownButtonFormField<String>(
-          initialValue: formData[field.name]?.toString(),
+          value: formData[name]
+              ?.toString(), // Use value instead of initialValue for controlled
           decoration: InputDecoration(
-            labelText: field.label + (field.required ? ' *' : ''),
+            labelText: label + (required ? ' *' : ''),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             contentPadding: const EdgeInsets.symmetric(horizontal: 12),
           ),
           items:
-              field.options
-                  ?.map((o) => DropdownMenuItem(value: o, child: Text(o)))
+              options
+                  ?.map(
+                    (o) => DropdownMenuItem(
+                      value: o.toString(),
+                      child: Text(o.toString()),
+                    ),
+                  )
                   .toList() ??
               [],
-          onChanged: (v) => notifier.updateFormData(field.name, v),
+          onChanged: (v) => notifier.updateFormData(name, v),
         );
       case 'date':
         return _buildTextField(
-          label: field.label,
-          required: field.required,
+          label: label,
+          required: required,
           hint: 'YYYY-MM-DD',
-          initialValue: formData[field.name]?.toString(),
-          onChanged: (v) => notifier.updateFormData(field.name, v),
+          initialValue: formData[name]?.toString(),
+          onChanged: (v) => notifier.updateFormData(name, v),
         );
       default:
         return _buildTextField(
-          label: field.label,
-          required: field.required,
-          initialValue: formData[field.name]?.toString(),
-          onChanged: (v) => notifier.updateFormData(field.name, v),
+          label: label,
+          required: required,
+          initialValue: formData[name]?.toString(),
+          onChanged: (v) => notifier.updateFormData(name, v),
         );
     }
   }
@@ -806,7 +817,15 @@ class AddRegistryEntryScreen extends ConsumerWidget {
             onPressed: state.isLoading
                 ? null
                 : () async {
-                    final success = await notifier.submit();
+                    final success = await notifier.submitEntry(
+                      manualBookNumber: null,
+                      manualPageNumber: null,
+                      manualEntryNumber: null,
+                      documentDateGregorian:
+                          DateTime.now(), // TODO: Get from form
+                      documentDateHijri: null,
+                      textFieldValues: {},
+                    );
                     if (success && context.mounted) {
                       _showSuccessDialog(context);
                     }
@@ -996,7 +1015,7 @@ class AddRegistryEntryScreen extends ConsumerWidget {
       child: Row(
         children: [
           TextButton.icon(
-            onPressed: notifier.prevStep,
+            onPressed: state.currentStep > 0 ? notifier.prevStep : null,
             icon: const Icon(Icons.arrow_back_ios, size: 14),
             label: Text('رجوع', style: TextStyle(fontFamily: 'Tajawal')),
           ),

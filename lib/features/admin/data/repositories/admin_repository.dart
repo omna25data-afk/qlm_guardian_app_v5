@@ -265,12 +265,16 @@ class AdminRepository {
     int page = 1,
     String? searchQuery,
     String? status,
+    int? contractTypeId,
+    String? category,
   }) async {
     final params = <String, dynamic>{'page': page};
     if (searchQuery != null && searchQuery.isNotEmpty) {
       params['search'] = searchQuery;
     }
     if (status != null && status != 'all') params['status'] = status;
+    if (contractTypeId != null) params['contract_type_id'] = contractTypeId;
+    if (category != null) params['category'] = category;
 
     final response = await _apiClient.get(
       ApiEndpoints.adminRecordBooks,
@@ -278,6 +282,15 @@ class AdminRepository {
     );
     return (response.data['data'] as List?)
             ?.map((e) => RecordBook.fromJson(e))
+            .toList() ??
+        [];
+  }
+
+  /// Fetch internal writers (data entry users)
+  Future<List<Map<String, dynamic>>> getWriters() async {
+    final response = await _apiClient.get(ApiEndpoints.adminWriters);
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
             .toList() ??
         [];
   }
@@ -372,5 +385,315 @@ class AdminRepository {
       queryParameters: params.isNotEmpty ? params : null,
     );
     return response.data;
+  }
+
+  /// Fees report
+  Future<Map<String, dynamic>> getFeesReport({
+    int? year,
+    String? periodType,
+    String? periodValue,
+    int? contractTypeId,
+  }) async {
+    final params = <String, dynamic>{};
+    if (year != null) params['year'] = year;
+    if (periodType != null) params['period_type'] = periodType;
+    if (periodValue != null) params['period_value'] = periodValue;
+    if (contractTypeId != null) params['contract_type_id'] = contractTypeId;
+
+    final response = await _apiClient.get(
+      ApiEndpoints.feesReport,
+      queryParameters: params.isNotEmpty ? params : null,
+    );
+    return response.data;
+  }
+
+  /// Guardian detail report
+  Future<Map<String, dynamic>> getGuardianDetailReport(
+    int guardianId, {
+    int? year,
+    String? periodType,
+    String? periodValue,
+  }) async {
+    final params = <String, dynamic>{};
+    if (year != null) params['year'] = year;
+    if (periodType != null) params['period_type'] = periodType;
+    if (periodValue != null) params['period_value'] = periodValue;
+
+    final response = await _apiClient.get(
+      ApiEndpoints.guardianDetailReport(guardianId),
+      queryParameters: params.isNotEmpty ? params : null,
+    );
+    return response.data;
+  }
+
+  // ─── Record Book Actions ────────────────────────────────
+
+  /// Create a new record book
+  Future<void> createRecordBook(Map<String, dynamic> data) async {
+    await _apiClient.post(ApiEndpoints.adminRecordBooks, data: data);
+  }
+
+  /// Update a record book
+  Future<void> updateRecordBook(int id, Map<String, dynamic> data) async {
+    await _apiClient.put(ApiEndpoints.adminRecordBookUpdate(id), data: data);
+  }
+
+  /// Open a record book
+  Future<void> openRecordBook(int id, {String? date}) async {
+    await _apiClient.post(
+      ApiEndpoints.adminRecordBookOpen(id),
+      data: date != null ? {'opening_date': date} : null,
+    );
+  }
+
+  /// Close a record book
+  Future<void> closeRecordBook(int id, {String? date}) async {
+    await _apiClient.post(
+      ApiEndpoints.adminRecordBookClose(id),
+      data: date != null ? {'closing_date': date} : null,
+    );
+  }
+
+  /// Fetch record book procedures
+  Future<List<Map<String, dynamic>>> getRecordBookProcedures(int id) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.adminRecordBookProcedures(id),
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
+  // ─── Registry Entry Actions ─────────────────────────────
+
+  /// Fetch pending documentation entries
+  Future<List<RegistryEntryModel>> getPendingEntries({
+    int page = 1,
+    String? search,
+    int? year,
+    int? contractTypeId,
+  }) async {
+    final params = <String, dynamic>{'page': page};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (year != null) params['year'] = year;
+    if (contractTypeId != null) params['contract_type_id'] = contractTypeId;
+
+    final response = await _apiClient.get(
+      ApiEndpoints.adminPendingEntries,
+      queryParameters: params,
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => RegistryEntryModel.fromJson(e))
+            .toList() ??
+        [];
+  }
+
+  /// Document a registry entry
+  Future<void> documentEntry(int id, Map<String, dynamic> data) async {
+    await _apiClient.put(ApiEndpoints.adminDocumentEntry(id), data: data);
+  }
+
+  /// Calculate fees for a registry entry
+  Future<Map<String, dynamic>> calculateFees(
+    int id, {
+    double? contractValue,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.calculateFees(id),
+      data: contractValue != null ? {'contract_value': contractValue} : null,
+    );
+    return response.data['data'] ?? response.data;
+  }
+
+  // ─── Registry Entry Creation ─────────────────────────────
+
+  /// Store a new registry entry (Admin)
+  Future<Map<String, dynamic>> storeRegistryEntry(
+    Map<String, dynamic> data,
+  ) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.adminRegistryEntries,
+      data: data,
+    );
+    return response.data is Map<String, dynamic>
+        ? response.data
+        : {'status': true};
+  }
+
+  /// Fetch contract types list
+  Future<List<Map<String, dynamic>>> getContractTypes() async {
+    final response = await _apiClient.get(ApiEndpoints.contractTypes);
+    final data = response.data;
+    if (data is List) return data.cast<Map<String, dynamic>>();
+    if (data is Map && data['data'] is List) {
+      return (data['data'] as List).cast<Map<String, dynamic>>();
+    }
+    return [];
+  }
+
+  /// Fetch contract subtypes
+  Future<List<Map<String, dynamic>>> getContractSubtypes(
+    int contractTypeId, {
+    String? parentCode,
+  }) async {
+    final params = <String, dynamic>{};
+    if (parentCode != null) params['parent_code'] = parentCode;
+    final response = await _apiClient.get(
+      ApiEndpoints.contractSubtypes(contractTypeId),
+      queryParameters: params,
+    );
+    final data = response.data;
+    if (data is List) return data.cast<Map<String, dynamic>>();
+    if (data is Map && data['data'] is List) {
+      return (data['data'] as List).cast<Map<String, dynamic>>();
+    }
+    return [];
+  }
+
+  /// Fetch guardians for selection dropdown
+  Future<List<AdminGuardianModel>> getActiveGuardians() async {
+    final response = await _apiClient.get(
+      ApiEndpoints.adminGuardians,
+      queryParameters: {'per_page': 200},
+    );
+    final data = response.data;
+    final list = data is List ? data : (data['data'] as List?) ?? [];
+    return list.map((e) => AdminGuardianModel.fromJson(e)).toList();
+  }
+
+  // ─── Basic Data ─────────────────────────────────────────
+
+  /// Fetch fee customizations
+  Future<List<Map<String, dynamic>>> getFeeCustomizations() async {
+    final response = await _apiClient.get(ApiEndpoints.adminFeeCustomizations);
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
+  /// Create a fee customization
+  Future<void> createFeeCustomization(Map<String, dynamic> data) async {
+    await _apiClient.post(ApiEndpoints.adminFeeCustomizations, data: data);
+  }
+
+  /// Fetch record book templates
+  Future<List<Map<String, dynamic>>> getRecordBookTemplates() async {
+    final response = await _apiClient.get(
+      ApiEndpoints.adminRecordBookTemplates,
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
+  /// Fetch other writers
+  Future<List<Map<String, dynamic>>> getOtherWriters() async {
+    final response = await _apiClient.get(ApiEndpoints.adminOtherWriters);
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
+  /// Fetch contract types (admin detailed)
+  Future<List<Map<String, dynamic>>> getAdminContractTypes() async {
+    final response = await _apiClient.get(ApiEndpoints.adminContractTypes);
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
+  /// Fetch constraint types
+  Future<List<Map<String, dynamic>>> getConstraintTypes() async {
+    final response = await _apiClient.get(ApiEndpoints.adminConstraintTypes);
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
+  /// Fetch record book types (admin detailed)
+  Future<List<Map<String, dynamic>>> getAdminRecordBookTypes() async {
+    final response = await _apiClient.get(ApiEndpoints.adminRecordBookTypes);
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
+  // ─── Inspection ─────────────────────────────────────────
+
+  /// Fetch record books for inspection
+  Future<List<Map<String, dynamic>>> getInspectionRecordBooks({
+    int page = 1,
+    String? search,
+    int? guardianId,
+    String? status,
+  }) async {
+    final params = <String, dynamic>{'page': page};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (guardianId != null) params['guardian_id'] = guardianId;
+    if (status != null) params['status'] = status;
+
+    final response = await _apiClient.get(
+      ApiEndpoints.adminInspectionRecordBooks,
+      queryParameters: params,
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
+  /// Fetch record book detail for inspection
+  Future<Map<String, dynamic>> getInspectionRecordBookDetail(int id) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.adminInspectionRecordBookDetail(id),
+    );
+    return response.data['data'] ?? response.data;
+  }
+
+  /// Fetch entry inspection notes
+  Future<List<Map<String, dynamic>>> getEntryInspectionNotes({
+    int page = 1,
+    int? registryEntryId,
+    int? recordBookInspectionId,
+  }) async {
+    final params = <String, dynamic>{'page': page};
+    if (registryEntryId != null) {
+      params['registry_entry_id'] = registryEntryId;
+    }
+    if (recordBookInspectionId != null) {
+      params['record_book_inspection_id'] = recordBookInspectionId;
+    }
+
+    final response = await _apiClient.get(
+      ApiEndpoints.adminInspectionEntryNotes,
+      queryParameters: params,
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
+  /// Delete a guardian
+  Future<void> deleteGuardian(int id) async {
+    await _apiClient.delete('${ApiEndpoints.adminGuardians}/$id');
+  }
+
+  /// Fetch guardian inspections
+  Future<List<Map<String, dynamic>>> getGuardianInspections(int id) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.adminGuardianInspections(id),
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
   }
 }

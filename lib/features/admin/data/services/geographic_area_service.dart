@@ -18,9 +18,7 @@ class GeographicAreaService {
       final response = await _apiClient.get(
         ApiEndpoints.adminAreas,
         queryParameters: {
-          if (parentId != null) 'parent_id': parentId,
-          if (parentId == null)
-            'level': 1, // Fetch root level (Governorates) if no parent
+          if (parentId != null) 'parent_id': parentId else 'level': 1,
           'type':
               'all', // Ensure we get all types if needed, or filter by level logic in backend
         },

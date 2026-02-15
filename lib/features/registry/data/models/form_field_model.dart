@@ -11,6 +11,8 @@ class FormFieldModel extends Equatable {
   final bool required;
   final List<String>? options; // For select type
   final String? placeholder;
+  @JsonKey(name: 'helper_text')
+  final String? helperText;
   @JsonKey(name: 'default_value')
   final dynamic defaultValue;
 
@@ -21,6 +23,7 @@ class FormFieldModel extends Equatable {
     this.required = false,
     this.options,
     this.placeholder,
+    this.helperText,
     this.defaultValue,
   });
 
@@ -37,6 +40,7 @@ class FormFieldModel extends Equatable {
     required,
     options,
     placeholder,
+    helperText,
     defaultValue,
   ];
 }

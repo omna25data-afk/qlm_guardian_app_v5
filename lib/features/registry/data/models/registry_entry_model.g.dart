@@ -13,6 +13,11 @@ RegistryEntryModel _$RegistryEntryModelFromJson(Map<String, dynamic> json) =>
       remoteId: (json['remote_id'] as num?)?.toInt(),
       guardianId: (json['guardian_id'] as num?)?.toInt(),
       contractTypeId: (json['contract_type_id'] as num?)?.toInt(),
+      contractType: json['contract_type'] == null
+          ? null
+          : ContractTypeModel.fromJson(
+              json['contract_type'] as Map<String, dynamic>,
+            ),
       constraintTypeId: (json['constraint_type_id'] as num?)?.toInt(),
       status: json['status'] as String? ?? 'draft',
       serialNumber: (json['serial_number'] as num?)?.toInt(),
@@ -34,6 +39,9 @@ RegistryEntryModel _$RegistryEntryModelFromJson(Map<String, dynamic> json) =>
       documentGregorianDate: json['document_gregorian_date'] == null
           ? null
           : DateTime.parse(json['document_gregorian_date'] as String),
+      docGregorianDate: json['doc_gregorian_date'] == null
+          ? null
+          : DateTime.parse(json['doc_gregorian_date'] as String),
       docRecordBookId: (json['doc_record_book_id'] as num?)?.toInt(),
       docRecordBookNumber: (json['doc_record_book_number'] as num?)?.toInt(),
       docPageNumber: (json['doc_page_number'] as num?)?.toInt(),
@@ -75,6 +83,7 @@ Map<String, dynamic> _$RegistryEntryModelToJson(
   'remote_id': instance.remoteId,
   'guardian_id': instance.guardianId,
   'contract_type_id': instance.contractTypeId,
+  'contract_type': instance.contractType,
   'constraint_type_id': instance.constraintTypeId,
   'status': instance.status,
   'serial_number': instance.serialNumber,
@@ -93,6 +102,7 @@ Map<String, dynamic> _$RegistryEntryModelToJson(
   'document_hijri_date': instance.documentHijriDate,
   'document_gregorian_date': instance.documentGregorianDate?.toIso8601String(),
   'doc_record_book_id': instance.docRecordBookId,
+  'doc_gregorian_date': instance.docGregorianDate?.toIso8601String(),
   'doc_record_book_number': instance.docRecordBookNumber,
   'doc_page_number': instance.docPageNumber,
   'doc_entry_number': instance.docEntryNumber,

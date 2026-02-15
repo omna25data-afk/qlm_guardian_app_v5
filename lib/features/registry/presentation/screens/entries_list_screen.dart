@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../providers/entries_provider.dart';
+import '../providers/contract_types_provider.dart';
 import '../widgets/registry_entry_card.dart';
 import 'entry_details_screen.dart';
 
@@ -12,6 +13,7 @@ class EntriesListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final filteredEntriesAsync = ref.watch(filteredEntriesProvider);
     final selectedFilter = ref.watch(entryStatusFilterProvider);
+    ref.watch(contractTypesProvider); // Trigger fetch
 
     return Column(
       children: [

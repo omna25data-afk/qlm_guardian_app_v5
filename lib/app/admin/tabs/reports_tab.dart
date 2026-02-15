@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../../features/admin/presentation/providers/reports_provider.dart';
+import '../../../features/admin/presentation/providers/admin_guardians_provider.dart';
 
 /// التقارير — إحصائية ومالية وأداء
 class ReportsTab extends ConsumerStatefulWidget {
@@ -84,6 +85,7 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
         await notifier.loadGuardianStats(year: _selectedYear);
         await notifier.loadEntriesStats(year: _selectedYear);
         await notifier.loadContractTypesSummary(year: _selectedYear);
+        await notifier.loadFeesReport(year: _selectedYear);
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -110,6 +112,16 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
             // Contract Types Summary
             if (state.contractTypesSummary != null)
               _buildContractTypesSummarySection(state.contractTypesSummary!),
+            const SizedBox(height: 20),
+
+            // Fees Report
+            _buildSectionTitle('تقرير الرسوم المالية', Icons.monetization_on),
+            _buildFeesReportSection(state.feesReport),
+            const SizedBox(height: 20),
+
+            // Guardian Detail Report
+            _buildSectionTitle('تقرير أمين مفصل', Icons.person_search),
+            _buildGuardianDetailSection(state.guardianDetailReport),
 
             const SizedBox(height: 32),
           ],
@@ -399,6 +411,171 @@ class _ReportsTabState extends ConsumerState<ReportsTab> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFeesReportSection(Map<String, dynamic>? data) {
+    if (data == null) {
+      return Center(
+        child: TextButton(
+          onPressed: () => ref
+              .read(reportsProvider.notifier)
+              .loadFeesReport(year: _selectedYear),
+          child: const Text(
+            'تحميل تقرير الرسوم',
+            style: TextStyle(fontFamily: 'Tajawal'),
+          ),
+        ),
+      );
+    }
+
+    final summary = data['summary'] as Map<String, dynamic>? ?? {};
+
+    return Column(
+      children: [
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.5,
+          children: [
+            StatCard(
+              title: 'إجمالي الرسوم',
+              count: '${summary['total_fees'] ?? 0}',
+              icon: Icons.payments,
+              iconColor: AppColors.primary,
+            ),
+            StatCard(
+              title: 'رسوم التصديق',
+              count: '${summary['authentication_fees'] ?? 0}',
+              icon: Icons.verified,
+              iconColor: AppColors.success,
+            ),
+            StatCard(
+              title: 'صندوق الاستدامة',
+              count: '${summary['sustainability_fees'] ?? 0}',
+              icon: Icons.volunteer_activism,
+              iconColor: Colors.teal,
+            ),
+            StatCard(
+              title: 'صندوق الدعم',
+              count: '${summary['support_fees'] ?? 0}',
+              icon: Icons.handshake,
+              iconColor: Colors.orange,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGuardianDetailSection(Map<String, dynamic>? report) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Guardian Selector
+        Consumer(
+          builder: (context, ref, _) {
+            final guardiansState = ref.watch(adminGuardiansProvider);
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<int>(
+                  hint: const Text(
+                    'اختر أمين للمعاينة',
+                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 13),
+                  ),
+                  isExpanded: true,
+                  value: null,
+                  onChanged: (id) {
+                    if (id != null) {
+                      ref
+                          .read(reportsProvider.notifier)
+                          .loadGuardianDetailReport(id, year: _selectedYear);
+                    }
+                  },
+                  items: guardiansState.guardians.map((g) {
+                    return DropdownMenuItem(
+                      value: g.id,
+                      child: Text(
+                        g.name,
+                        style: const TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: 13,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+        if (report != null) ...[
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Column(
+              children: [
+                _buildReportRow(
+                  'عدد القيود الموثقة',
+                  '${report['documented_entries_count'] ?? 0}',
+                ),
+                const Divider(),
+                _buildReportRow(
+                  'إجمالي المبالغ',
+                  '${report['total_amount'] ?? 0}',
+                ),
+                const Divider(),
+                _buildReportRow(
+                  'رسوم الأمين (النسبة)',
+                  '${report['guardian_share'] ?? 0}',
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildReportRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Tajawal',
+              color: AppColors.textSecondary,
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontFamily: 'Tajawal',
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -7,6 +7,8 @@ class ReportsState {
   final Map<String, dynamic>? guardianStats;
   final Map<String, dynamic>? entriesStats;
   final Map<String, dynamic>? contractTypesSummary;
+  final Map<String, dynamic>? feesReport;
+  final Map<String, dynamic>? guardianDetailReport;
   final bool isLoading;
   final String? error;
 
@@ -15,6 +17,8 @@ class ReportsState {
     this.guardianStats,
     this.entriesStats,
     this.contractTypesSummary,
+    this.feesReport,
+    this.guardianDetailReport,
     this.isLoading = false,
     this.error,
   });
@@ -24,6 +28,8 @@ class ReportsState {
     Map<String, dynamic>? guardianStats,
     Map<String, dynamic>? entriesStats,
     Map<String, dynamic>? contractTypesSummary,
+    Map<String, dynamic>? feesReport,
+    Map<String, dynamic>? guardianDetailReport,
     bool? isLoading,
     String? error,
   }) {
@@ -32,6 +38,8 @@ class ReportsState {
       guardianStats: guardianStats ?? this.guardianStats,
       entriesStats: entriesStats ?? this.entriesStats,
       contractTypesSummary: contractTypesSummary ?? this.contractTypesSummary,
+      feesReport: feesReport ?? this.feesReport,
+      guardianDetailReport: guardianDetailReport ?? this.guardianDetailReport,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
@@ -107,6 +115,34 @@ class ReportsNotifier extends StateNotifier<ReportsState> {
         periodValue: periodValue,
       );
       state = state.copyWith(contractTypesSummary: summary, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<void> loadFeesReport({int? year, int? contractTypeId}) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final repository = _ref.read(adminRepositoryProvider);
+      final data = await repository.getFeesReport(
+        year: year,
+        contractTypeId: contractTypeId,
+      );
+      state = state.copyWith(feesReport: data, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<void> loadGuardianDetailReport(int guardianId, {int? year}) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final repository = _ref.read(adminRepositoryProvider);
+      final data = await repository.getGuardianDetailReport(
+        guardianId,
+        year: year,
+      );
+      state = state.copyWith(guardianDetailReport: data, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }

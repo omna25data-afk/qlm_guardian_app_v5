@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
+import 'contract_type_model.dart';
 
 part 'registry_entry_model.g.dart';
 
@@ -16,6 +17,8 @@ class RegistryEntryModel extends Equatable {
   final int? guardianId;
   @JsonKey(name: 'contract_type_id')
   final int? contractTypeId;
+  @JsonKey(name: 'contract_type') // Nested object
+  final ContractTypeModel? contractType;
   @JsonKey(name: 'constraint_type_id')
   final int? constraintTypeId; // New
   final String? status; // draft, pending, documented, etc.
@@ -58,6 +61,9 @@ class RegistryEntryModel extends Equatable {
   // --- Documentation Record (Court) ---
   @JsonKey(name: 'doc_record_book_id')
   final int? docRecordBookId;
+
+  @JsonKey(name: 'doc_gregorian_date')
+  final DateTime? docGregorianDate;
   @JsonKey(name: 'doc_record_book_number')
   final int? docRecordBookNumber;
   @JsonKey(name: 'doc_page_number')
@@ -125,6 +131,7 @@ class RegistryEntryModel extends Equatable {
     this.remoteId,
     this.guardianId,
     this.contractTypeId,
+    this.contractType,
     this.constraintTypeId,
     this.status = 'draft',
     this.serialNumber,
@@ -142,6 +149,7 @@ class RegistryEntryModel extends Equatable {
     this.writerName,
     this.documentHijriDate,
     this.documentGregorianDate,
+    this.docGregorianDate,
     this.docRecordBookId,
     this.docRecordBookNumber,
     this.docPageNumber,
@@ -183,6 +191,7 @@ class RegistryEntryModel extends Equatable {
     serialNumber,
     guardianRecordBookId,
     contractTypeId,
+    contractType,
     extraAttributes,
     firstPartyName,
     secondPartyName,
@@ -196,6 +205,7 @@ class RegistryEntryModel extends Equatable {
     int? remoteId,
     int? guardianId,
     int? contractTypeId,
+    ContractTypeModel? contractType,
     int? constraintTypeId,
     String? status,
     int? serialNumber,
@@ -213,6 +223,7 @@ class RegistryEntryModel extends Equatable {
     String? writerName,
     String? documentHijriDate,
     DateTime? documentGregorianDate,
+    DateTime? docGregorianDate,
     int? docRecordBookId,
     int? docRecordBookNumber,
     int? docPageNumber,
@@ -247,6 +258,7 @@ class RegistryEntryModel extends Equatable {
       remoteId: remoteId ?? this.remoteId,
       guardianId: guardianId ?? this.guardianId,
       contractTypeId: contractTypeId ?? this.contractTypeId,
+      contractType: contractType ?? this.contractType,
       constraintTypeId: constraintTypeId ?? this.constraintTypeId,
       status: status ?? this.status,
       serialNumber: serialNumber ?? this.serialNumber,
@@ -265,6 +277,7 @@ class RegistryEntryModel extends Equatable {
       documentHijriDate: documentHijriDate ?? this.documentHijriDate,
       documentGregorianDate:
           documentGregorianDate ?? this.documentGregorianDate,
+      docGregorianDate: docGregorianDate ?? this.docGregorianDate,
       docRecordBookId: docRecordBookId ?? this.docRecordBookId,
       docRecordBookNumber: docRecordBookNumber ?? this.docRecordBookNumber,
       docPageNumber: docPageNumber ?? this.docPageNumber,

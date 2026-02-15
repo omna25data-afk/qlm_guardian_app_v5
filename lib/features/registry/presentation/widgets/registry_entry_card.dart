@@ -4,7 +4,8 @@ import 'package:intl/intl.dart' as intl;
 import '../../data/models/registry_entry_model.dart';
 import '../../data/models/contract_type_model.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../providers/entries_provider.dart';
+
+import '../screens/entry_details_screen.dart';
 
 class RegistryEntryCard extends ConsumerWidget {
   final RegistryEntryModel entry;
@@ -16,8 +17,12 @@ class RegistryEntryCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final statusColor = _getStatusColor(entry.status ?? 'draft');
     final statusLabel = _getStatusLabel(entry.status ?? 'draft');
-    final contractTypesMap = ref.watch(contractTypeMapProvider);
-    final contractType = contractTypesMap[entry.contractTypeId];
+
+    // Use nested contract object directly
+    final contractTypeName = entry.contractType?.name ?? 'محرر غير محدد';
+
+    // final contractTypesMap = ref.watch(contractTypeMapProvider);
+    // final contractType = contractTypesMap[entry.contractTypeId];
 
     return Card(
       elevation: 3,
@@ -25,7 +30,16 @@ class RegistryEntryCard extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
-        onTap: onTap,
+        onTap:
+            onTap ??
+            () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EntryDetailsScreen(entry: entry),
+                ),
+              );
+            },
         borderRadius: BorderRadius.circular(16),
         child: Column(
           children: [
@@ -52,14 +66,14 @@ class RegistryEntryCard extends ConsumerWidget {
                       ),
                     ),
                     child: Icon(
-                      _getTypeIcon(contractType),
+                      _getTypeIcon(entry.contractType),
                       color: AppColors.primary,
                       size: 20,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    contractType?.name ?? 'محرر غير محدد',
+                    contractTypeName,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -171,6 +185,76 @@ class RegistryEntryCard extends ConsumerWidget {
 
                   const Divider(height: 24),
 
+                  // --- Subject & Writer ---
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'الموضوع',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[600],
+                                fontFamily: 'Tajawal',
+                              ),
+                            ),
+                            Text(
+                              entry.subject ?? '-',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Tajawal',
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Details Icon Button
+                      IconButton(
+                        icon: const Icon(
+                          Icons.visibility_outlined,
+                          color: AppColors.primary,
+                        ),
+                        onPressed: onTap,
+                        tooltip: 'عرض التفاصيل',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Financials Summary if any
+                  if (entry.totalAmount > 0) ...[
+                    Row(
+                      children: [
+                        Text(
+                          'الإجمالي: ',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[700],
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
+                        Text(
+                          '${entry.totalAmount.toStringAsFixed(2)} ر.ي',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Tajawal',
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
+                  const Divider(height: 24),
+
                   // --- DOCUMENTATION DATA (Green Area) ---
                   Container(
                     width: double.infinity,
@@ -236,7 +320,7 @@ class RegistryEntryCard extends ConsumerWidget {
                               ),
                             ),
                             Text(
-                              '${entry.docHijriDate ?? '-'} هـ  |  ${entry.documentGregorianDate != null ? intl.DateFormat('yyyy/MM/dd').format(entry.documentGregorianDate!) : '-'} م',
+                              '${entry.docHijriDate?.split('T').first ?? '-'} هـ  |  ${entry.docGregorianDate != null ? intl.DateFormat('yyyy/MM/dd').format(entry.docGregorianDate!) : '-'} م',
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,

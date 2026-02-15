@@ -26,6 +26,7 @@ class RecordBook {
   final String? templateName;
   final int? issuanceYear;
   final List<int> years;
+  final int currentPageNumber;
 
   RecordBook({
     this.id = 0,
@@ -51,6 +52,7 @@ class RecordBook {
     this.templateName,
     this.issuanceYear,
     List<int>? years,
+    this.currentPageNumber = 0,
   }) : bookNumber = bookNumber ?? number,
        entriesCount = entriesCount ?? totalEntries,
        years = years ?? [];
@@ -81,6 +83,7 @@ class RecordBook {
       templateName: json['template_name'] as String?,
       issuanceYear: json['issuance_year'] as int?,
       years: (json['years'] as List<dynamic>?)?.map((e) => e as int).toList(),
+      currentPageNumber: json['current_page_number'] ?? 0,
     );
   }
 

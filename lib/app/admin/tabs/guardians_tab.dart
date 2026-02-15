@@ -284,6 +284,56 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
                     guardian.employmentStatus ?? 'غير محدد',
                     _parseColor(guardian.employmentStatusColor),
                   ),
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                AddEditGuardianScreen(guardian: guardian),
+                          ),
+                        );
+                      } else if (value == 'delete') {
+                        _showDeleteConfirmation(guardian);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, size: 20),
+                            SizedBox(width: 8),
+                            Text(
+                              'تعديل',
+                              style: TextStyle(fontFamily: 'Tajawal'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete,
+                              size: 20,
+                              color: AppColors.error,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'حذف',
+                              style: TextStyle(
+                                fontFamily: 'Tajawal',
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               const Divider(height: 24),
@@ -370,20 +420,58 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
   Color _parseColor(String? colorName) {
     if (colorName == null) return Colors.grey;
     switch (colorName.toLowerCase()) {
-      case 'red':
-      case 'danger':
-        return AppColors.error;
-      case 'orange':
-      case 'warning':
-        return AppColors.warning;
-      case 'green':
       case 'success':
+      case 'green':
         return AppColors.success;
+      case 'danger':
+      case 'error':
+      case 'red':
+        return AppColors.error;
+      case 'warning':
+      case 'orange':
+        return AppColors.warning;
+      case 'info':
       case 'blue':
-      case 'primary':
-        return AppColors.info;
+        return Colors.blue;
       default:
         return Colors.grey;
     }
+  }
+
+  void _showDeleteConfirmation(AdminGuardianModel guardian) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          'تأكيد الحذف',
+          style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'هل أنت متأكد من حذف الأمين "${guardian.name}"؟ لا يمكن التراجع عن هذا الإجراء.',
+          style: const TextStyle(fontFamily: 'Tajawal'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('إلغاء', style: TextStyle(fontFamily: 'Tajawal')),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final success = await ref
+                  .read(adminGuardiansProvider.notifier)
+                  .deleteGuardian(guardian.id);
+              if (success && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('تم حذف الأمين بنجاح')),
+                );
+              }
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            child: const Text('حذف', style: TextStyle(fontFamily: 'Tajawal')),
+          ),
+        ],
+      ),
+    );
   }
 }

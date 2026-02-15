@@ -86,6 +86,17 @@ class AdminGuardiansNotifier extends StateNotifier<AdminGuardiansState> {
     });
   }
 
+  Future<bool> deleteGuardian(int id) async {
+    try {
+      await _repository.deleteGuardian(id);
+      fetchGuardians(refresh: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
+  }
+
   @override
   void dispose() {
     _debounceTimer?.cancel();

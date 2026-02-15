@@ -7,6 +7,7 @@ import '../../data/models/admin_guardian_model.dart';
 import '../widgets/renew_card_sheet.dart';
 import '../widgets/renew_license_sheet.dart';
 import 'guardian_renewals_screen.dart';
+import '../providers/guardian_inspections_provider.dart';
 
 class GuardianDetailsScreen extends ConsumerWidget {
   final AdminGuardianModel guardian;
@@ -347,6 +348,10 @@ class GuardianDetailsScreen extends ConsumerWidget {
                           ),
                       ],
                     ),
+                  const SizedBox(height: 16),
+
+                  _buildInspectionsSection(context, ref),
+
                   const SizedBox(height: 32),
                 ],
               ),
@@ -642,10 +647,115 @@ class GuardianDetailsScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildInspectionsSection(BuildContext context, WidgetRef ref) {
+    // Trigger fetch
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(guardianInspectionsProvider.notifier)
+          .fetchInspections(guardian.id);
+    });
+
+    final state = ref.watch(guardianInspectionsProvider);
+    final inspections = state.inspectionsByGuardian[guardian.id] ?? [];
+
+    return _buildSection(
+      context,
+      title: 'عمليات التفتيش',
+      icon: Icons.fact_check_outlined,
+      children: [
+        if (state.isLoading && inspections.isEmpty)
+          const Center(child: CircularProgressIndicator())
+        else if (state.error != null && inspections.isEmpty)
+          Center(
+            child: Text(
+              'خطأ في تحميل التفتيشات',
+              style: TextStyle(color: AppColors.error, fontFamily: 'Tajawal'),
+            ),
+          )
+        else if (inspections.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Text(
+                'لا توجد عمليات تفتيش مسجلة',
+                style: TextStyle(fontFamily: 'Tajawal', color: Colors.grey),
+              ),
+            ),
+          )
+        else
+          ...inspections.map((insp) {
+            return Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.border.withValues(alpha: 0.5),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'تفتيش بتاريخ: ${insp['date'] ?? '---'}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Tajawal',
+                        ),
+                      ),
+                      _buildStatusBadge(
+                        insp['status_label'] ?? '---',
+                        _parseColor(insp['status_color']),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    insp['notes'] ?? 'لا توجد ملاحظات',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                      fontFamily: 'Tajawal',
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+      ],
+    );
+  }
+
+  Widget _buildStatusBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: color,
+          fontFamily: 'Tajawal',
+        ),
+      ),
+    );
+  }
+
   Color _parseColor(String? colorName) {
     switch (colorName?.toLowerCase()) {
       case 'red':
       case 'danger':
+      case 'error':
         return AppColors.error;
       case 'orange':
       case 'warning':
@@ -654,6 +764,7 @@ class GuardianDetailsScreen extends ConsumerWidget {
       case 'success':
         return AppColors.success;
       case 'blue':
+      case 'info':
       case 'primary':
         return AppColors.info;
       default:
