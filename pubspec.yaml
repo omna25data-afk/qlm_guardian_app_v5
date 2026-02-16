@@ -66,6 +66,8 @@ dependencies:
   shared_preferences: ^2.2.2
   file_picker: ^10.3.10
   local_auth: ^3.0.0
+  hijri_picker:
+    path: ./packages/hijri_picker
 
 dev_dependencies:
   flutter_test:

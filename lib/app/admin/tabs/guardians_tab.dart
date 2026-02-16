@@ -42,32 +42,7 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
       backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          // 1. Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) {
-                ref
-                    .read(adminGuardiansProvider.notifier)
-                    .onSearchChanged(value);
-              },
-              decoration: InputDecoration(
-                hintText: 'بحث عن أمين (الاسم، السجل، رقم الهوية...)',
-                hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Tajawal'),
-                prefixIcon: const Icon(Icons.search, color: AppColors.primary),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-            ),
-          ),
-
-          // 2. Tabs
+          // 1. Tabs
           Container(
             color: Colors.white,
             child: TabBar(
@@ -94,6 +69,31 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
                 Tab(text: 'المناطق'),
                 Tab(text: 'التكليفات'),
               ],
+            ),
+          ),
+
+          // 2. Search Bar
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                ref
+                    .read(adminGuardiansProvider.notifier)
+                    .onSearchChanged(value);
+              },
+              decoration: InputDecoration(
+                hintText: 'بحث عن أمين (الاسم، السجل، رقم الهوية...)',
+                hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Tajawal'),
+                prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
+              ),
             ),
           ),
 
@@ -227,134 +227,236 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
   }
 
   Widget _buildGuardianCard(AdminGuardianModel guardian) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => GuardianDetailsScreen(guardian: guardian),
+    final statusColor = _parseColor(guardian.employmentStatusColor);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: statusColor.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
-        );
-      },
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 2,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              Row(
+        ],
+        border: Border.all(color: statusColor.withValues(alpha: 0.1), width: 1),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GuardianDetailsScreen(guardian: guardian),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    backgroundImage: guardian.photoUrl != null
-                        ? NetworkImage(guardian.photoUrl!)
-                        : null,
-                    child: guardian.photoUrl == null
-                        ? const Icon(Icons.person, color: AppColors.primary)
-                        : null,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          guardian.name,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            fontFamily: 'Tajawal',
-                          ),
-                        ),
-                        Text(
-                          'سجل رقم: ${guardian.serialNumber}',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                            fontFamily: 'Tajawal',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _buildStatusBadge(
-                    guardian.employmentStatus ?? 'غير محدد',
-                    _parseColor(guardian.employmentStatusColor),
-                  ),
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                AddEditGuardianScreen(guardian: guardian),
-                          ),
-                        );
-                      } else if (value == 'delete') {
-                        _showDeleteConfirmation(guardian);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              'تعديل',
-                              style: TextStyle(fontFamily: 'Tajawal'),
+                  // Header: Avatar + Name + Serial + Menu
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Avatar with dynamic status ring
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: statusColor.withValues(alpha: 0.3),
+                                width: 2,
+                              ),
                             ),
-                          ],
-                        ),
+                            child: CircleAvatar(
+                              radius: 28,
+                              backgroundColor: statusColor.withValues(
+                                alpha: 0.1,
+                              ),
+                              backgroundImage: guardian.photoUrl != null
+                                  ? NetworkImage(guardian.photoUrl!)
+                                  : null,
+                              child: guardian.photoUrl == null
+                                  ? Icon(
+                                      Icons.person,
+                                      color: statusColor,
+                                      size: 30,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 2,
+                            right: 2,
+                            child: Container(
+                              width: 16,
+                              height: 16,
+                              decoration: BoxDecoration(
+                                color: statusColor,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: statusColor.withValues(alpha: 0.4),
+                                    blurRadius: 4,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
+                      const SizedBox(width: 16),
+                      // Info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.delete,
-                              size: 20,
-                              color: AppColors.error,
-                            ),
-                            SizedBox(width: 8),
                             Text(
-                              'حذف',
-                              style: TextStyle(
+                              guardian.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17,
                                 fontFamily: 'Tajawal',
-                                color: AppColors.error,
+                                color: AppColors.primary,
+                                height: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.05,
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '#م ${guardian.serialNumber}',
+                                style: const TextStyle(
+                                  color: AppColors.primaryLight,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Tajawal',
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
+                      // Actions
+                      Column(
+                        children: [
+                          _buildStatusBadge(
+                            guardian.employmentStatus ?? 'غير محدد',
+                            statusColor,
+                          ),
+                          const SizedBox(height: 4),
+                          PopupMenuButton<String>(
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(
+                              Icons.more_vert,
+                              color: Colors.grey,
+                            ),
+                            onSelected: (value) {
+                              if (value == 'edit') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AddEditGuardianScreen(
+                                      guardian: guardian,
+                                    ),
+                                  ),
+                                );
+                              } else if (value == 'delete') {
+                                _showDeleteConfirmation(guardian);
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit_outlined, size: 20),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'تعديل',
+                                      style: TextStyle(fontFamily: 'Tajawal'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.delete_outline,
+                                      size: 20,
+                                      color: AppColors.error,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'حذف',
+                                      style: TextStyle(
+                                        color: AppColors.error,
+                                        fontFamily: 'Tajawal',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Divider(height: 1, color: AppColors.border),
+                  ),
+
+                  // Info Grid: Identity, License, Card (Circulars)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildCircularStatusItem(
+                        label: 'الهوية',
+                        days: guardian.identityDays,
+                        color: guardian.identityStatusColor,
+                      ),
+                      _buildCircularStatusItem(
+                        label: 'الترخيص',
+                        days: guardian.licenseDays,
+                        color: guardian.licenseStatusColor,
+                      ),
+                      _buildCircularStatusItem(
+                        label: 'المزاولة',
+                        days: guardian.cardDays,
+                        color: guardian.cardStatusColor,
+                      ),
                     ],
                   ),
                 ],
               ),
-              const Divider(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildInfoItem(
-                    Icons.card_membership,
-                    'الترخيص',
-                    guardian.licenseStatus ?? '-',
-                    guardian.licenseStatusColor,
-                  ),
-                  _buildInfoItem(
-                    Icons.badge,
-                    'المزاولة',
-                    guardian.cardStatus ?? '-',
-                    guardian.cardStatusColor,
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -363,17 +465,16 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
 
   Widget _buildStatusBadge(String text, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         text,
         style: TextStyle(
           color: color,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.bold,
           fontFamily: 'Tajawal',
         ),
@@ -381,37 +482,60 @@ class _GuardiansTabState extends ConsumerState<GuardiansTab>
     );
   }
 
-  Widget _buildInfoItem(
-    IconData icon,
-    String label,
-    String value,
-    Color color,
-  ) {
-    return Row(
+  Widget _buildCircularStatusItem({
+    required String label,
+    required int? days,
+    required Color color,
+  }) {
+    final String dayText = days == null
+        ? '---'
+        : (days < 0 ? 'منتهي' : '$days يوم');
+
+    return Column(
       children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                color: Colors.grey[600],
-                fontFamily: 'Tajawal',
+        Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
+          ),
+          padding: const EdgeInsets.all(4),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: color, width: 3.5),
+            ),
+            child: Center(
+              child: Text(
+                days == null ? '?' : days.toString(),
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                  fontFamily: 'Tajawal',
+                ),
               ),
             ),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: color,
-                fontFamily: 'Tajawal',
-              ),
-            ),
-          ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: Colors.grey[600],
+            fontFamily: 'Tajawal',
+          ),
+        ),
+        Text(
+          dayText,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: color,
+            fontFamily: 'Tajawal',
+          ),
         ),
       ],
     );

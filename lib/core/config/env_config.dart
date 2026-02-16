@@ -27,7 +27,7 @@ class EnvConfig {
 
   static const EnvConfig staging = EnvConfig(
     environment: Environment.staging,
-    apiBaseUrl: 'https://staging.qlmguardian.com/api',
+    apiBaseUrl: 'https://darkturquoise-lark-306795.hostingersite.com/api',
     enableLogging: true,
   );
 

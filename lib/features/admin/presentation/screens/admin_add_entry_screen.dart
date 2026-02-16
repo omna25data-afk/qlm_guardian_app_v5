@@ -1,6 +1,8 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hijri/hijri_calendar.dart';
+import 'package:hijri_picker/hijri_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../providers/add_entry_provider.dart';
@@ -704,10 +706,9 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
         Row(
           children: [
             Expanded(
-              child: _buildTextField(
+              child: _buildHijriDateField(
                 controller: _documentHijriDateController,
                 label: 'التاريخ الهجري',
-                hint: '1446/01/01',
               ),
             ),
             const SizedBox(width: 12),
@@ -921,10 +922,9 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
         Row(
           children: [
             Expanded(
-              child: _buildTextField(
+              child: _buildHijriDateField(
                 controller: _docHijriDateController,
                 label: 'التاريخ الهجري',
-                hint: '1446/01/01',
               ),
             ),
             const SizedBox(width: 12),
@@ -1365,6 +1365,46 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
         if (date != null) {
           controller.text =
               '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        }
+      },
+    );
+  }
+
+  Widget _buildHijriDateField({
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return TextFormField(
+      controller: controller,
+      readOnly: true,
+      style: const TextStyle(fontFamily: 'Tajawal'),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(fontFamily: 'Tajawal'),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        suffixIcon: const Icon(Icons.calendar_month),
+      ),
+      onTap: () async {
+        final HijriCalendar? selectedDate = await showHijriDatePicker(
+          context: context,
+          initialDate: HijriCalendar.now(),
+          lastDate: HijriCalendar()
+            ..hYear = 1460
+            ..hMonth = 9
+            ..hDay = 25,
+          firstDate: HijriCalendar()
+            ..hYear = 1430
+            ..hMonth = 12
+            ..hDay = 25,
+          initialDatePickerMode: DatePickerMode.day,
+        );
+
+        if (selectedDate != null) {
+          controller.text = selectedDate.toString(); // Returns dd/mm/yyyy
         }
       },
     );

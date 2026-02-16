@@ -122,7 +122,7 @@ class GuardianDetailsScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              guardian.serialNumber ?? '---',
+                              '#م ${guardian.serialNumber ?? '---'}',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -204,6 +204,16 @@ class GuardianDetailsScreen extends ConsumerWidget {
                     title: 'الهوية والسكن',
                     icon: Icons.badge_outlined,
                     children: [
+                      Container(
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        child: _buildCircularStatusItem(
+                          label: 'صلاحية الهوية',
+                          days: guardian.identityDays,
+                          color: guardian.identityStatusColor,
+                        ),
+                      ),
+                      const SizedBox(height: 20, width: double.infinity),
                       _buildGridItem(
                         'نوع الإثبات',
                         guardian.proofType ?? 'غير محدد',
@@ -256,6 +266,17 @@ class GuardianDetailsScreen extends ConsumerWidget {
                         },
                       ),
 
+                      Container(
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        child: _buildCircularStatusItem(
+                          label: 'صلاحية الترخيص',
+                          days: guardian.licenseDays,
+                          color: guardian.licenseStatusColor,
+                        ),
+                      ),
+                      const SizedBox(height: 16, width: double.infinity),
+
                       _buildGridItem(
                         'رقم الترخيص',
                         guardian.licenseNumber ?? 'غير محدد',
@@ -280,6 +301,17 @@ class GuardianDetailsScreen extends ConsumerWidget {
                           );
                         },
                       ),
+
+                      Container(
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        child: _buildCircularStatusItem(
+                          label: 'صلاحية البطاقة',
+                          days: guardian.cardDays,
+                          color: guardian.cardStatusColor,
+                        ),
+                      ),
+                      const SizedBox(height: 16, width: double.infinity),
 
                       _buildGridItem(
                         'رقم البطاقة',
@@ -556,6 +588,82 @@ class GuardianDetailsScreen extends ConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCircularStatusItem({
+    required String label,
+    required int? days,
+    required Color color,
+  }) {
+    final String dayText = days == null
+        ? '---'
+        : (days < 0 ? 'منتهي' : '$days يوم');
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 70,
+          height: 70,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
+          ),
+          padding: const EdgeInsets.all(5),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: color, width: 4),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    days == null ? '?' : days.toString(),
+                    style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                      fontFamily: 'Tajawal',
+                      height: 1,
+                    ),
+                  ),
+                  const Text(
+                    'يوم',
+                    style: TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Tajawal',
+                      height: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+            fontFamily: 'Tajawal',
+          ),
+        ),
+        Text(
+          dayText,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: color,
+            fontFamily: 'Tajawal',
+          ),
+        ),
+      ],
     );
   }
 

@@ -255,84 +255,184 @@ class RegistryEntryCard extends ConsumerWidget {
 
                   const Divider(height: 24),
 
+                  // --- GUARDIAN RECORD DATA (Blue Area) ---
+                  if (entry.guardianEntryNumber != null ||
+                      entry.guardianPageNumber != null ||
+                      entry.guardianRecordBookNumber != null) ...[
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEFF6FF), // Blue-50
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFFBFDBFE), // Blue-200
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'بيانات سجل الأمين',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue[800],
+                                  fontFamily: 'Tajawal',
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Divider(color: Color(0xFFBFDBFE), height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildDocInfoItem(
+                                label: 'رقم القيد',
+                                value:
+                                    entry.guardianEntryNumber?.toString() ??
+                                    '-',
+                                isHighlighted: true,
+                                color: Colors.blue,
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                width: 1,
+                                height: 24,
+                                color: Colors.blue.withValues(alpha: 0.3),
+                              ),
+                              const SizedBox(width: 12),
+                              _buildDocInfoItem(
+                                label: 'رقم الصفحة',
+                                value:
+                                    entry.guardianPageNumber?.toString() ?? '-',
+                                color: Colors.blue,
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                width: 1,
+                                height: 24,
+                                color: Colors.blue.withValues(alpha: 0.3),
+                              ),
+                              const SizedBox(width: 12),
+                              _buildDocInfoItem(
+                                label: 'رقم السجل',
+                                value:
+                                    entry.guardianRecordBookNumber
+                                        ?.toString() ??
+                                    '-',
+                                color: Colors.blue,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
                   // --- DOCUMENTATION DATA (Green Area) ---
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0FDF4), // Green-50
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFFBBF7D0),
-                      ), // Green-200
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _buildDocInfoItem(
-                              label: 'رقم القيد',
-                              value: entry.docEntryNumber?.toString() ?? '-',
-                              isHighlighted: true,
-                            ),
-                            const SizedBox(width: 12),
-                            Container(
-                              width: 1,
-                              height: 24,
-                              color: Colors.green.withValues(alpha: 0.3),
-                            ),
-                            const SizedBox(width: 12),
-                            _buildDocInfoItem(
-                              label: 'رقم الصفحة',
-                              value: entry.docPageNumber?.toString() ?? '-',
-                            ),
-                            const SizedBox(width: 12),
-                            Container(
-                              width: 1,
-                              height: 24,
-                              color: Colors.green.withValues(alpha: 0.3),
-                            ),
-                            const SizedBox(width: 12),
-                            _buildDocInfoItem(
-                              label: 'رقم السجل',
-                              value:
-                                  entry.docRecordBookNumber?.toString() ?? '-',
+                  if (entry.docEntryNumber != null ||
+                      entry.docPageNumber != null ||
+                      entry.docRecordBookNumber != null)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0FDF4), // Green-50
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFFBBF7D0),
+                        ), // Green-200
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'بيانات التوثيق (الوزارة)',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green[800],
+                                  fontFamily: 'Tajawal',
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Divider(color: Color(0xFFBBF7D0), height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildDocInfoItem(
+                                label: 'رقم القيد',
+                                value: entry.docEntryNumber?.toString() ?? '-',
+                                isHighlighted: true,
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                width: 1,
+                                height: 24,
+                                color: Colors.green.withValues(alpha: 0.3),
+                              ),
+                              const SizedBox(width: 12),
+                              _buildDocInfoItem(
+                                label: 'رقم الصفحة',
+                                value: entry.docPageNumber?.toString() ?? '-',
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                width: 1,
+                                height: 24,
+                                color: Colors.green.withValues(alpha: 0.3),
+                              ),
+                              const SizedBox(width: 12),
+                              _buildDocInfoItem(
+                                label: 'رقم السجل',
+                                value:
+                                    entry.docRecordBookNumber?.toString() ??
+                                    '-',
+                              ),
+                            ],
+                          ),
+                          if (entry.docHijriDate != null ||
+                              entry.docGregorianDate != null) ...[
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.event_available,
+                                  size: 14,
+                                  color: Colors.green,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'تاريخ التوثيق: ',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.green[800],
+                                    fontFamily: 'Tajawal',
+                                  ),
+                                ),
+                                Text(
+                                  '${entry.docHijriDate?.split('T').first ?? '-'} هـ  |  ${entry.docGregorianDate != null ? intl.DateFormat('yyyy/MM/dd').format(entry.docGregorianDate!) : '-'} م',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green[900],
+                                    fontFamily: 'Tajawal',
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.event_available,
-                              size: 14,
-                              color: Colors.green,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'تاريخ التوثيق: ',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.green[800],
-                                fontFamily: 'Tajawal',
-                              ),
-                            ),
-                            Text(
-                              '${entry.docHijriDate?.split('T').first ?? '-'} هـ  |  ${entry.docGregorianDate != null ? intl.DateFormat('yyyy/MM/dd').format(entry.docGregorianDate!) : '-'} م',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green[900],
-                                fontFamily: 'Tajawal',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -373,14 +473,16 @@ class RegistryEntryCard extends ConsumerWidget {
     required String label,
     required String value,
     bool isHighlighted = false,
+    MaterialColor? color,
   }) {
+    final themeColor = color ?? Colors.green;
     return Column(
       children: [
         Text(
           label,
           style: TextStyle(
             fontSize: 10,
-            color: Colors.green[700],
+            color: themeColor[700],
             fontFamily: 'Tajawal',
           ),
         ),
@@ -390,9 +492,7 @@ class RegistryEntryCard extends ConsumerWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: isHighlighted
-                ? const Color(0xFF15803D)
-                : Colors.green[900], // Green-700 or 900
+            color: isHighlighted ? themeColor[800] : themeColor[900],
             fontFamily: 'Tajawal',
           ),
         ),

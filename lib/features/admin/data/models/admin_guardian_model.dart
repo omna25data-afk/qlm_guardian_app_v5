@@ -173,6 +173,21 @@ class AdminGuardianModel {
     return name;
   }
 
+  int? get identityDays => getDaysRemaining(expiryDate);
+  int? get licenseDays => getDaysRemaining(licenseExpiryDate);
+  int? get cardDays => getDaysRemaining(professionCardExpiryDate);
+
+  int? getDaysRemaining(String? dateStr) {
+    if (dateStr == null) return null;
+    try {
+      final dt = DateTime.parse(dateStr);
+      final now = DateTime.now();
+      return dt.difference(now).inDays;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Color get identityStatusColor => _getStatusColorFromDate(expiryDate);
 
   Color get licenseStatusColor {
