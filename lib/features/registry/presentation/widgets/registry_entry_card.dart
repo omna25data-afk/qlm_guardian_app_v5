@@ -15,20 +15,28 @@ class RegistryEntryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statusColor = _getStatusColor(entry.status ?? 'draft');
-    final statusLabel = _getStatusLabel(entry.status ?? 'draft');
+    // Use backend-provided status colors and labels if available
+    final statusColor = entry.statusColor != null
+        ? _parseColor(entry.statusColor!)
+        : _getStatusColor(entry.status ?? 'draft');
+    final statusLabel =
+        entry.statusLabel ?? _getStatusLabel(entry.status ?? 'draft');
 
-    // Use nested contract object directly
     final contractTypeName = entry.contractType?.name ?? 'محرر غير محدد';
 
-    // final contractTypesMap = ref.watch(contractTypeMapProvider);
-    // final contractType = contractTypesMap[entry.contractTypeId];
-
-    return Card(
-      elevation: 3,
-      shadowColor: Colors.black12,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: InkWell(
         onTap:
             onTap ??
@@ -47,10 +55,13 @@ class RegistryEntryCard extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.05),
+                color: statusColor.withValues(alpha: 0.05),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16),
                   topRight: Radius.circular(16),
+                ),
+                border: Border(
+                  bottom: BorderSide(color: statusColor.withValues(alpha: 0.1)),
                 ),
               ),
               child: Row(
@@ -61,9 +72,13 @@ class RegistryEntryCard extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.2),
-                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Icon(
                       _getTypeIcon(entry.contractType),
@@ -71,52 +86,56 @@ class RegistryEntryCard extends ConsumerWidget {
                       size: 20,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    contractTypeName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      fontFamily: 'Tajawal',
-                      color: AppColors.primary,
-                    ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        contractTypeName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          fontFamily: 'Tajawal',
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      if (entry.serialNumber != null)
+                        Text(
+                          'رقم القيد: ${entry.serialNumber}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[600],
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
+                    ],
                   ),
                   const Spacer(),
                   // Status Badge
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
+                      horizontal: 12,
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.1),
+                      color: statusColor,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: statusColor.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            color: statusColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          statusLabel,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: statusColor,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Tajawal',
-                          ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: statusColor.withValues(alpha: 0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
                         ),
                       ],
+                    ),
+                    child: Text(
+                      statusLabel,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Tajawal',
+                      ),
                     ),
                   ),
                 ],
@@ -141,7 +160,7 @@ class RegistryEntryCard extends ConsumerWidget {
                               entry.firstPartyName ?? '-',
                               Icons.person,
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 12),
                             if (entry.secondPartyName != null &&
                                 entry.secondPartyName!.isNotEmpty)
                               _buildPartyRow(
@@ -152,287 +171,133 @@ class RegistryEntryCard extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
+                      Container(width: 1, height: 60, color: Colors.grey[200]),
+                      const SizedBox(width: 16),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
                             'تاريخ المحرر',
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 11,
                               color: Colors.grey[600],
                               fontFamily: 'Tajawal',
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            entry.date != null
-                                ? intl.DateFormat(
-                                    'yyyy/MM/dd',
-                                    'ar',
-                                  ).format(entry.date!)
-                                : '-',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Tajawal',
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  const Divider(height: 24),
-
-                  // --- Subject & Writer ---
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'الموضوع',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey[600],
-                                fontFamily: 'Tajawal',
-                              ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey[200]!),
                             ),
-                            Text(
-                              entry.subject ?? '-',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Tajawal',
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      // Details Icon Button
-                      IconButton(
-                        icon: const Icon(
-                          Icons.visibility_outlined,
-                          color: AppColors.primary,
-                        ),
-                        onPressed: onTap,
-                        tooltip: 'عرض التفاصيل',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Financials Summary if any
-                  if (entry.totalAmount > 0) ...[
-                    Row(
-                      children: [
-                        Text(
-                          'الإجمالي: ',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[700],
-                            fontFamily: 'Tajawal',
-                          ),
-                        ),
-                        Text(
-                          '${entry.totalAmount.toStringAsFixed(2)} ر.ي',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Tajawal',
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-
-                  const Divider(height: 24),
-
-                  // --- GUARDIAN RECORD DATA (Blue Area) ---
-                  if (entry.guardianEntryNumber != null ||
-                      entry.guardianPageNumber != null ||
-                      entry.guardianRecordBookNumber != null) ...[
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEFF6FF), // Blue-50
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFFBFDBFE), // Blue-200
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'بيانات سجل الأمين',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue[800],
-                                  fontFamily: 'Tajawal',
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Divider(color: Color(0xFFBFDBFE), height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _buildDocInfoItem(
-                                label: 'رقم القيد',
-                                value:
-                                    entry.guardianEntryNumber?.toString() ??
-                                    '-',
-                                isHighlighted: true,
-                                color: Colors.blue,
-                              ),
-                              const SizedBox(width: 12),
-                              Container(
-                                width: 1,
-                                height: 24,
-                                color: Colors.blue.withValues(alpha: 0.3),
-                              ),
-                              const SizedBox(width: 12),
-                              _buildDocInfoItem(
-                                label: 'رقم الصفحة',
-                                value:
-                                    entry.guardianPageNumber?.toString() ?? '-',
-                                color: Colors.blue,
-                              ),
-                              const SizedBox(width: 12),
-                              Container(
-                                width: 1,
-                                height: 24,
-                                color: Colors.blue.withValues(alpha: 0.3),
-                              ),
-                              const SizedBox(width: 12),
-                              _buildDocInfoItem(
-                                label: 'رقم السجل',
-                                value:
-                                    entry.guardianRecordBookNumber
-                                        ?.toString() ??
-                                    '-',
-                                color: Colors.blue,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-
-                  // --- DOCUMENTATION DATA (Green Area) ---
-                  if (entry.docEntryNumber != null ||
-                      entry.docPageNumber != null ||
-                      entry.docRecordBookNumber != null)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF0FDF4), // Green-50
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFFBBF7D0),
-                        ), // Green-200
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'بيانات التوثيق (الوزارة)',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green[800],
-                                  fontFamily: 'Tajawal',
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Divider(color: Color(0xFFBBF7D0), height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _buildDocInfoItem(
-                                label: 'رقم القيد',
-                                value: entry.docEntryNumber?.toString() ?? '-',
-                                isHighlighted: true,
-                              ),
-                              const SizedBox(width: 12),
-                              Container(
-                                width: 1,
-                                height: 24,
-                                color: Colors.green.withValues(alpha: 0.3),
-                              ),
-                              const SizedBox(width: 12),
-                              _buildDocInfoItem(
-                                label: 'رقم الصفحة',
-                                value: entry.docPageNumber?.toString() ?? '-',
-                              ),
-                              const SizedBox(width: 12),
-                              Container(
-                                width: 1,
-                                height: 24,
-                                color: Colors.green.withValues(alpha: 0.3),
-                              ),
-                              const SizedBox(width: 12),
-                              _buildDocInfoItem(
-                                label: 'رقم السجل',
-                                value:
-                                    entry.docRecordBookNumber?.toString() ??
-                                    '-',
-                              ),
-                            ],
-                          ),
-                          if (entry.docHijriDate != null ||
-                              entry.docGregorianDate != null) ...[
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            child: Column(
                               children: [
-                                const Icon(
-                                  Icons.event_available,
-                                  size: 14,
-                                  color: Colors.green,
-                                ),
-                                const SizedBox(width: 6),
                                 Text(
-                                  'تاريخ التوثيق: ',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.green[800],
-                                    fontFamily: 'Tajawal',
-                                  ),
-                                ),
-                                Text(
-                                  '${entry.docHijriDate?.split('T').first ?? '-'} هـ  |  ${entry.docGregorianDate != null ? intl.DateFormat('yyyy/MM/dd').format(entry.docGregorianDate!) : '-'} م',
-                                  style: TextStyle(
-                                    fontSize: 11,
+                                  entry.date != null
+                                      ? intl.DateFormat(
+                                          'yyyy/MM/dd',
+                                          'ar',
+                                        ).format(entry.date!)
+                                      : '-',
+                                  style: const TextStyle(
+                                    fontSize: 13,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.green[900],
                                     fontFamily: 'Tajawal',
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
+                                if (entry.hijriDate != null)
+                                  Text(
+                                    entry.hijriDate!,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey[500],
+                                      fontFamily: 'Tajawal',
+                                    ),
+                                  ),
                               ],
                             ),
-                          ],
+                          ),
                         ],
                       ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // --- Subject & Stats ---
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey[200]!),
                     ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.subject,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                entry.subject ?? 'لا يوجد موضوع',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.textPrimary,
+                                  fontFamily: 'Tajawal',
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (entry.totalAmount > 0) ...[
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Divider(height: 1),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'إجمالي المبلغ',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                  fontFamily: 'Tajawal',
+                                ),
+                              ),
+                              Text(
+                                '${intl.NumberFormat('#,##0.00', 'ar').format(entry.totalAmount)} ر.ي',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                  fontFamily: 'Tajawal',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+
+                  // --- Footer Actions ---
+                  // Can add actions here if needed (Edit, Delete, etc.)
                 ],
               ),
             ),
@@ -445,12 +310,27 @@ class RegistryEntryCard extends ConsumerWidget {
   Widget _buildPartyRow(String label, String name, IconData icon) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey[600]),
-        const SizedBox(width: 6),
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 14, color: AppColors.primary),
+        ),
+        const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey[600],
+                  fontFamily: 'Tajawal',
+                ),
+              ),
               Text(
                 name,
                 style: const TextStyle(
@@ -498,6 +378,40 @@ class RegistryEntryCard extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  // Parse color string from backend (e.g. 'success', 'danger', 'primary', or hex)
+  Color _parseColor(String colorName) {
+    switch (colorName.toLowerCase()) {
+      case 'success':
+      case 'green':
+        return AppColors.success;
+      case 'danger':
+      case 'error':
+      case 'red':
+        return AppColors.error;
+      case 'warning':
+      case 'orange':
+        return Colors.orange;
+      case 'info':
+      case 'blue':
+        return Colors.blue;
+      case 'primary':
+        return AppColors.primary;
+      case 'gray':
+      case 'grey':
+        return Colors.grey;
+      default:
+        // Try parsing hex
+        if (colorName.startsWith('#')) {
+          try {
+            return Color(
+              int.parse(colorName.substring(1), radix: 16) + 0xFF000000,
+            );
+          } catch (_) {}
+        }
+        return Colors.grey;
+    }
   }
 
   Color _getStatusColor(String status) {
