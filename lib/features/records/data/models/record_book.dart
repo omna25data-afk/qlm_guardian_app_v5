@@ -44,6 +44,8 @@ class RecordBook {
   final int usedPages;
   final int usagePercentage;
   final String? categoryLabel;
+  final String? categoryColor;
+  final String? categoryIcon;
   final int totalEntries;
   final int completedEntries;
   final int draftEntries;
@@ -95,6 +97,8 @@ class RecordBook {
     this.usedPages = 0,
     this.usagePercentage = 0,
     this.categoryLabel,
+    this.categoryColor,
+    this.categoryIcon,
     this.totalEntries = 0,
     this.completedEntries = 0,
     this.draftEntries = 0,
@@ -181,6 +185,8 @@ class RecordBook {
       usedPages: json['used_pages'] ?? json['constraints_count'] ?? 0,
       usagePercentage: json['used_percentage'] ?? 0,
       categoryLabel: json['category_label'],
+      categoryColor: json['category_color'],
+      categoryIcon: json['category_icon'],
       totalEntries: json['total_entries_count'] ?? json['entries_count'] ?? 0,
       completedEntries: json['completed_entries_count'] ?? 0,
       draftEntries: json['draft_entries_count'] ?? 0,

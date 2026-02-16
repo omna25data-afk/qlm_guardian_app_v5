@@ -31,16 +31,46 @@ class PremiumRecordBookCard extends StatelessWidget {
     Color categoryColor;
     IconData categoryIcon;
 
-    if (book.category == 'documentation_final') {
-      categoryColor = AppColors.success; // Green
-      categoryIcon = Icons.verified_user_outlined; // or check_circle_outline
-    } else if (book.category == 'documentation_recording') {
-      categoryColor = Colors.orange; // Orange
-      categoryIcon = Icons.edit_note; // or history_edu
+    if (book.categoryColor != null) {
+      // Parse color from backend string (e.g., 'success', 'info', 'warning', 'danger')
+      switch (book.categoryColor) {
+        case 'success':
+          categoryColor = AppColors.success;
+          break;
+        case 'info':
+          categoryColor =
+              AppColors.primary; // Info usually maps to primary/blue
+          break;
+        case 'warning':
+          categoryColor = Colors.orange;
+          break;
+        case 'danger':
+          categoryColor = AppColors.error;
+          break;
+        case 'gray':
+        default:
+          categoryColor = Colors.grey;
+      }
     } else {
-      // Default to guardian_recording or fallback
-      categoryColor = AppColors.primary; // Blue (assuming primary is blue-ish)
-      categoryIcon = Icons.person_outline;
+      // Fallback
+      categoryColor = AppColors.primary;
+    }
+
+    if (book.categoryIcon != null) {
+      // Simple mapping based on backend icon names
+      if (book.categoryIcon!.contains('check-badge')) {
+        categoryIcon = Icons.verified_user_outlined;
+      } else if (book.categoryIcon!.contains('pencil-square')) {
+        categoryIcon = Icons.edit_note;
+      } else if (book.categoryIcon!.contains('user')) {
+        categoryIcon = Icons.person_outline;
+      } else if (book.categoryIcon!.contains('arrows-right-left')) {
+        categoryIcon = Icons.swap_horiz;
+      } else {
+        categoryIcon = Icons.book_outlined;
+      }
+    } else {
+      categoryIcon = Icons.book_outlined;
     }
 
     // Derived Data
