@@ -9,10 +9,13 @@ import '../models/admin_renewal_model.dart';
 import '../../../records/data/models/record_book.dart';
 import '../../../registry/data/models/registry_entry_model.dart';
 
+import '../../../system/data/repositories/system_repository.dart';
+
 class AdminRepository {
   final ApiClient _apiClient;
+  final SystemRepository _systemRepository;
 
-  AdminRepository(this._apiClient);
+  AdminRepository(this._apiClient, this._systemRepository);
 
   // ─── Guardians ───────────────────────────────────────────
 
@@ -284,14 +287,15 @@ class AdminRepository {
     }
     if (sortBy != null) params['sort_by'] = sortBy;
 
-    final response = await _apiClient.get(
-      ApiEndpoints.adminRecordBooks,
-      queryParameters: params,
-    );
-    return (response.data['data'] as List?)
-            ?.map((e) => RecordBook.fromJson(e))
-            .toList() ??
-        [];
+    final response = await _systemRepository.getAdminRecordBooks(params);
+
+    // The generated response returns the raw Dio Response.
+    // We expect the data to be in response.data['data'] for paginated lists.
+    final List? data = response.data['data'] is List
+        ? response.data['data']
+        : (response.data is List ? response.data : null);
+
+    return data?.map((e) => RecordBook.fromJson(e)).toList() ?? [];
   }
 
   /// Fetch internal writers (data entry users)
@@ -332,14 +336,13 @@ class AdminRepository {
     if (dateFrom != null) params['date_from'] = dateFrom;
     if (dateTo != null) params['date_to'] = dateTo;
 
-    final response = await _apiClient.get(
-      ApiEndpoints.adminRegistryEntries,
-      queryParameters: params,
-    );
-    return (response.data['data'] as List?)
-            ?.map((e) => RegistryEntryModel.fromJson(e))
-            .toList() ??
-        [];
+    final response = await _systemRepository.getRegistryEntries(params);
+
+    final List? data = response.data['data'] is List
+        ? response.data['data']
+        : (response.data is List ? response.data : null);
+
+    return data?.map((e) => RegistryEntryModel.fromJson(e)).toList() ?? [];
   }
 
   // ─── Reports ─────────────────────────────────────────────

@@ -1,0 +1,87 @@
+class RecordBookCustomization {
+  final int id;
+  final int? recordBookTypeId;
+  final String recordType;
+  final String fieldName;
+  final String fieldLabel;
+  final String fieldType;
+  final String? fieldOptions;
+  final bool isRequired;
+  final bool isVisible;
+  final int displayOrder;
+  final String? validationRules;
+  final String? defaultValue;
+  final String fieldGroup;
+  final int createdBy;
+  final bool isActive;
+  final String? createdAt;
+  final String? updatedAt;
+  final String? deletedAt;
+
+  RecordBookCustomization({
+    required this.id,
+    this.recordBookTypeId,
+    required this.recordType,
+    required this.fieldName,
+    required this.fieldLabel,
+    required this.fieldType,
+    this.fieldOptions,
+    required this.isRequired,
+    required this.isVisible,
+    required this.displayOrder,
+    this.validationRules,
+    this.defaultValue,
+    required this.fieldGroup,
+    required this.createdBy,
+    required this.isActive,
+    this.createdAt,
+    this.updatedAt,
+    this.deletedAt,
+  });
+
+  factory RecordBookCustomization.fromJson(Map<String, dynamic> json) {
+    return RecordBookCustomization(
+      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      recordBookTypeId: json['record_book_type_id'] != null ? (json['record_book_type_id'] is int ? json['record_book_type_id'] : int.tryParse(json['record_book_type_id'].toString()) ?? null) : null,
+      recordType: json['record_type'] ?? '',
+      fieldName: json['field_name'] ?? '',
+      fieldLabel: json['field_label'] ?? '',
+      fieldType: json['field_type'] ?? '',
+      fieldOptions: json['field_options'] ?? null,
+      isRequired: json['is_required'] == 1 || json['is_required'] == true || json['is_required'] == '1',
+      isVisible: json['is_visible'] == 1 || json['is_visible'] == true || json['is_visible'] == '1',
+      displayOrder: json['display_order'] != null ? (json['display_order'] is int ? json['display_order'] : int.tryParse(json['display_order'].toString()) ?? 0) : 0,
+      validationRules: json['validation_rules'] ?? null,
+      defaultValue: json['default_value'] ?? null,
+      fieldGroup: json['field_group'] ?? '',
+      createdBy: json['created_by'] != null ? (json['created_by'] is int ? json['created_by'] : int.tryParse(json['created_by'].toString()) ?? 0) : 0,
+      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
+      createdAt: json['created_at'] ?? null,
+      updatedAt: json['updated_at'] ?? null,
+      deletedAt: json['deleted_at'] ?? null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'record_book_type_id': recordBookTypeId,
+      'record_type': recordType,
+      'field_name': fieldName,
+      'field_label': fieldLabel,
+      'field_type': fieldType,
+      'field_options': fieldOptions,
+      'is_required': isRequired,
+      'is_visible': isVisible,
+      'display_order': displayOrder,
+      'validation_rules': validationRules,
+      'default_value': defaultValue,
+      'field_group': fieldGroup,
+      'created_by': createdBy,
+      'is_active': isActive,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'deleted_at': deletedAt,
+    };
+  }
+}

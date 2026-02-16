@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../features/records/data/models/record_book.dart';
 import '../../../../../features/admin/presentation/providers/admin_record_books_provider.dart';
+import '../record_book_entries_screen.dart';
 import '../../../../../features/admin/presentation/providers/admin_record_book_actions_provider.dart';
 import '../../../../admin/presentation/widgets/premium_record_book_card.dart';
 import '../../../../../features/admin/presentation/providers/admin_dashboard_provider.dart'; // Fixed import
@@ -608,6 +609,7 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
               onOpen: () => _showOpenConfirmation(book),
               onClose: () => _showCloseConfirmation(book),
               onProcedures: () => _showProcedures(book),
+              onShowEntries: () => _showEntries(context, book),
             );
 
             if (header != null) {
@@ -839,5 +841,12 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
       default:
         return Icons.description;
     }
+  }
+
+  void _showEntries(BuildContext context, RecordBook book) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => RecordBookEntriesScreen(book: book)),
+    );
   }
 }

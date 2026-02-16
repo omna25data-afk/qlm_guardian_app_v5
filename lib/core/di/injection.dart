@@ -11,6 +11,8 @@ import '../../features/admin/data/repositories/admin_repository.dart';
 import '../../features/records/data/repositories/records_repository.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository.dart';
 import '../../features/profile/data/repositories/profile_repository.dart';
+import '../config/app_config.dart';
+import '../../features/system/data/repositories/system_repository.dart';
 
 final getIt = GetIt.instance;
 
@@ -72,10 +74,16 @@ Future<void> initDependencies() async {
     ),
   );
 
+  // --- System Repository (Generated) ---
+  getIt.registerLazySingleton<SystemRepository>(
+    () =>
+        SystemRepository(getIt<ApiClient>().dio, baseUrl: AppConfig.apiBaseUrl),
+  );
+
   // --- Migrated Features (v4 → v5) ---
 
   getIt.registerLazySingleton<AdminRepository>(
-    () => AdminRepository(getIt<ApiClient>()),
+    () => AdminRepository(getIt<ApiClient>(), getIt<SystemRepository>()),
   );
 
   getIt.registerLazySingleton<RecordsRepository>(

@@ -378,9 +378,7 @@ class _RecordBookNotebooksScreenState
             _buildDetailRow(
               Icons.calendar_today,
               'سنة الصرف',
-              book.issuanceYear != null
-                  ? '${book.issuanceYear} هـ'
-                  : 'غير محدد',
+              '${book.issuanceYear} هـ',
             ),
             const SizedBox(height: 8),
             _buildDetailRow(Icons.history, 'السنوات', book.years.join('، ')),
@@ -425,9 +423,7 @@ class _RecordBookNotebooksScreenState
             _buildInfoItem(
               Icons.calendar_today,
               'سنة الصرف للهيئة',
-              notebook.issuanceYear != null
-                  ? '${notebook.issuanceYear} هـ'
-                  : 'غير محدد',
+              '${notebook.issuanceYear} هـ',
             ),
             _buildInfoItem(
               Icons.history,

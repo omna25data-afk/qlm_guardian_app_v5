@@ -1,72 +1,116 @@
 import 'package:flutter/material.dart';
 
-/// Record Book model — migrated from v4 with full field set.
-/// Uses manual fromJson to handle complex field mappings and defaults.
+/// Record Book model — aligned with generated system model.
+/// This model acts as the primary data structure for the UI,
+/// combining database fields with computed properties for the frontend.
 class RecordBook {
   final int id;
-  final int number;
-  final String title;
+  final int? recordBookTypeId;
+  final int? recordBookTemplateId;
+  final String name;
+  final String category;
+  final int? contractTypeId;
+  final int? legitimateGuardianId;
+  final int bookNumber;
+  final String? ministryRecordNumber;
+  final String? formNumber;
   final int hijriYear;
+  final int totalPages;
+  final int constraintsPerPage;
+  final int startConstraintNumber;
+  final int endConstraintNumber;
+  final int? assignedTo;
+  final int createdBy;
+  final String status;
+  final int? issuedProcedureId;
+  final int? currentOpeningProcedureId;
+  final String? openingProcedureDate;
+  final String? openingProcedureDateHijri;
+  final String? closingProcedureDate;
+  final String? closureType;
+  final String? closureReason;
+  final String? closingProcedureDateHijri;
+  final String? notes;
+  final bool isActive;
+  final String? createdAt;
+  final String? updatedAt;
+  final String? deletedAt;
+  final String? recordGroup;
+  final String? recordCategory;
+
+  // Computed & UI-specific fields (from API Resource)
   final String statusLabel;
   final String contractType;
-  final int totalPages;
   final int usedPages;
   final int usagePercentage;
-  final String category;
   final String? categoryLabel;
-  final bool isActive;
   final int totalEntries;
   final int completedEntries;
   final int draftEntries;
+  final int pendingEntries;
+  final int registeredEntries;
+  final int rejectedEntries;
   final int notebooksCount;
-  final int? contractTypeId;
-  final int bookNumber;
-  final int entriesCount;
-  final String? ministryRecordNumber;
-  final int? templateId;
   final String? templateName;
-  final int? issuanceYear;
-  final List<int> years;
-  final int currentPageNumber;
   final String writerName;
   final String writerTypeLabel;
 
   RecordBook({
-    this.id = 0,
-    this.number = 0,
-    this.title = '',
-    this.hijriYear = 0,
+    required this.id,
+    this.recordBookTypeId,
+    this.recordBookTemplateId,
+    required this.name,
+    required this.category,
+    this.contractTypeId,
+    this.legitimateGuardianId,
+    required this.bookNumber,
+    this.ministryRecordNumber,
+    this.formNumber,
+    required this.hijriYear,
+    required this.totalPages,
+    required this.constraintsPerPage,
+    required this.startConstraintNumber,
+    required this.endConstraintNumber,
+    this.assignedTo,
+    required this.createdBy,
+    required this.status,
+    this.issuedProcedureId,
+    this.currentOpeningProcedureId,
+    this.openingProcedureDate,
+    this.openingProcedureDateHijri,
+    this.closingProcedureDate,
+    this.closureType,
+    this.closureReason,
+    this.closingProcedureDateHijri,
+    this.notes,
+    required this.isActive,
+    this.createdAt,
+    this.updatedAt,
+    this.deletedAt,
+    this.recordGroup,
+    this.recordCategory,
+    // Helpers
     this.statusLabel = '',
     this.contractType = '',
-    this.totalPages = 0,
     this.usedPages = 0,
     this.usagePercentage = 0,
-    this.category = 'guardian_recording', // Default to avoid nulls
     this.categoryLabel,
-    this.isActive = false,
     this.totalEntries = 0,
     this.completedEntries = 0,
     this.draftEntries = 0,
-    this.notebooksCount = 0,
-    this.contractTypeId,
-    int? bookNumber,
-    int? entriesCount,
-    this.ministryRecordNumber,
-    this.templateId,
+    this.pendingEntries = 0,
+    this.registeredEntries = 0,
+    this.rejectedEntries = 0,
+
+    this.notebooksCount = 1,
     this.templateName,
-    this.issuanceYear,
-    List<int>? years,
-    this.currentPageNumber = 0,
     this.writerName = '',
     this.writerTypeLabel = '',
-  }) : bookNumber = bookNumber ?? number,
-       entriesCount = entriesCount ?? totalEntries,
-       years = years ?? [];
+  });
 
   factory RecordBook.fromJson(Map<String, dynamic> json) {
-    // Helper to extract name safely
-    String extractName() {
-      // 1. Direct assignments from API
+    // Helper to extract writer name safely
+    String extractWriterName() {
       if (json['writer_name'] != null &&
           json['writer_name'].toString().isNotEmpty) {
         return json['writer_name'];
@@ -76,68 +120,77 @@ class RecordBook {
         return json['assigned_name'];
       }
 
-      // 2. Legitimate Guardian (Amin) - From Backend Resource
-      // The backend returns 'full_name', 'first_name', 'family_name'. NOT 'name'.
-      if (json['legitimate_guardian'] is Map) {
-        final g = json['legitimate_guardian'];
-        if (g['full_name'] != null) return g['full_name'];
-        if (g['name'] != null) return g['name']; // Fallback
-        if (g['first_name'] != null) {
-          return '${g['first_name']} ${g['family_name'] ?? ''}'.trim();
+      final lg = json['legitimate_guardian'] ?? json['legitimateGuardian'];
+      if (lg is Map) {
+        if (lg['full_name'] != null) {
+          return lg['full_name'];
         }
-      }
-      // CamelCase check
-      if (json['legitimateGuardian'] is Map) {
-        final g = json['legitimateGuardian'];
-        if (g['full_name'] != null) return g['full_name'];
-        if (g['name'] != null) return g['name'];
-        if (g['first_name'] != null) {
-          return '${g['first_name']} ${g['family_name'] ?? ''}'.trim();
+        if (lg['name'] != null) {
+          return lg['name'];
         }
-      }
-
-      // 3. User / Writer / Assigned (Generic Fallbacks)
-      if (json['writer'] is Map && json['writer']['name'] != null) {
-        return json['writer']['name'];
-      }
-      if (json['assigned'] is Map && json['assigned']['name'] != null) {
-        return json['assigned']['name'];
-      }
-      if (json['user'] is Map && json['user']['name'] != null) {
-        return json['user']['name'];
+        if (lg['first_name'] != null) {
+          return '${lg['first_name']} ${lg['family_name'] ?? ''}'.trim();
+        }
       }
 
       return '';
     }
 
     return RecordBook(
-      id: json['id'] ?? 0,
-      number: json['book_number'] ?? 0,
-      title: json['name'] ?? '',
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      recordBookTypeId: json['record_book_type_id'],
+      recordBookTemplateId: json['record_book_template_id'],
+      name: json['name'] ?? '',
+      category: json['category'] ?? 'guardian_recording',
+      contractTypeId: json['contract_type_id'],
+      legitimateGuardianId: json['legitimate_guardian_id'],
+      bookNumber: json['book_number'] ?? 0,
+      ministryRecordNumber: json['ministry_record_number'],
+      formNumber: json['form_number'],
       hijriYear: json['hijri_year'] ?? 0,
+      totalPages: json['total_pages'] ?? 0,
+      constraintsPerPage: json['constraints_per_page'] ?? 0,
+      startConstraintNumber: json['start_constraint_number'] ?? 0,
+      endConstraintNumber: json['end_constraint_number'] ?? 0,
+      assignedTo: json['assigned_to'],
+      createdBy: json['created_by'] ?? 0,
+      status: json['status'] ?? '',
+      issuedProcedureId: json['issued_procedure_id'],
+      currentOpeningProcedureId: json['current_opening_procedure_id'],
+      openingProcedureDate: json['opening_procedure_date'],
+      openingProcedureDateHijri: json['opening_procedure_date_hijri'],
+      closingProcedureDate: json['closing_procedure_date'],
+      closureType: json['closure_type'],
+      closureReason: json['closure_reason'],
+      closingProcedureDateHijri: json['closing_procedure_date_hijri'],
+      notes: json['notes'],
+      isActive:
+          json['is_active'] == true ||
+          json['is_active'] == 1 ||
+          json['is_active'] == '1',
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
+      deletedAt: json['deleted_at'],
+      recordGroup: json['record_group'],
+      recordCategory: json['record_category'],
+      // Helpers
       statusLabel: json['status_label'] ?? '',
       contractType: json['contract_type_name'] ?? json['type_name'] ?? '',
-      totalPages: json['total_pages'] ?? 0,
-      usedPages: json['constraints_count'] ?? 0,
+      usedPages: json['used_pages'] ?? json['constraints_count'] ?? 0,
       usagePercentage: json['used_percentage'] ?? 0,
-      category: json['category'] ?? 'guardian_recording',
       categoryLabel: json['category_label'],
-      isActive: json['is_active'] == true || json['is_active'] == 1,
-      totalEntries:
-          json['total_entries_count'] ?? json['constraints_count'] ?? 0,
+      totalEntries: json['total_entries_count'] ?? json['entries_count'] ?? 0,
       completedEntries: json['completed_entries_count'] ?? 0,
       draftEntries: json['draft_entries_count'] ?? 0,
+      pendingEntries: json['pending_entries_count'] ?? 0,
+      registeredEntries: json['registered_entries_count'] ?? 0,
+      rejectedEntries: json['rejected_entries_count'] ?? 0,
+
       notebooksCount: json['notebooks_count'] ?? 1,
-      contractTypeId: json['contract_type_id'],
-      bookNumber: json['book_number'] as int?,
-      entriesCount: json['entries_count'] as int?,
-      ministryRecordNumber: json['ministry_record_number'] as String?,
-      templateId: json['template_id'] as int?,
-      templateName: json['template_name'] as String?,
-      issuanceYear: json['issuance_year'] as int?,
-      years: (json['years'] as List<dynamic>?)?.map((e) => e as int).toList(),
-      currentPageNumber: json['current_page_number'] ?? 0,
-      writerName: extractName(),
+      templateName: json['template_name'],
+      writerName: extractWriterName(),
       writerTypeLabel: json['writer_type_label'] ?? '',
     );
   }
@@ -154,4 +207,13 @@ class RecordBook {
     }
     return Colors.grey;
   }
+
+  // Backward compatibility getters
+  String get title => name;
+  int get number => bookNumber;
+  int get entriesCount => totalEntries;
+  int get issuanceYear => hijriYear;
+  List<String> get years => [hijriYear.toString()];
+  int get currentPageNumber =>
+      (usedPages < totalPages) ? usedPages + 1 : totalPages;
 }

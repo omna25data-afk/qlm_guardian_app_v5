@@ -8,6 +8,7 @@ class PremiumRecordBookCard extends StatelessWidget {
   final VoidCallback onOpen;
   final VoidCallback onClose;
   final VoidCallback onProcedures;
+  final VoidCallback onShowEntries;
 
   const PremiumRecordBookCard({
     super.key,
@@ -16,6 +17,7 @@ class PremiumRecordBookCard extends StatelessWidget {
     required this.onOpen,
     required this.onClose,
     required this.onProcedures,
+    required this.onShowEntries,
   });
 
   @override
@@ -115,7 +117,7 @@ class PremiumRecordBookCard extends StatelessWidget {
                           Expanded(
                             child: _buildIconText(
                               Icons.calendar_today_outlined,
-                              'تاريخ الصرف: ${book.issuanceYear ?? book.hijriYear}',
+                              'تاريخ الصرف: ${book.issuanceYear} هـ',
                             ),
                           ),
                         ],
@@ -177,36 +179,37 @@ class PremiumRecordBookCard extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                // 4. Statistics Grid (Entries)
-                Container(
-                  color: Colors.grey[50],
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildStatItem(
-                        context,
-                        'إجمالي القيود',
-                        '${book.totalEntries}', // Or book.entriesCount
-                        AppColors.textPrimary,
-                      ),
-                      _buildVerticalDivider(),
-                      _buildStatItem(
-                        context,
-                        'موثقة',
-                        '${book.completedEntries}', // Use completedEntries from model
-                        AppColors.success,
-                      ),
-                      _buildVerticalDivider(),
-                      _buildStatItem(
-                        context,
-                        'غير موثقة',
-                        '${book.draftEntries}', // Use draftEntries from model
-                        Colors.orange,
-                      ),
-                    ],
+                // 4. Statistics Grid (Entries) - Always show if there are entries or if it's an active book
+                if (book.totalEntries > 0 || book.isActive)
+                  Container(
+                    color: Colors.grey[50],
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildStatItem(
+                          context,
+                          'إجمالي القيود',
+                          '${book.totalEntries}',
+                          AppColors.textPrimary,
+                        ),
+                        _buildVerticalDivider(),
+                        _buildStatItem(
+                          context,
+                          'موثقة',
+                          '${book.completedEntries}',
+                          AppColors.success,
+                        ),
+                        _buildVerticalDivider(),
+                        _buildStatItem(
+                          context,
+                          'قيد العمل',
+                          '${book.draftEntries + book.pendingEntries + book.registeredEntries}',
+                          Colors.orange,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
                 // 5. Actions Footer
                 Padding(
@@ -242,6 +245,29 @@ class PremiumRecordBookCard extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: onShowEntries,
+                          icon: const Icon(Icons.list_alt, size: 16),
+                          label: const Text(
+                            'عرض القيود',
+                            style: TextStyle(
+                              fontFamily: 'Tajawal',
+                              fontSize: 12,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: AppColors.primary.withValues(alpha: 0.5),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            foregroundColor: AppColors.primary,
                           ),
                         ),
                       ),

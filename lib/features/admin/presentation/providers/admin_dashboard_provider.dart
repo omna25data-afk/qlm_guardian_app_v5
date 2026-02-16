@@ -4,9 +4,12 @@ import '../../../../core/network/api_client.dart';
 import '../../data/models/admin_dashboard_data.dart';
 import '../../data/repositories/admin_repository.dart';
 
+import '../../../system/data/repositories/system_repository.dart';
+
 final adminRepositoryProvider = Provider<AdminRepository>((ref) {
   final apiClient = getIt<ApiClient>();
-  return AdminRepository(apiClient);
+  final systemRepository = getIt<SystemRepository>();
+  return AdminRepository(apiClient, systemRepository);
 });
 
 final adminDashboardProvider =
