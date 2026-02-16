@@ -5,8 +5,10 @@ import 'package:hijri/hijri_calendar.dart';
 import 'package:hijri_picker/hijri_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/searchable_dropdown.dart';
 import '../providers/add_entry_provider.dart';
 import '../providers/admin_pending_entries_provider.dart';
+import '../../../records/data/models/record_book.dart';
 
 /// Contract type label helpers (matches Filament RegistryEntryForm)
 const Map<int, Map<String, String>> _contractPartyLabels = {
@@ -521,46 +523,35 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
         // ── Contract Type Selection ──
         _sectionLabel('نوع العقد *'),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: state.contractTypes.map((ct) {
-            final id = ct['id'] is int
-                ? ct['id'] as int
-                : int.tryParse(ct['id'].toString()) ?? 0;
-            final name = ct['name']?.toString() ?? '';
-            final isSelected = _selectedContractTypeId == id;
+        SearchableDropdown<Map<String, dynamic>>(
+          items: state.contractTypes,
+          label: 'نوع العقد *',
+          hint: 'اختر نوع العقد',
+          value: _selectedContractTypeId != null
+              ? state.contractTypes.firstWhere(
+                  (element) => element['id'] == _selectedContractTypeId,
+                  orElse: () => {},
+                )
+              : null,
+          itemLabelBuilder: (item) => item['name']?.toString() ?? '',
+          onChanged: (item) {
+            if (item == null) return;
+            final id = item['id'] is int
+                ? item['id'] as int
+                : int.tryParse(item['id'].toString()) ?? 0;
 
-            return ChoiceChip(
-              label: Text(
-                name,
-                style: TextStyle(
-                  fontFamily: 'Tajawal',
-                  fontSize: 13,
-                  color: isSelected ? Colors.white : null,
-                ),
-              ),
-              selected: isSelected,
-              selectedColor: AppColors.primary,
-              onSelected: (sel) {
-                setState(() {
-                  _selectedContractTypeId = sel ? id : null;
-                  _selectedSubtype1 = null;
-                  _selectedSubtype2 = null;
-                });
-                if (sel) {
-                  ref.read(addEntryProvider.notifier).loadSubtypes(id);
-                  ref
-                      .read(addEntryProvider.notifier)
-                      .loadDocumentationRecordBooks(id);
-                  _calculateFees();
-                } else {
-                  ref.read(addEntryProvider.notifier).clearSubtypes();
-                  ref.read(addEntryProvider.notifier).clearRecordBooks();
-                }
-              },
-            );
-          }).toList(),
+            setState(() {
+              _selectedContractTypeId = id;
+              _selectedSubtype1 = null;
+              _selectedSubtype2 = null;
+            });
+            ref.read(addEntryProvider.notifier).loadSubtypes(id);
+            ref
+                .read(addEntryProvider.notifier)
+                .loadDocumentationRecordBooks(id);
+            _calculateFees();
+          },
+          validator: (item) => item == null || item.isEmpty ? 'مطلوب' : null,
         ),
 
         const Divider(height: 32),
@@ -602,75 +593,76 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
         // ── Writer Selector ──
         if (_writerType == 'guardian') ...[
           const SizedBox(height: 16),
-          _sectionLabel('اختر الأمين *'),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<int>(
-            value: _selectedGuardianId,
-            isExpanded: true,
-            decoration: _inputDecoration('اختر الأمين الشرعي'),
-            items: state.guardians
-                .map(
-                  (g) => DropdownMenuItem<int>(
-                    value: g['id'] as int,
-                    child: Text(
-                      g['name']?.toString() ?? '',
-                      style: const TextStyle(fontFamily: 'Tajawal'),
-                    ),
-                  ),
-                )
-                .toList(),
-            onChanged: (id) => setState(() => _selectedGuardianId = id),
-            validator: (v) =>
-                _writerType == 'guardian' && v == null ? 'مطلوب' : null,
+          const SizedBox(height: 16),
+          SearchableDropdown<Map<String, dynamic>>(
+            items: state.guardians,
+            label: 'اختر الأمين *',
+            hint: 'ابحث عن اسم الأمين...',
+            value: _selectedGuardianId != null
+                ? state.guardians.firstWhere(
+                    (g) => g['id'] == _selectedGuardianId,
+                    orElse: () => {},
+                  )
+                : null,
+            itemLabelBuilder: (item) => item['name']?.toString() ?? '',
+            onChanged: (item) {
+              if (item != null) {
+                setState(() => _selectedGuardianId = item['id'] as int);
+              }
+            },
+            validator: (item) =>
+                _writerType == 'guardian' && (item == null || item.isEmpty)
+                ? 'مطلوب'
+                : null,
           ),
         ] else if (_writerType == 'documentation') ...[
           const SizedBox(height: 16),
-          _sectionLabel('اختر الموثق *'),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<int>(
-            value: _selectedWriterId,
-            isExpanded: true,
-            decoration: _inputDecoration('اختر الموثق'),
-            items: state.writers
-                .map(
-                  (w) => DropdownMenuItem<int>(
-                    value: w['id'] as int,
-                    child: Text(
-                      w['name']?.toString() ?? '',
-                      style: const TextStyle(fontFamily: 'Tajawal'),
-                    ),
-                  ),
-                )
-                .toList(),
-            onChanged: (id) {
-              setState(() => _selectedWriterId = id);
-              _calculateFees(); // Writer type change affects fees
+          const SizedBox(height: 16),
+          SearchableDropdown<Map<String, dynamic>>(
+            items: state.writers,
+            label: 'اختر الموثق *',
+            hint: 'ابحث عن الموثق...',
+            value: _selectedWriterId != null
+                ? state.writers.firstWhere(
+                    (w) => w['id'] == _selectedWriterId,
+                    orElse: () => {},
+                  )
+                : null,
+            itemLabelBuilder: (item) => item['name']?.toString() ?? '',
+            onChanged: (item) {
+              if (item != null) {
+                setState(() => _selectedWriterId = item['id'] as int);
+                _calculateFees();
+              }
             },
-            validator: (v) =>
-                _writerType == 'documentation' && v == null ? 'مطلوب' : null,
+            validator: (item) =>
+                _writerType == 'documentation' && (item == null || item.isEmpty)
+                ? 'مطلوب'
+                : null,
           ),
         ] else if (_writerType == 'external') ...[
           const SizedBox(height: 16),
-          _sectionLabel('اختر الكاتب *'),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<int>(
-            value: _selectedOtherWriterId,
-            isExpanded: true,
-            decoration: _inputDecoration('اختر الكاتب'),
-            items: state.otherWriters
-                .map(
-                  (w) => DropdownMenuItem<int>(
-                    value: w['id'] as int,
-                    child: Text(
-                      w['name']?.toString() ?? '',
-                      style: const TextStyle(fontFamily: 'Tajawal'),
-                    ),
-                  ),
-                )
-                .toList(),
-            onChanged: (id) => setState(() => _selectedOtherWriterId = id),
-            validator: (v) =>
-                _writerType == 'external' && v == null ? 'مطلوب' : null,
+          const SizedBox(height: 16),
+          SearchableDropdown<Map<String, dynamic>>(
+            items: state.otherWriters,
+            label: 'اختر الكاتب *',
+            hint: 'ابحث عن الكاتب...',
+            value: _selectedOtherWriterId != null
+                ? state.otherWriters.firstWhere(
+                    (w) => w['id'] == _selectedOtherWriterId,
+                    orElse: () => {},
+                  )
+                : null,
+            itemLabelBuilder: (item) => item['name']?.toString() ?? '',
+            onChanged: (item) {
+              if (item != null) {
+                setState(() => _selectedOtherWriterId = item['id'] as int);
+              }
+            },
+            validator: (item) =>
+                _writerType == 'external' && (item == null || item.isEmpty)
+                ? 'مطلوب'
+                : null,
           ),
         ],
 
@@ -756,30 +748,30 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
 
       // Subtypes
       if (state.subtypes1.isNotEmpty) ...[
-        DropdownButtonFormField<String>(
-          value: _selectedSubtype1,
-          isExpanded: true,
-          decoration: _inputDecoration('نوع المبيع'),
-          items: state.subtypes1
-              .map(
-                (s) => DropdownMenuItem<String>(
-                  value: s['code']?.toString() ?? s['name']?.toString(),
-                  child: Text(
-                    s['name']?.toString() ?? '',
-                    style: const TextStyle(fontFamily: 'Tajawal'),
-                  ),
-                ),
-              )
-              .toList(),
-          onChanged: (v) {
+        SearchableDropdown<Map<String, dynamic>>(
+          items: state.subtypes1,
+          label: 'نوع المبيع',
+          hint: 'اختر نوع المبيع',
+          value: _selectedSubtype1 != null
+              ? state.subtypes1.firstWhere(
+                  (s) =>
+                      (s['code']?.toString() ?? s['name']?.toString()) ==
+                      _selectedSubtype1,
+                  orElse: () => {},
+                )
+              : null,
+          itemLabelBuilder: (item) => item['name']?.toString() ?? '',
+          onChanged: (item) {
+            if (item == null) return;
+            final code = item['code']?.toString() ?? item['name']?.toString();
             setState(() {
-              _selectedSubtype1 = v;
+              _selectedSubtype1 = code;
               _selectedSubtype2 = null;
             });
-            if (v != null && _selectedContractTypeId != null) {
+            if (code != null && _selectedContractTypeId != null) {
               ref
                   .read(addEntryProvider.notifier)
-                  .loadSubtypes(_selectedContractTypeId!, parentCode: v);
+                  .loadSubtypes(_selectedContractTypeId!, parentCode: code);
             }
           },
         ),
@@ -787,22 +779,24 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
       ],
 
       if (state.subtypes2.isNotEmpty) ...[
-        DropdownButtonFormField<String>(
-          value: _selectedSubtype2,
-          isExpanded: true,
-          decoration: _inputDecoration('النوع الفرعي'),
-          items: state.subtypes2
-              .map(
-                (s) => DropdownMenuItem<String>(
-                  value: s['code']?.toString() ?? s['name']?.toString(),
-                  child: Text(
-                    s['name']?.toString() ?? '',
-                    style: const TextStyle(fontFamily: 'Tajawal'),
-                  ),
-                ),
-              )
-              .toList(),
-          onChanged: (v) => setState(() => _selectedSubtype2 = v),
+        SearchableDropdown<Map<String, dynamic>>(
+          items: state.subtypes2,
+          label: 'النوع الفرعي',
+          hint: 'اختر النوع الفرعي',
+          value: _selectedSubtype2 != null
+              ? state.subtypes2.firstWhere(
+                  (s) =>
+                      (s['code']?.toString() ?? s['name']?.toString()) ==
+                      _selectedSubtype2,
+                  orElse: () => {},
+                )
+              : null,
+          itemLabelBuilder: (item) => item['name']?.toString() ?? '',
+          onChanged: (item) {
+            if (item == null) return;
+            final code = item['code']?.toString() ?? item['name']?.toString();
+            setState(() => _selectedSubtype2 = code);
+          },
         ),
         const SizedBox(height: 16),
       ],
@@ -849,30 +843,30 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
       const SizedBox(height: 8),
 
       if (state.subtypes1.isNotEmpty) ...[
-        DropdownButtonFormField<String>(
-          value: _selectedSubtype1,
-          isExpanded: true,
-          decoration: _inputDecoration('نوع التصرف'),
-          items: state.subtypes1
-              .map(
-                (s) => DropdownMenuItem<String>(
-                  value: s['code']?.toString() ?? s['name']?.toString(),
-                  child: Text(
-                    s['name']?.toString() ?? '',
-                    style: const TextStyle(fontFamily: 'Tajawal'),
-                  ),
-                ),
-              )
-              .toList(),
-          onChanged: (v) {
+        SearchableDropdown<Map<String, dynamic>>(
+          items: state.subtypes1,
+          label: 'نوع التصرف',
+          hint: 'اختر نوع التصرف',
+          value: _selectedSubtype1 != null
+              ? state.subtypes1.firstWhere(
+                  (s) =>
+                      (s['code']?.toString() ?? s['name']?.toString()) ==
+                      _selectedSubtype1,
+                  orElse: () => {},
+                )
+              : null,
+          itemLabelBuilder: (item) => item['name']?.toString() ?? '',
+          onChanged: (item) {
+            if (item == null) return;
+            final code = item['code']?.toString() ?? item['name']?.toString();
             setState(() {
-              _selectedSubtype1 = v;
+              _selectedSubtype1 = code;
               _selectedSubtype2 = null;
             });
-            if (v != null && _selectedContractTypeId != null) {
+            if (code != null && _selectedContractTypeId != null) {
               ref
                   .read(addEntryProvider.notifier)
-                  .loadSubtypes(_selectedContractTypeId!, parentCode: v);
+                  .loadSubtypes(_selectedContractTypeId!, parentCode: code);
             }
           },
         ),
@@ -894,25 +888,40 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Documentation Record Book Selector
-        _sectionLabel('السجل التوثيقي *'),
+        // Documentation Record Book Selector
+        _sectionLabel('سجل التوثيق *'),
         const SizedBox(height: 8),
-        DropdownButtonFormField<int>(
-          value: _selectedDocRecordBookId,
-          isExpanded: true,
-          decoration: _inputDecoration('اختر السجل'),
-          items: state.documentationRecordBooks
-              .map(
-                (b) => DropdownMenuItem<int>(
-                  value: b.id,
-                  child: Text(
-                    '${b.bookNumber} - ${b.hijriYear} (ص: ${b.currentPageNumber})',
-                    style: const TextStyle(fontFamily: 'Tajawal'),
+        SearchableDropdown<RecordBook>(
+          items: state.documentationRecordBooks,
+          label: 'سجل التوثيق *',
+          hint: 'اختر سجل التوثيق',
+          value: _selectedDocRecordBookId != null
+              ? state.documentationRecordBooks.firstWhere(
+                  (b) => b.id == _selectedDocRecordBookId,
+                  orElse: () => RecordBook(
+                    id: -1,
+                    bookNumber: 0,
+                    name: 'غير محدد',
+                    category: '',
+                    hijriYear: 1400,
+                    totalPages: 0,
+                    constraintsPerPage: 0,
+                    startConstraintNumber: 0,
+                    endConstraintNumber: 0,
+                    createdBy: 0,
+                    status: '',
+                    isActive: false,
                   ),
-                ),
-              )
-              .toList(),
-          onChanged: (id) => setState(() => _selectedDocRecordBookId = id),
-          validator: (v) => v == null ? 'مطلوب' : null,
+                )
+              : null,
+          itemLabelBuilder: (b) =>
+              '${b.bookNumber} - ${b.hijriYear} (ص: ${b.currentPageNumber})',
+          onChanged: (book) {
+            if (book != null && book.id != -1) {
+              setState(() => _selectedDocRecordBookId = book.id);
+            }
+          },
+          validator: (book) => book == null || book.id == -1 ? 'مطلوب' : null,
         ),
         const SizedBox(height: 16),
 
@@ -1296,8 +1305,21 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
     return InputDecoration(
       labelText: label,
       labelStyle: const TextStyle(fontFamily: 'Tajawal'),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+      ),
+      filled: true,
+      fillColor: Colors.grey.shade50,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 
@@ -1323,13 +1345,24 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
         hintText: hint,
         labelStyle: const TextStyle(fontFamily: 'Tajawal'),
         hintStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 13),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 12,
+          vertical: 14,
         ),
-        filled: readOnly,
-        fillColor: readOnly ? Colors.grey.withValues(alpha: 0.1) : null,
+        filled: true,
+        fillColor: readOnly ? Colors.grey.shade100 : Colors.grey.shade50,
       ),
       validator: required
           ? (v) => (v == null || v.isEmpty) ? 'هذا الحقل مطلوب' : null
@@ -1359,8 +1392,8 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
         final date = await showDatePicker(
           context: context,
           initialDate: DateTime.now(),
-          firstDate: DateTime(2020),
-          lastDate: DateTime(2030),
+          firstDate: DateTime(1900),
+          lastDate: DateTime(2100),
         );
         if (date != null) {
           controller.text =
@@ -1393,13 +1426,13 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen> {
           context: context,
           initialDate: HijriCalendar.now(),
           lastDate: HijriCalendar()
-            ..hYear = 1460
-            ..hMonth = 9
-            ..hDay = 25,
-          firstDate: HijriCalendar()
-            ..hYear = 1430
+            ..hYear = 1500
             ..hMonth = 12
-            ..hDay = 25,
+            ..hDay = 30,
+          firstDate: HijriCalendar()
+            ..hYear = 1300
+            ..hMonth = 1
+            ..hDay = 1,
           initialDatePickerMode: DatePickerMode.day,
         );
 
