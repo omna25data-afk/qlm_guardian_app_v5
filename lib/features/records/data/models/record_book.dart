@@ -12,6 +12,7 @@ class RecordBook {
   final int totalPages;
   final int usedPages;
   final int usagePercentage;
+  final String category;
   final String? categoryLabel;
   final bool isActive;
   final int totalEntries;
@@ -27,6 +28,8 @@ class RecordBook {
   final int? issuanceYear;
   final List<int> years;
   final int currentPageNumber;
+  final String writerName;
+  final String writerTypeLabel;
 
   RecordBook({
     this.id = 0,
@@ -38,6 +41,7 @@ class RecordBook {
     this.totalPages = 0,
     this.usedPages = 0,
     this.usagePercentage = 0,
+    this.category = 'guardian_recording', // Default to avoid nulls
     this.categoryLabel,
     this.isActive = false,
     this.totalEntries = 0,
@@ -53,11 +57,59 @@ class RecordBook {
     this.issuanceYear,
     List<int>? years,
     this.currentPageNumber = 0,
+    this.writerName = '',
+    this.writerTypeLabel = '',
   }) : bookNumber = bookNumber ?? number,
        entriesCount = entriesCount ?? totalEntries,
        years = years ?? [];
 
   factory RecordBook.fromJson(Map<String, dynamic> json) {
+    // Helper to extract name safely
+    String extractName() {
+      // 1. Direct assignments from API
+      if (json['writer_name'] != null &&
+          json['writer_name'].toString().isNotEmpty) {
+        return json['writer_name'];
+      }
+      if (json['assigned_name'] != null &&
+          json['assigned_name'].toString().isNotEmpty) {
+        return json['assigned_name'];
+      }
+
+      // 2. Legitimate Guardian (Amin) - From Backend Resource
+      // The backend returns 'full_name', 'first_name', 'family_name'. NOT 'name'.
+      if (json['legitimate_guardian'] is Map) {
+        final g = json['legitimate_guardian'];
+        if (g['full_name'] != null) return g['full_name'];
+        if (g['name'] != null) return g['name']; // Fallback
+        if (g['first_name'] != null) {
+          return '${g['first_name']} ${g['family_name'] ?? ''}'.trim();
+        }
+      }
+      // CamelCase check
+      if (json['legitimateGuardian'] is Map) {
+        final g = json['legitimateGuardian'];
+        if (g['full_name'] != null) return g['full_name'];
+        if (g['name'] != null) return g['name'];
+        if (g['first_name'] != null) {
+          return '${g['first_name']} ${g['family_name'] ?? ''}'.trim();
+        }
+      }
+
+      // 3. User / Writer / Assigned (Generic Fallbacks)
+      if (json['writer'] is Map && json['writer']['name'] != null) {
+        return json['writer']['name'];
+      }
+      if (json['assigned'] is Map && json['assigned']['name'] != null) {
+        return json['assigned']['name'];
+      }
+      if (json['user'] is Map && json['user']['name'] != null) {
+        return json['user']['name'];
+      }
+
+      return '';
+    }
+
     return RecordBook(
       id: json['id'] ?? 0,
       number: json['book_number'] ?? 0,
@@ -68,6 +120,7 @@ class RecordBook {
       totalPages: json['total_pages'] ?? 0,
       usedPages: json['constraints_count'] ?? 0,
       usagePercentage: json['used_percentage'] ?? 0,
+      category: json['category'] ?? 'guardian_recording',
       categoryLabel: json['category_label'],
       isActive: json['is_active'] == true || json['is_active'] == 1,
       totalEntries:
@@ -84,6 +137,8 @@ class RecordBook {
       issuanceYear: json['issuance_year'] as int?,
       years: (json['years'] as List<dynamic>?)?.map((e) => e as int).toList(),
       currentPageNumber: json['current_page_number'] ?? 0,
+      writerName: extractName(),
+      writerTypeLabel: json['writer_type_label'] ?? '',
     );
   }
 

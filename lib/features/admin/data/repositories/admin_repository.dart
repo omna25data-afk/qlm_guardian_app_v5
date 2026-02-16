@@ -267,6 +267,9 @@ class AdminRepository {
     String? status,
     int? contractTypeId,
     String? category,
+    String? type,
+    String? guardianId,
+    String? sortBy,
   }) async {
     final params = <String, dynamic>{'page': page};
     if (searchQuery != null && searchQuery.isNotEmpty) {
@@ -274,7 +277,12 @@ class AdminRepository {
     }
     if (status != null && status != 'all') params['status'] = status;
     if (contractTypeId != null) params['contract_type_id'] = contractTypeId;
-    if (category != null) params['category'] = category;
+    if (category != null && category != 'all') params['category'] = category;
+    if (type != null && type != 'all') params['type'] = type;
+    if (guardianId != null && guardianId.isNotEmpty) {
+      params['guardian_id'] = guardianId;
+    }
+    if (sortBy != null) params['sort_by'] = sortBy;
 
     final response = await _apiClient.get(
       ApiEndpoints.adminRecordBooks,
@@ -306,6 +314,11 @@ class AdminRepository {
     String? searchQuery,
     String? status,
     int? recordBookId,
+    int? year,
+    int? contractTypeId,
+    String? writerType,
+    String? dateFrom,
+    String? dateTo,
   }) async {
     final params = <String, dynamic>{'page': page};
     if (searchQuery != null && searchQuery.isNotEmpty) {
@@ -313,6 +326,11 @@ class AdminRepository {
     }
     if (status != null && status != 'all') params['status'] = status;
     if (recordBookId != null) params['guardian_record_book_id'] = recordBookId;
+    if (year != null) params['year'] = year;
+    if (contractTypeId != null) params['contract_type_id'] = contractTypeId;
+    if (writerType != null) params['writer_type'] = writerType;
+    if (dateFrom != null) params['date_from'] = dateFrom;
+    if (dateTo != null) params['date_to'] = dateTo;
 
     final response = await _apiClient.get(
       ApiEndpoints.adminRegistryEntries,
