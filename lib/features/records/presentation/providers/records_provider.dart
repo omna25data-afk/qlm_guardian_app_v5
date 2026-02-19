@@ -1,12 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/injection.dart';
-import '../../../../core/network/api_client.dart';
+
 import '../../data/models/record_book.dart';
 import '../../data/repositories/records_repository.dart';
 
 final recordsRepositoryProvider = Provider<RecordsRepository>((ref) {
-  final apiClient = getIt<ApiClient>();
-  return RecordsRepository(apiClient);
+  return getIt<RecordsRepository>();
 });
 
 final recordBooksProvider =

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Actually, I'll just remove the lines reported as unused.
 
-import '../../../../registry/data/models/registry_entry_model.dart';
+import '../../../../system/data/models/registry_entry_sections.dart';
 import '../../../../admin/presentation/widgets/premium_entry_card.dart';
 import '../../../../admin/data/repositories/admin_repository.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -14,13 +14,13 @@ import '../admin_add_entry_screen.dart';
 final allEntriesProvider =
     StateNotifierProvider.autoDispose<
       AllEntriesNotifier,
-      AsyncValue<List<RegistryEntryModel>>
+      AsyncValue<List<RegistryEntrySections>>
     >((ref) {
       return AllEntriesNotifier(getIt<AdminRepository>());
     });
 
 class AllEntriesNotifier
-    extends StateNotifier<AsyncValue<List<RegistryEntryModel>>> {
+    extends StateNotifier<AsyncValue<List<RegistryEntrySections>>> {
   final AdminRepository _repository;
 
   // Filters

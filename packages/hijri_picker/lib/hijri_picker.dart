@@ -1,4 +1,5 @@
 library hijri_picker;
+// ignore_for_file: library_private_types_in_public_api, deprecated_member_use
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -67,7 +68,6 @@ class _DatePickerDialogState extends State<HijriDatePickerDialog> {
     textDirection = Directionality.of(context);
     if (!_announcedInitialDate) {
       _announcedInitialDate = true;
-      // ignore: deprecated_member_use
       SemanticsService.announce(_selectedDate.toString(), textDirection);
     }
   }
@@ -98,10 +98,8 @@ class _DatePickerDialogState extends State<HijriDatePickerDialog> {
     setState(() {
       _mode = mode;
       if (_mode == DatePickerMode.day) {
-        // ignore: deprecated_member_use
         SemanticsService.announce(_selectedDate.toString(), textDirection);
       } else {
-        // ignore: deprecated_member_use
         SemanticsService.announce(_selectedDate.toString(), textDirection);
       }
     });
@@ -265,13 +263,20 @@ class _DatePickerHeader extends StatelessWidget {
     Color yearColor;
     switch (ThemeData.estimateBrightnessForColor(themeData.primaryColor)) {
       case Brightness.light:
-        dayColor = mode == DatePickerMode.day ? Colors.black87 : Colors.black54;
-        yearColor =
-            mode == DatePickerMode.year ? Colors.black87 : Colors.black54;
+        dayColor = mode == DatePickerMode.day
+            ? themeData.colorScheme.onPrimary
+            : themeData.colorScheme.onPrimary.withOpacity(0.6);
+        yearColor = mode == DatePickerMode.year
+            ? themeData.colorScheme.onPrimary
+            : themeData.colorScheme.onPrimary.withOpacity(0.6);
         break;
       case Brightness.dark:
-        dayColor = mode == DatePickerMode.day ? Colors.white : Colors.white70;
-        yearColor = mode == DatePickerMode.year ? Colors.white : Colors.white70;
+        dayColor = mode == DatePickerMode.day
+            ? themeData.colorScheme.onSurface
+            : themeData.colorScheme.onSurface.withOpacity(0.6);
+        yearColor = mode == DatePickerMode.year
+            ? themeData.colorScheme.onSurface
+            : themeData.colorScheme.onSurface.withOpacity(0.6);
         break;
     }
     final TextStyle? dayStyle = headerTextTheme.headlineMedium?.copyWith(
@@ -804,7 +809,11 @@ class HijriDayPicker extends StatelessWidget {
     final int daysInMonth = getDaysInMonth(year, month);
     final int firstDayOffset = _computeFirstDayOffset(year, month);
     final List<Widget> labels = <Widget>[];
-    labels.addAll(_getDayHeaders(themeData.textTheme.bodySmall, localizations));
+    labels.addAll(_getDayHeaders(
+      themeData.textTheme.bodySmall
+          ?.copyWith(color: themeData.colorScheme.onSurface),
+      localizations,
+    ));
     for (int i = 0; true; i += 1) {
       final int day = i - firstDayOffset + 1;
       if (day > daysInMonth) break;
@@ -829,14 +838,18 @@ class HijriDayPicker extends StatelessWidget {
                 !selectableDayPredicate!(dayToBuild));
 
         BoxDecoration? decoration;
-        TextStyle? itemStyle = themeData.textTheme.bodyMedium;
+        TextStyle? itemStyle = themeData.textTheme.bodyMedium?.copyWith(
+          color: themeData.colorScheme.onSurface,
+        );
 
         final bool isSelectedDay = selectedDate.hYear == year &&
             selectedDate.hMonth == month &&
             selectedDate.hDay == day;
         if (isSelectedDay) {
           // The selected day gets a circle background highlight, and a contrasting text color.
-          itemStyle = themeData.primaryTextTheme.bodyLarge;
+          itemStyle = themeData.primaryTextTheme.bodyLarge?.copyWith(
+            color: themeData.colorScheme.onPrimary,
+          );
           decoration = BoxDecoration(
             color: themeData.colorScheme.secondary,
             shape: BoxShape.circle,
@@ -900,7 +913,7 @@ class HijriDayPicker extends StatelessWidget {
             child: Center(
               child: ExcludeSemantics(
                 child: Text(
-                  "${displayedMonth.toFormat("MMMM")} ${displayedMonth.hYear}",
+                  "${displayedMonth.hMonth} - ${displayedMonth.toFormat("MMMM")} ${displayedMonth.hYear}",
                   style: themeData.textTheme.titleMedium,
                 ),
               ),

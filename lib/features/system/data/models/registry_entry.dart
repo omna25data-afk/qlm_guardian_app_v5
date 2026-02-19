@@ -85,43 +85,142 @@ class RegistryEntry {
 
   factory RegistryEntry.fromJson(Map<String, dynamic> json) {
     return RegistryEntry(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      serialNumber: json['serial_number'] != null ? (json['serial_number'] is int ? json['serial_number'] : int.tryParse(json['serial_number'].toString()) ?? 0) : 0,
-      hijriYear: json['hijri_year'] != null ? (json['hijri_year'] is int ? json['hijri_year'] : int.tryParse(json['hijri_year'].toString()) ?? 0) : 0,
-      constraintTypeId: json['constraint_type_id'] != null ? (json['constraint_type_id'] is int ? json['constraint_type_id'] : int.tryParse(json['constraint_type_id'].toString()) ?? null) : null,
-      contractTypeId: json['contract_type_id'] != null ? (json['contract_type_id'] is int ? json['contract_type_id'] : int.tryParse(json['contract_type_id'].toString()) ?? null) : null,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      serialNumber: json['serial_number'] != null
+          ? (json['serial_number'] is int
+                ? json['serial_number']
+                : int.tryParse(json['serial_number'].toString()) ?? 0)
+          : 0,
+      hijriYear: json['hijri_year'] != null
+          ? (json['hijri_year'] is int
+                ? json['hijri_year']
+                : int.tryParse(json['hijri_year'].toString()) ?? 0)
+          : 0,
+      constraintTypeId: json['constraint_type_id'] != null
+          ? (json['constraint_type_id'] is int
+                ? json['constraint_type_id']
+                : int.tryParse(json['constraint_type_id'].toString()) ?? null)
+          : null,
+      contractTypeId: json['contract_type_id'] != null
+          ? (json['contract_type_id'] is int
+                ? json['contract_type_id']
+                : int.tryParse(json['contract_type_id'].toString()) ?? null)
+          : null,
       firstPartyName: json['first_party_name'] ?? '',
       secondPartyName: json['second_party_name'] ?? '',
       writerType: json['writer_type'] ?? '',
-      writerId: json['writer_id'] != null ? (json['writer_id'] is int ? json['writer_id'] : int.tryParse(json['writer_id'].toString()) ?? null) : null,
-      otherWriterId: json['other_writer_id'] != null ? (json['other_writer_id'] is int ? json['other_writer_id'] : int.tryParse(json['other_writer_id'].toString()) ?? null) : null,
+      writerId: json['writer_id'] != null
+          ? (json['writer_id'] is int
+                ? json['writer_id']
+                : int.tryParse(json['writer_id'].toString()) ?? null)
+          : null,
+      otherWriterId: json['other_writer_id'] != null
+          ? (json['other_writer_id'] is int
+                ? json['other_writer_id']
+                : int.tryParse(json['other_writer_id'].toString()) ?? null)
+          : null,
       writerName: json['writer_name'] ?? '',
       documentHijriDate: json['document_hijri_date'] ?? null,
       documentGregorianDate: json['document_gregorian_date'] ?? null,
-      docRecordBookId: json['doc_record_book_id'] != null ? (json['doc_record_book_id'] is int ? json['doc_record_book_id'] : int.tryParse(json['doc_record_book_id'].toString()) ?? null) : null,
-      docRecordBookNumber: json['doc_record_book_number'] != null ? (json['doc_record_book_number'] is int ? json['doc_record_book_number'] : int.tryParse(json['doc_record_book_number'].toString()) ?? null) : null,
-      docPageNumber: json['doc_page_number'] != null ? (json['doc_page_number'] is int ? json['doc_page_number'] : int.tryParse(json['doc_page_number'].toString()) ?? null) : null,
-      docEntryNumber: json['doc_entry_number'] != null ? (json['doc_entry_number'] is int ? json['doc_entry_number'] : int.tryParse(json['doc_entry_number'].toString()) ?? null) : null,
-      docBoxNumber: json['doc_box_number'] != null ? (json['doc_box_number'] is int ? json['doc_box_number'] : int.tryParse(json['doc_box_number'].toString()) ?? null) : null,
-      docDocumentNumber: json['doc_document_number'] != null ? (json['doc_document_number'] is int ? json['doc_document_number'] : int.tryParse(json['doc_document_number'].toString()) ?? null) : null,
+      docRecordBookId: json['doc_record_book_id'] != null
+          ? (json['doc_record_book_id'] is int
+                ? json['doc_record_book_id']
+                : int.tryParse(json['doc_record_book_id'].toString()) ?? null)
+          : null,
+      docRecordBookNumber: json['doc_record_book_number'] != null
+          ? (json['doc_record_book_number'] is int
+                ? json['doc_record_book_number']
+                : int.tryParse(json['doc_record_book_number'].toString()) ??
+                      null)
+          : null,
+      docPageNumber: json['doc_page_number'] != null
+          ? (json['doc_page_number'] is int
+                ? json['doc_page_number']
+                : int.tryParse(json['doc_page_number'].toString()) ?? null)
+          : null,
+      docEntryNumber: json['doc_entry_number'] != null
+          ? (json['doc_entry_number'] is int
+                ? json['doc_entry_number']
+                : int.tryParse(json['doc_entry_number'].toString()) ?? null)
+          : null,
+      docBoxNumber: json['doc_box_number'] != null
+          ? (json['doc_box_number'] is int
+                ? json['doc_box_number']
+                : int.tryParse(json['doc_box_number'].toString()) ?? null)
+          : null,
+      docDocumentNumber: json['doc_document_number'] != null
+          ? (json['doc_document_number'] is int
+                ? json['doc_document_number']
+                : int.tryParse(json['doc_document_number'].toString()) ?? null)
+          : null,
       docHijriDate: json['doc_hijri_date'] ?? null,
       docGregorianDate: json['doc_gregorian_date'] ?? null,
-      feeAmount: json['fee_amount'] != null ? (json['fee_amount'] is num ? json['fee_amount'].toDouble() : double.tryParse(json['fee_amount'].toString()) ?? 0.0) : 0.0,
-      supportAmount: json['support_amount'] != null ? (json['support_amount'] is num ? json['support_amount'].toDouble() : double.tryParse(json['support_amount'].toString()) ?? 0.0) : 0.0,
+      feeAmount: json['fee_amount'] != null
+          ? (json['fee_amount'] is num
+                ? json['fee_amount'].toDouble()
+                : double.tryParse(json['fee_amount'].toString()) ?? 0.0)
+          : 0.0,
+      supportAmount: json['support_amount'] != null
+          ? (json['support_amount'] is num
+                ? json['support_amount'].toDouble()
+                : double.tryParse(json['support_amount'].toString()) ?? 0.0)
+          : 0.0,
       receiptNumber: json['receipt_number'] ?? null,
-      sustainabilityAmount: json['sustainability_amount'] != null ? (json['sustainability_amount'] is num ? json['sustainability_amount'].toDouble() : double.tryParse(json['sustainability_amount'].toString()) ?? 0.0) : 0.0,
-      guardianId: json['guardian_id'] != null ? (json['guardian_id'] is int ? json['guardian_id'] : int.tryParse(json['guardian_id'].toString()) ?? null) : null,
-      guardianRecordBookId: json['guardian_record_book_id'] != null ? (json['guardian_record_book_id'] is int ? json['guardian_record_book_id'] : int.tryParse(json['guardian_record_book_id'].toString()) ?? null) : null,
-      guardianRecordBookNumber: json['guardian_record_book_number'] != null ? (json['guardian_record_book_number'] is int ? json['guardian_record_book_number'] : int.tryParse(json['guardian_record_book_number'].toString()) ?? null) : null,
-      guardianPageNumber: json['guardian_page_number'] != null ? (json['guardian_page_number'] is int ? json['guardian_page_number'] : int.tryParse(json['guardian_page_number'].toString()) ?? null) : null,
-      guardianEntryNumber: json['guardian_entry_number'] != null ? (json['guardian_entry_number'] is int ? json['guardian_entry_number'] : int.tryParse(json['guardian_entry_number'].toString()) ?? null) : null,
+      sustainabilityAmount: json['sustainability_amount'] != null
+          ? (json['sustainability_amount'] is num
+                ? json['sustainability_amount'].toDouble()
+                : double.tryParse(json['sustainability_amount'].toString()) ??
+                      0.0)
+          : 0.0,
+      guardianId: json['guardian_id'] != null
+          ? (json['guardian_id'] is int
+                ? json['guardian_id']
+                : int.tryParse(json['guardian_id'].toString()) ?? null)
+          : null,
+      guardianRecordBookId: json['guardian_record_book_id'] != null
+          ? (json['guardian_record_book_id'] is int
+                ? json['guardian_record_book_id']
+                : int.tryParse(json['guardian_record_book_id'].toString()) ??
+                      null)
+          : null,
+      guardianRecordBookNumber: json['guardian_record_book_number'] != null
+          ? (json['guardian_record_book_number'] is int
+                ? json['guardian_record_book_number']
+                : int.tryParse(
+                        json['guardian_record_book_number'].toString(),
+                      ) ??
+                      null)
+          : null,
+      guardianPageNumber: json['guardian_page_number'] != null
+          ? (json['guardian_page_number'] is int
+                ? json['guardian_page_number']
+                : int.tryParse(json['guardian_page_number'].toString()) ?? null)
+          : null,
+      guardianEntryNumber: json['guardian_entry_number'] != null
+          ? (json['guardian_entry_number'] is int
+                ? json['guardian_entry_number']
+                : int.tryParse(json['guardian_entry_number'].toString()) ??
+                      null)
+          : null,
       guardianHijriDate: json['guardian_hijri_date'] ?? null,
       constraintableType: json['constraintable_type'] ?? null,
-      constraintableId: json['constraintable_id'] != null ? (json['constraintable_id'] is int ? json['constraintable_id'] : int.tryParse(json['constraintable_id'].toString()) ?? null) : null,
+      constraintableId: json['constraintable_id'] != null
+          ? (json['constraintable_id'] is int
+                ? json['constraintable_id']
+                : int.tryParse(json['constraintable_id'].toString()) ?? null)
+          : null,
       status: json['status'] ?? '',
       deliveryStatus: json['delivery_status'] ?? '',
       notes: json['notes'] ?? null,
-      createdBy: json['created_by'] != null ? (json['created_by'] is int ? json['created_by'] : int.tryParse(json['created_by'].toString()) ?? 0) : 0,
+      createdBy: json['created_by'] != null
+          ? (json['created_by'] is int
+                ? json['created_by']
+                : int.tryParse(json['created_by'].toString()) ?? 0)
+          : 0,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,

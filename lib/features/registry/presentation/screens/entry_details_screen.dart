@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
-import '../../data/models/registry_entry_model.dart';
-import '../../data/models/contract_type_model.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart';
+import 'package:qlm_guardian_app_v5/features/system/data/models/contract_type.dart';
 
 class EntryDetailsScreen extends StatelessWidget {
-  final RegistryEntryModel entry;
+  final RegistryEntrySections entry;
 
   const EntryDetailsScreen({super.key, required this.entry});
 
@@ -27,34 +27,37 @@ class EntryDetailsScreen extends StatelessWidget {
             _buildInfoCard([
               _buildInfoRow(
                 'رقم القيد',
-                entry.docEntryNumber?.toString() ?? '-',
+                entry.documentInfo.docEntryNumber?.toString() ?? '-',
               ),
               _buildInfoRow(
                 'رقم السجل',
-                entry.docRecordBookNumber?.toString() ?? '-',
+                entry.documentInfo.docRecordBookNumber?.toString() ?? '-',
               ),
               _buildInfoRow(
                 'رقم الصفحة',
-                entry.docPageNumber?.toString() ?? '-',
+                entry.documentInfo.docPageNumber?.toString() ?? '-',
               ),
               _buildInfoRow(
                 'رقم الصندوق',
-                entry.docBoxNumber?.toString() ?? '-',
+                entry.documentInfo.docBoxNumber?.toString() ?? '-',
               ),
               _buildInfoRow(
                 'رقم الوثيقة',
-                entry.docDocumentNumber?.toString() ?? '-',
+                entry.documentInfo.docDocumentNumber?.toString() ?? '-',
               ),
               _buildInfoRow(
                 'تاريخ التوثيق (هـ)',
-                entry.docHijriDate?.split('T').first ?? '-',
+                entry.documentInfo.docHijriDate?.split('T').first ?? '-',
               ),
               _buildInfoRow(
                 'تاريخ التوثيق (م)',
-                entry.docGregorianDate != null
-                    ? intl.DateFormat(
-                        'yyyy/MM/dd',
-                      ).format(entry.docGregorianDate!)
+                entry.documentInfo.docGregorianDate != null
+                    ? intl.DateFormat('yyyy/MM/dd').format(
+                        DateTime.tryParse(
+                              entry.documentInfo.docGregorianDate!,
+                            ) ??
+                            DateTime.now(),
+                      )
                     : '-',
               ),
             ]),
@@ -65,19 +68,19 @@ class EntryDetailsScreen extends StatelessWidget {
             _buildInfoCard([
               _buildInfoRow(
                 'رقم القيد لدى الأمين',
-                entry.guardianEntryNumber?.toString() ?? '-',
+                entry.guardianInfo.guardianEntryNumber?.toString() ?? '-',
               ),
               _buildInfoRow(
                 'رقم السجل',
-                entry.guardianRecordBookNumber?.toString() ?? '-',
+                entry.guardianInfo.guardianRecordBookNumber?.toString() ?? '-',
               ),
               _buildInfoRow(
                 'رقم الصفحة',
-                entry.guardianPageNumber?.toString() ?? '-',
+                entry.guardianInfo.guardianPageNumber?.toString() ?? '-',
               ),
               _buildInfoRow(
                 'تاريخ القيد (هـ)',
-                entry.guardianHijriDate?.split('T').first ?? '-',
+                entry.guardianInfo.guardianHijriDate?.split('T').first ?? '-',
               ),
             ]),
             const SizedBox(height: 24),
@@ -85,8 +88,8 @@ class EntryDetailsScreen extends StatelessWidget {
             // --- Parties ---
             _buildSectionTitle('الأطراف'),
             _buildInfoCard([
-              _buildInfoRow('الطرف الأول', entry.firstPartyName ?? '-'),
-              _buildInfoRow('الطرف الثاني', entry.secondPartyName ?? '-'),
+              _buildInfoRow('الطرف الأول', entry.basicInfo.firstPartyName),
+              _buildInfoRow('الطرف الثاني', entry.basicInfo.secondPartyName),
             ]),
             const SizedBox(height: 24),
 
@@ -113,7 +116,7 @@ class EntryDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    entry.subject ?? '-',
+                    entry.basicInfo.subject ?? '-',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -131,7 +134,7 @@ class EntryDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    entry.content ?? '-',
+                    entry.basicInfo.content ?? '-',
                     style: const TextStyle(
                       fontSize: 14,
                       fontFamily: 'Tajawal',
@@ -148,55 +151,62 @@ class EntryDetailsScreen extends StatelessWidget {
             _buildInfoCard([
               _buildInfoRow(
                 'مبلغ الرسوم',
-                '${entry.feeAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
+                '${entry.financialInfo.feeAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
               ),
               _buildInfoRow(
                 'مبلغ الغرامة',
-                '${entry.penaltyAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
+                '${entry.financialInfo.penaltyAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
               ),
               _buildInfoRow(
                 'رسوم المصادقة',
-                '${entry.authenticationFeeAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
+                '${entry.financialInfo.authenticationFeeAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
               ),
               _buildInfoRow(
                 'رسوم الانتقال',
-                '${entry.transferFeeAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
+                '${entry.financialInfo.transferFeeAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
               ),
               _buildInfoRow(
                 'مبلغ الدعم',
-                '${entry.supportAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
+                '${entry.financialInfo.supportAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
               ),
               _buildInfoRow(
                 'الاستدامة',
-                '${entry.sustainabilityAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
+                '${entry.financialInfo.sustainabilityAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
               ),
               const Divider(),
               _buildInfoRow(
                 'الإجمالي',
-                '${entry.totalAmount.toStringAsFixed(2)} ر.ي',
+                '${entry.financialInfo.totalAmount.toStringAsFixed(2)} ر.ي',
                 isBold: true,
                 valueColor: AppColors.primary,
               ),
-              _buildInfoRow('رقم السند', entry.receiptNumber ?? '-'),
-              if (entry.exemptionType != null)
-                _buildInfoRow('نوع الإعفاء', entry.exemptionType!),
+              _buildInfoRow(
+                'رقم السند',
+                entry.financialInfo.receiptNumber ?? '-',
+              ),
+              if (entry.financialInfo.exemptionType != null)
+                _buildInfoRow(
+                  'نوع الإعفاء',
+                  entry.financialInfo.exemptionType!,
+                ),
             ]),
             const SizedBox(height: 24),
 
             // --- System Info ---
             _buildSectionTitle('معلومات النظام'),
             _buildInfoCard([
-              _buildInfoRow('الحالة', _getStatusLabel(entry.status ?? 'draft')),
+              _buildInfoRow('الحالة', _getStatusLabel(entry.statusInfo.status)),
               _buildInfoRow(
                 'تاريخ الإنشاء',
-                entry.createdAt != null
-                    ? intl.DateFormat(
-                        'yyyy/MM/dd HH:mm',
-                      ).format(entry.createdAt!)
+                entry.metadata.createdAt != null
+                    ? intl.DateFormat('yyyy/MM/dd HH:mm').format(
+                        DateTime.tryParse(entry.metadata.createdAt!) ??
+                            DateTime.now(),
+                      )
                     : '-',
               ),
-              _buildInfoRow('نوع الكاتب', entry.writerType ?? '-'),
-              _buildInfoRow('اسم الكاتب', entry.writerName ?? '-'),
+              _buildInfoRow('نوع الكاتب', entry.writerInfo.writerType ?? '-'),
+              _buildInfoRow('اسم الكاتب', entry.writerInfo.writerName ?? '-'),
             ]),
             const SizedBox(height: 40),
           ],
@@ -222,10 +232,14 @@ class EntryDetailsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(_getTypeIcon(entry.contractType), color: Colors.white, size: 48),
+          Icon(
+            _getTypeIcon(entry.basicInfo.contractType),
+            color: Colors.white,
+            size: 48,
+          ),
           const SizedBox(height: 12),
           Text(
-            entry.contractType?.name ?? 'محرر غير محدد',
+            entry.basicInfo.contractType?.name ?? 'محرر غير محدد',
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -242,7 +256,7 @@ class EntryDetailsScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              'الرقم المتسلسل: ${entry.serialNumber ?? "-"}',
+              'الرقم المتسلسل: ${entry.basicInfo.serialNumber}',
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.white,
@@ -342,7 +356,7 @@ class EntryDetailsScreen extends StatelessWidget {
     }
   }
 
-  IconData _getTypeIcon(ContractTypeModel? type) {
+  IconData _getTypeIcon(ContractType? type) {
     if (type == null) return Icons.description_outlined;
     return Icons.description;
   }

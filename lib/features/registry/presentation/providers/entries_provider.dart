@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/models/registry_entry_model.dart';
+import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart';
 import '../../data/repositories/registry_repository.dart';
 import '../../../../core/di/injection.dart';
 
@@ -15,7 +15,7 @@ final entrySearchQueryProvider = StateProvider<String>((ref) => '');
 final entryStatusFilterProvider = StateProvider<String?>((ref) => null);
 
 // Raw Entries Provider (Fetched from Repo)
-final rawEntriesProvider = FutureProvider<List<RegistryEntryModel>>((
+final rawEntriesProvider = FutureProvider<List<RegistryEntrySections>>((
   ref,
 ) async {
   final repository = ref.watch(registryRepositoryProvider);
@@ -23,38 +23,46 @@ final rawEntriesProvider = FutureProvider<List<RegistryEntryModel>>((
 });
 
 // Filtered Entries Provider
-final filteredEntriesProvider = Provider<AsyncValue<List<RegistryEntryModel>>>((
-  ref,
-) {
-  final entriesAsync = ref.watch(rawEntriesProvider);
-  final searchQuery = ref.watch(entrySearchQueryProvider).trim().toLowerCase();
-  final statusFilter = ref.watch(entryStatusFilterProvider);
+final filteredEntriesProvider =
+    Provider<AsyncValue<List<RegistryEntrySections>>>((ref) {
+      final entriesAsync = ref.watch(rawEntriesProvider);
+      final searchQuery = ref
+          .watch(entrySearchQueryProvider)
+          .trim()
+          .toLowerCase();
+      final statusFilter = ref.watch(entryStatusFilterProvider);
 
-  return entriesAsync.whenData((entries) {
-    return entries.where((entry) {
-      // 1. Filter by Status
-      if (statusFilter != null && entry.status != statusFilter) {
-        return false;
-      }
+      return entriesAsync.whenData((entries) {
+        return entries.where((entry) {
+          // 1. Filter by Status
+          if (statusFilter != null && entry.statusInfo.status != statusFilter) {
+            return false;
+          }
 
-      // 2. Filter by Search Query
-      if (searchQuery.isNotEmpty) {
-        final matchesSubject =
-            entry.subject?.toLowerCase().contains(searchQuery) ?? false;
-        final matchesParty1 =
-            entry.firstPartyName?.toLowerCase().contains(searchQuery) ?? false;
-        final matchesParty2 =
-            entry.secondPartyName?.toLowerCase().contains(searchQuery) ?? false;
-        final matchesNumber =
-            entry.registerNumber?.toString().contains(searchQuery) ?? false;
+          // 2. Filter by Search Query
+          if (searchQuery.isNotEmpty) {
+            final matchesSubject =
+                entry.basicInfo.subject?.toLowerCase().contains(searchQuery) ??
+                false;
+            final matchesParty1 = entry.basicInfo.firstPartyName
+                .toLowerCase()
+                .contains(searchQuery);
+            final matchesParty2 = entry.basicInfo.secondPartyName
+                .toLowerCase()
+                .contains(searchQuery);
+            final matchesNumber =
+                entry.basicInfo.registerNumber?.toString().contains(
+                  searchQuery,
+                ) ??
+                false;
 
-        return matchesSubject ||
-            matchesParty1 ||
-            matchesParty2 ||
-            matchesNumber;
-      }
+            return matchesSubject ||
+                matchesParty1 ||
+                matchesParty2 ||
+                matchesNumber;
+          }
 
-      return true;
-    }).toList();
-  });
-});
+          return true;
+        }).toList();
+      });
+    });

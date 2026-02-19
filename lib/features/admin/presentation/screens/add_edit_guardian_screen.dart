@@ -455,7 +455,7 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
             context: context,
             initialDate: date ?? DateTime.now(),
             firstDate: DateTime(1900),
-            lastDate: DateTime(2100),
+            lastDate: DateTime(2075),
             locale: const Locale('ar', 'SA'),
           );
           if (d != null) onSelect(d);

@@ -9,7 +9,7 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import 'tabs/admin_dashboard_tab.dart';
 import 'tabs/guardians_tab.dart';
 import 'tabs/records_tab.dart';
-import 'tabs/reports_tab.dart';
+import '../../features/reports/presentation/screens/reports_dashboard_screen.dart';
 import 'tabs/admin_settings_tab.dart';
 
 /// Admin Shell — واجهة رئيس القلم
@@ -28,7 +28,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     AdminDashboardTab(),
     GuardiansTab(),
     RecordsTab(),
-    ReportsTab(),
+    ReportsDashboardScreen(),
     AdminSettingsTab(),
   ];
 
@@ -181,58 +181,71 @@ class _AdminShellState extends ConsumerState<AdminShell> {
         ],
       ),
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavItem(
-                index: 0,
-                icon: Icons.dashboard_outlined,
-                activeIcon: Icons.dashboard,
-                label: 'الرئيسية',
-                isSelected: _selectedIndex == 0,
-                isWide: isWide,
-                onTap: _onItemTapped,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _NavItem(
+                        index: 0,
+                        icon: Icons.dashboard_outlined,
+                        activeIcon: Icons.dashboard,
+                        label: 'الرئيسية',
+                        isSelected: _selectedIndex == 0,
+                        isWide: isWide,
+                        onTap: _onItemTapped,
+                      ),
+                      _NavItem(
+                        index: 1,
+                        icon: Icons.group_outlined,
+                        activeIcon: Icons.group,
+                        label: 'إدارة الأمناء',
+                        isSelected: _selectedIndex == 1,
+                        isWide: isWide,
+                        onTap: _onItemTapped,
+                      ),
+                      _NavItem(
+                        index: 2,
+                        icon: Icons.source_outlined,
+                        activeIcon: Icons.source,
+                        label: 'إدارة السجلات',
+                        isSelected: _selectedIndex == 2,
+                        isWide: isWide,
+                        onTap: _onItemTapped,
+                      ),
+                      _NavItem(
+                        index: 3,
+                        icon: Icons.analytics_outlined,
+                        activeIcon: Icons.analytics,
+                        label: 'إدارة التقارير',
+                        isSelected: _selectedIndex == 3,
+                        isWide: isWide,
+                        onTap: _onItemTapped,
+                      ),
+                      _NavItem(
+                        index: 4,
+                        icon: Icons.build_outlined,
+                        activeIcon: Icons.build,
+                        label: 'الأدوات المساعدة',
+                        isSelected: _selectedIndex == 4,
+                        isWide: isWide,
+                        onTap: _onItemTapped,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              _NavItem(
-                index: 1,
-                icon: Icons.group_outlined,
-                activeIcon: Icons.group,
-                label: 'إدارة الأمناء',
-                isSelected: _selectedIndex == 1,
-                isWide: isWide,
-                onTap: _onItemTapped,
-              ),
-              _NavItem(
-                index: 2,
-                icon: Icons.source_outlined,
-                activeIcon: Icons.source,
-                label: 'إدارة السجلات',
-                isSelected: _selectedIndex == 2,
-                isWide: isWide,
-                onTap: _onItemTapped,
-              ),
-              _NavItem(
-                index: 3,
-                icon: Icons.analytics_outlined,
-                activeIcon: Icons.analytics,
-                label: 'إدارة التقارير',
-                isSelected: _selectedIndex == 3,
-                isWide: isWide,
-                onTap: _onItemTapped,
-              ),
-              _NavItem(
-                index: 4,
-                icon: Icons.build_outlined,
-                activeIcon: Icons.build,
-                label: 'الأدوات المساعدة',
-                isSelected: _selectedIndex == 4,
-                isWide: isWide,
-                onTap: _onItemTapped,
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

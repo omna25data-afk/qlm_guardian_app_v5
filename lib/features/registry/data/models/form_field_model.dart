@@ -15,6 +15,10 @@ class FormFieldModel extends Equatable {
   final String? helperText;
   @JsonKey(name: 'default_value')
   final dynamic defaultValue;
+  @JsonKey(name: 'subtype_1')
+  final dynamic subtype1;
+  @JsonKey(name: 'subtype_2')
+  final dynamic subtype2;
 
   const FormFieldModel({
     required this.name,
@@ -25,6 +29,8 @@ class FormFieldModel extends Equatable {
     this.placeholder,
     this.helperText,
     this.defaultValue,
+    this.subtype1,
+    this.subtype2,
   });
 
   factory FormFieldModel.fromJson(Map<String, dynamic> json) =>
@@ -42,5 +48,7 @@ class FormFieldModel extends Equatable {
     placeholder,
     helperText,
     defaultValue,
+    subtype1,
+    subtype2,
   ];
 }

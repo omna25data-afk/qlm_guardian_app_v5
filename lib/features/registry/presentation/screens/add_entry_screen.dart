@@ -1,6 +1,8 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hijri/hijri_calendar.dart';
+import 'package:hijri_picker/hijri_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../records/data/models/record_book.dart';
@@ -34,6 +36,12 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
   // ─── Section 3: Delivery ───
   String _deliveryStatus = 'preserved';
   DateTime? _deliveryDate;
+
+  @override
+  void initState() {
+    super.initState();
+    HijriCalendar.setLocal('ar');
+  }
 
   @override
   void dispose() {
@@ -312,35 +320,97 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                           children: [
                             // Hijri Date (text field — no hijri package)
                             Expanded(
-                              child: TextFormField(
-                                initialValue: _documentDateHijriText,
-                                style: const TextStyle(
-                                  fontFamily: 'Tajawal',
-                                  fontWeight: FontWeight.bold,
+                              child: InkWell(
+                                onTap: () async {
+                                  try {
+                                    final now = HijriCalendar.now();
+                                    final first = HijriCalendar()
+                                      ..hYear = 1360
+                                      ..hMonth = 1
+                                      ..hDay = 1;
+
+                                    // Set last date to the end of current Hijri year
+                                    final last = HijriCalendar()
+                                      ..hYear = now.hYear
+                                      ..hMonth = 12
+                                      ..hDay = 30;
+
+                                    if (now.isBefore(
+                                      first.hYear,
+                                      first.hMonth,
+                                      first.hDay,
+                                    )) {
+                                      print(
+                                        'Adjusting initial date (too early)',
+                                      );
+                                      now.hYear = first.hYear;
+                                    }
+
+                                    final HijriCalendar? picked =
+                                        await showHijriDatePicker(
+                                          context: context,
+                                          initialDate: now,
+                                          lastDate: last,
+                                          firstDate: first,
+                                          initialDatePickerMode:
+                                              DatePickerMode.day,
+                                        );
+                                    if (picked != null) {
+                                      setState(
+                                        () => _documentDateHijriText = picked
+                                            .toFormat("dd/mm/yyyy"),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'خطأ في فتح التقويم: $e',
+                                          ),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                child: InputDecorator(
+                                  decoration: InputDecoration(
+                                    labelText: 'تاريخ المحرر (هجري)',
+                                    labelStyle: const TextStyle(
+                                      fontFamily: 'Tajawal',
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        _documentDateHijriText.isNotEmpty
+                                            ? _documentDateHijriText
+                                            : 'اختر التاريخ',
+                                        style: const TextStyle(
+                                          fontFamily: 'Tajawal',
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.calendar_month,
+                                        size: 20,
+                                        color: Colors.grey,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                decoration: InputDecoration(
-                                  labelText: 'تاريخ المحرر (هجري)',
-                                  labelStyle: const TextStyle(
-                                    fontFamily: 'Tajawal',
-                                  ),
-                                  hintText: '01/01/1446هـ',
-                                  hintStyle: const TextStyle(
-                                    fontFamily: 'Tajawal',
-                                    fontSize: 12,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 12,
-                                  ),
-                                  suffixIcon: const Icon(
-                                    Icons.calendar_month,
-                                    size: 20,
-                                  ),
-                                ),
-                                onChanged: (v) => _documentDateHijriText = v,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -352,7 +422,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
                                     context: context,
                                     initialDate: _documentDateGregorian,
                                     firstDate: DateTime(2000),
-                                    lastDate: DateTime(2100),
+                                    lastDate: DateTime(2075),
                                   );
                                   if (picked != null) {
                                     setState(
@@ -743,6 +813,7 @@ class _AddEntryScreenState extends ConsumerState<AddEntryScreen> {
     final List<Widget> fields = [];
 
     for (var field in state.filteredFields) {
+      print('Building field: $field');
       final fieldName = field['name'] as String? ?? '';
       final fieldLabel = field['label'] as String? ?? '';
       final fieldType = field['type'] as String? ?? 'text';

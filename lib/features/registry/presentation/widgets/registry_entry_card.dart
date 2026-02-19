@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' as intl;
-import '../../data/models/registry_entry_model.dart';
-import '../../data/models/contract_type_model.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart';
+import 'package:qlm_guardian_app_v5/features/system/data/models/contract_type.dart';
 
 import '../screens/entry_details_screen.dart';
 
 class RegistryEntryCard extends ConsumerWidget {
-  final RegistryEntryModel entry;
+  final RegistryEntrySections entry;
   final VoidCallback? onTap;
 
   const RegistryEntryCard({super.key, required this.entry, this.onTap});
@@ -16,13 +16,16 @@ class RegistryEntryCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Use backend-provided status colors and labels if available
-    final statusColor = entry.statusColor != null
-        ? _parseColor(entry.statusColor!)
-        : _getStatusColor(entry.status ?? 'draft');
+    final statusColor = entry.statusInfo.statusColor != null
+        ? _parseColor(entry.statusInfo.statusColor!)
+        : _getStatusColor(entry.statusInfo.status);
     final statusLabel =
-        entry.statusLabel ?? _getStatusLabel(entry.status ?? 'draft');
+        entry.statusInfo.statusLabel ??
+        _getStatusLabel(entry.statusInfo.status);
 
-    final contractTypeName = entry.contractType?.name ?? 'محرر غير محدد';
+    // Use contract type from basicInfo if available
+    final contractTypeName =
+        entry.basicInfo.contractType?.name ?? 'محرر غير محدد';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -81,7 +84,7 @@ class RegistryEntryCard extends ConsumerWidget {
                       ],
                     ),
                     child: Icon(
-                      _getTypeIcon(entry.contractType),
+                      _getTypeIcon(entry.basicInfo.contractType),
                       color: AppColors.primary,
                       size: 20,
                     ),
@@ -99,9 +102,9 @@ class RegistryEntryCard extends ConsumerWidget {
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      if (entry.serialNumber != null)
+                      if (entry.basicInfo.serialNumber > 0)
                         Text(
-                          'رقم القيد: ${entry.serialNumber}',
+                          'رقم القيد: ${entry.basicInfo.serialNumber}',
                           style: TextStyle(
                             fontSize: 11,
                             color: Colors.grey[600],
@@ -157,15 +160,14 @@ class RegistryEntryCard extends ConsumerWidget {
                           children: [
                             _buildPartyRow(
                               'الطرف الأول:',
-                              entry.firstPartyName ?? '-',
+                              entry.basicInfo.firstPartyName,
                               Icons.person,
                             ),
                             const SizedBox(height: 12),
-                            if (entry.secondPartyName != null &&
-                                entry.secondPartyName!.isNotEmpty)
+                            if (entry.basicInfo.secondPartyName.isNotEmpty)
                               _buildPartyRow(
                                 'الطرف الثاني:',
-                                entry.secondPartyName!,
+                                entry.basicInfo.secondPartyName,
                                 Icons.person_outline,
                               ),
                           ],
@@ -199,11 +201,19 @@ class RegistryEntryCard extends ConsumerWidget {
                             child: Column(
                               children: [
                                 Text(
-                                  entry.date != null
+                                  entry.documentInfo.documentGregorianDate !=
+                                          null
                                       ? intl.DateFormat(
                                           'yyyy/MM/dd',
                                           'ar',
-                                        ).format(entry.date!)
+                                        ).format(
+                                          DateTime.tryParse(
+                                                entry
+                                                    .documentInfo
+                                                    .documentGregorianDate!,
+                                              ) ??
+                                              DateTime.now(),
+                                        )
                                       : '-',
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -212,9 +222,10 @@ class RegistryEntryCard extends ConsumerWidget {
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
-                                if (entry.hijriDate != null)
+                                if (entry.documentInfo.documentHijriDate !=
+                                    null)
                                   Text(
-                                    entry.hijriDate!,
+                                    entry.documentInfo.documentHijriDate!,
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: Colors.grey[500],
@@ -252,7 +263,7 @@ class RegistryEntryCard extends ConsumerWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                entry.subject ?? 'لا يوجد موضوع',
+                                entry.basicInfo.subject ?? 'لا يوجد موضوع',
                                 style: const TextStyle(
                                   fontSize: 13,
                                   color: AppColors.textPrimary,
@@ -264,7 +275,7 @@ class RegistryEntryCard extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        if (entry.totalAmount > 0) ...[
+                        if (entry.financialInfo.totalAmount > 0) ...[
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 8),
                             child: Divider(height: 1),
@@ -281,7 +292,7 @@ class RegistryEntryCard extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                '${intl.NumberFormat('#,##0.00', 'ar').format(entry.totalAmount)} ر.ي',
+                                '${intl.NumberFormat('#,##0.00', 'ar').format(entry.financialInfo.totalAmount)} ر.ي',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -343,37 +354,6 @@ class RegistryEntryCard extends ConsumerWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDocInfoItem({
-    required String label,
-    required String value,
-    bool isHighlighted = false,
-    MaterialColor? color,
-  }) {
-    final themeColor = color ?? Colors.green;
-    return Column(
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: themeColor[700],
-            fontFamily: 'Tajawal',
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: isHighlighted ? themeColor[800] : themeColor[900],
-            fontFamily: 'Tajawal',
           ),
         ),
       ],
@@ -454,7 +434,7 @@ class RegistryEntryCard extends ConsumerWidget {
     }
   }
 
-  IconData _getTypeIcon(ContractTypeModel? type) {
+  IconData _getTypeIcon(ContractType? type) {
     // If we had icon mapping logic or icon data from backend for ContractType
     // For now return generic or map based on name if possible
     if (type == null) return Icons.description_outlined;

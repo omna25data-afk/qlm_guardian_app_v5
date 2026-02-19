@@ -1,18 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../../core/di/injection.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../records/data/models/record_book.dart';
+import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart';
 import '../../data/models/contract_type_model.dart';
-import '../../data/models/registry_entry_model.dart';
 import '../../data/repositories/registry_repository.dart';
 import '../providers/registry_provider.dart' show registryRepositoryProvider;
 
-/// ═══════════════════════════════════════════════════════
-/// State for Add Registry Entry (Guardian) — V4-style
-/// ═══════════════════════════════════════════════════════
-
+/// State for Add Registry Entry (Guardian)
 class AddRegistryEntryState {
   final bool isLoading;
   final bool isSubmitting;
@@ -47,7 +43,7 @@ class AddRegistryEntryState {
   final bool isLoadingRecordBooks;
 
   // Delivery
-  final String deliveryStatus; // preserved | delivered
+  final String deliveryStatus;
   final DateTime? deliveryDate;
 
   // Sequential Mode
@@ -204,11 +200,8 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
       clearSelectedRecordBook: true,
     );
 
-    // Load subtypes level 1
     _fetchSubtypes(type.id, level: 1);
-    // Load form fields
-    _loadFormFields(type.id);
-    // Load record books
+    loadFormFields(type.id);
     _fetchRecordBooks();
   }
 
@@ -229,7 +222,16 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
       }
 
       final response = await _apiClient.get(url);
-      final data = List<Map<String, dynamic>>.from(response.data ?? []);
+
+      dynamic rawData = response.data;
+      if (rawData is Map) {
+        rawData = rawData['data'];
+      }
+
+      final list = (rawData as List? ?? []);
+      final data = list
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
 
       if (level == 1) {
         state = state.copyWith(subtypes1: data, isLoadingSubtypes1: false);
@@ -255,18 +257,39 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
       _fetchSubtypes(state.selectedType!.id, level: 2, parentCode: code);
     }
 
-    _filterFieldsLocally();
+    filterFields();
   }
 
   void selectSubtype2(String? code) {
     state = state.copyWith(selectedSubtype2: code);
-    _filterFieldsLocally();
+    filterFields();
   }
 
-  void _filterFieldsLocally() {
+  void filterFields({String? subtype1, String? subtype2}) {
+    if (subtype1 != null) state = state.copyWith(selectedSubtype1: subtype1);
+    if (subtype2 != null) state = state.copyWith(selectedSubtype2: subtype2);
+
     if (state.allFields.isEmpty) {
       state = state.copyWith(filteredFields: []);
       return;
+    }
+
+    int? selectedSubtype1Id;
+    if (state.selectedSubtype1 != null) {
+      final sub1 = state.subtypes1.firstWhere(
+        (s) => s['code'] == state.selectedSubtype1,
+        orElse: () => {},
+      );
+      selectedSubtype1Id = sub1['id'] as int?;
+    }
+
+    int? selectedSubtype2Id;
+    if (state.selectedSubtype2 != null) {
+      final sub2 = state.subtypes2.firstWhere(
+        (s) => s['code'] == state.selectedSubtype2,
+        orElse: () => {},
+      );
+      selectedSubtype2Id = sub2['id'] as int?;
     }
 
     final filtered = state.allFields.where((field) {
@@ -274,8 +297,34 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
       final fSub2 = field['subtype_2'];
 
       if (fSub1 == null && fSub2 == null) return true;
-      if (fSub1 != null && fSub1 != state.selectedSubtype1) return false;
-      if (fSub2 != null && fSub2 != state.selectedSubtype2) return false;
+
+      // Check Subtype 1
+      if (fSub1 != null) {
+        if (state.selectedSubtype1 == null) return false;
+        final fSub1Str = fSub1.toString();
+        final selectedSub1Str = state.selectedSubtype1.toString();
+        final selectedSub1IdStr = selectedSubtype1Id?.toString();
+
+        final matchesCode = fSub1Str == selectedSub1Str;
+        final matchesId =
+            selectedSub1IdStr != null && fSub1Str == selectedSub1IdStr;
+
+        if (!matchesCode && !matchesId) return false;
+      }
+
+      // Check Subtype 2
+      if (fSub2 != null) {
+        if (state.selectedSubtype2 == null) return false;
+        final fSub2Str = fSub2.toString();
+        final selectedSub2Str = state.selectedSubtype2.toString();
+        final selectedSub2IdStr = selectedSubtype2Id?.toString();
+
+        final matchesCode = fSub2Str == selectedSub2Str;
+        final matchesId =
+            selectedSub2IdStr != null && fSub2Str == selectedSub2IdStr;
+
+        if (!matchesCode && !matchesId) return false;
+      }
 
       return true;
     }).toList();
@@ -283,16 +332,15 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
     state = state.copyWith(filteredFields: filtered);
   }
 
-  Future<void> _loadFormFields(int contractTypeId) async {
+  Future<void> loadFormFields(int contractTypeId) async {
     state = state.copyWith(isLoadingFields: true);
 
     try {
       final fields = await _repository.getFormFields(contractTypeId);
 
-      // Convert FormFieldModel to maps for compatibility with V4 dynamic rendering
       final rawFields = fields
           .map(
-            (f) => {
+            (f) => <String, dynamic>{
               'name': f.name,
               'label': f.label,
               'type': f.type,
@@ -300,15 +348,14 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
               'placeholder': f.placeholder,
               'helper_text': f.helperText,
               'options': f.options,
-              'subtype_1': null, // fill from API if available
-              'subtype_2': null,
+              'subtype_1': f.subtype1,
+              'subtype_2': f.subtype2,
             },
           )
           .toList();
 
       state = state.copyWith(allFields: rawFields, isLoadingFields: false);
-
-      _filterFieldsLocally();
+      filterFields();
     } catch (e) {
       state = state.copyWith(
         isLoadingFields: false,
@@ -330,12 +377,18 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
           .map((x) => RecordBook.fromJson(Map<String, dynamic>.from(x)))
           .toList();
 
-      // Filter by contract type
+      // Filter by category (guardian can only use guardian_recording or both)
+      final guardianBooks = books
+          .where(
+            (b) => b.category == 'guardian_recording' || b.category == 'both',
+          )
+          .toList();
+
       final filtered = state.selectedType != null
-          ? books
+          ? guardianBooks
                 .where((b) => b.contractTypeId == state.selectedType!.id)
                 .toList()
-          : books;
+          : guardianBooks;
 
       RecordBook? autoSelected;
       if (filtered.length == 1) {
@@ -399,25 +452,132 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
     state = state.copyWith(isSubmitting: true, error: null, success: null);
 
     try {
-      // Merge text field values into form data
       final mergedFormData = Map<String, dynamic>.from(state.formData);
       mergedFormData.addAll(textFieldValues);
 
-      final entry = RegistryEntryModel(
-        contractTypeId: state.selectedType!.id,
-        firstPartyName: mergedFormData['first_party_name'] as String?,
-        secondPartyName: mergedFormData['second_party_name'] as String?,
-        writerType: 'guardian',
-        documentHijriDate: documentDateHijri,
-        documentGregorianDate: documentDateGregorian,
-        date: DateTime.now(),
-        status: 'draft',
-        guardianRecordBookNumber: int.tryParse(manualBookNumber ?? ''),
-        guardianPageNumber: int.tryParse(manualPageNumber ?? ''),
-        guardianEntryNumber: int.tryParse(manualEntryNumber ?? ''),
+      final subject = mergedFormData['subject'] as String?;
+      final content = mergedFormData['content'] as String?;
+      final notes =
+          mergedFormData['content'] as String?; // Notes same as content?
+      final registerNumber = mergedFormData['register_number'] as String?;
+      final subtype1 = int.tryParse(
+        mergedFormData['subtype_1']?.toString() ?? '',
+      );
+      final subtype2 = int.tryParse(
+        mergedFormData['subtype_2']?.toString() ?? '',
       );
 
-      await _repository.createEntry(entry);
+      final feeAmount =
+          double.tryParse(mergedFormData['fee_amount']?.toString() ?? '') ??
+          0.0;
+      final penaltyAmount =
+          double.tryParse(mergedFormData['penalty_amount']?.toString() ?? '') ??
+          0.0;
+      final authenticationFeeAmount =
+          double.tryParse(
+            mergedFormData['authentication_fee_amount']?.toString() ?? '',
+          ) ??
+          0.0;
+      final transferFeeAmount =
+          double.tryParse(
+            mergedFormData['transfer_fee_amount']?.toString() ?? '',
+          ) ??
+          0.0;
+      final otherFeeAmount =
+          double.tryParse(
+            mergedFormData['other_fee_amount']?.toString() ?? '',
+          ) ??
+          0.0;
+      final exemptionReason = mergedFormData['exemption_reason'] as String?;
+
+      final hijriYear = (mergedFormData['hijri_year'] is int)
+          ? mergedFormData['hijri_year'] as int
+          : int.tryParse(mergedFormData['hijri_year']?.toString() ?? '') ?? 0;
+
+      final excludedKeys = [
+        'subject',
+        'content',
+        'hijri_year',
+        'register_number',
+        'first_party_name',
+        'second_party_name',
+        'subtype_1',
+        'subtype_2',
+        'fee_amount',
+        'penalty_amount',
+        'authentication_fee_amount',
+        'transfer_fee_amount',
+        'other_fee_amount',
+        'exemption_reason',
+      ];
+
+      final formDataMap = Map<String, dynamic>.from(mergedFormData)
+        ..removeWhere((key, value) => excludedKeys.contains(key));
+
+      final entry = RegistryEntrySections(
+        id: 0,
+        basicInfo: RegistryBasicInfo(
+          serialNumber: 0,
+          hijriYear: hijriYear,
+          constraintTypeId: null,
+          contractTypeId: state.selectedType!.id,
+          firstPartyName:
+              mergedFormData['first_party_name'] as String? ?? 'طرف أول',
+          secondPartyName:
+              mergedFormData['second_party_name'] as String? ?? 'طرف ثاني',
+          subject: subject,
+          content: content,
+          subtype1: subtype1,
+          subtype2: subtype2,
+          registerNumber: registerNumber,
+        ),
+        writerInfo: const RegistryWriterInfo(
+          writerType: 'guardian',
+          writerName: '',
+        ),
+        documentInfo: RegistryDocumentInfo(
+          docHijriDate: documentDateHijri,
+          documentHijriDate: documentDateHijri,
+          docGregorianDate: documentDateGregorian.toIso8601String(),
+          documentGregorianDate: documentDateGregorian.toIso8601String(),
+        ),
+        financialInfo: RegistryFinancialInfo(
+          feeAmount: feeAmount,
+          supportAmount: 0,
+          sustainabilityAmount: 0,
+          penaltyAmount: penaltyAmount,
+          authenticationFeeAmount: authenticationFeeAmount,
+          transferFeeAmount: transferFeeAmount,
+          otherFeeAmount: otherFeeAmount,
+          exemptionReason: exemptionReason,
+          totalAmount:
+              feeAmount +
+              penaltyAmount +
+              authenticationFeeAmount +
+              transferFeeAmount +
+              otherFeeAmount,
+        ),
+        guardianInfo: RegistryGuardianInfo(
+          guardianRecordBookNumber: int.tryParse(manualBookNumber ?? ''),
+          guardianPageNumber: int.tryParse(manualPageNumber ?? ''),
+          guardianEntryNumber: int.tryParse(manualEntryNumber ?? ''),
+        ),
+        statusInfo: RegistryStatusInfo(
+          status: 'draft',
+          deliveryStatus: 'preserved',
+          notes: notes,
+        ),
+        metadata: RegistryMetadata(
+          createdBy: 0,
+          createdAt: DateTime.now().toIso8601String(),
+        ),
+        formData: formDataMap,
+      );
+
+      await _repository.createEntry(
+        entry,
+        attachmentPath: state.attachmentPath,
+      );
 
       state = state.copyWith(
         isSubmitting: false,
@@ -452,7 +612,6 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
   }
 }
 
-/// Provider for the Guardian Add Registry Entry screen
 final addRegistryEntryProvider =
     StateNotifierProvider.autoDispose<
       AddRegistryEntryNotifier,

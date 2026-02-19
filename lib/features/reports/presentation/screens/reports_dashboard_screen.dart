@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_colors.dart';
+
 import '../providers/reports_provider.dart';
 import 'fees_report_screen.dart';
 import 'guardian_statistics_screen.dart';
@@ -74,7 +74,7 @@ class ReportsFilterWidget extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: DropdownButtonFormField<int>(
+                child: InputDecorator(
                   decoration: const InputDecoration(
                     labelText: 'السنة',
                     border: OutlineInputBorder(),
@@ -83,38 +83,44 @@ class ReportsFilterWidget extends ConsumerWidget {
                       vertical: 8,
                     ),
                   ),
-                  value: filter.year,
-                  items: yearsAsync.when(
-                    data: (years) => years
-                        .map(
-                          (y) => DropdownMenuItem(value: y, child: Text('$y')),
-                        )
-                        .toList(),
-                    loading: () => [
-                      DropdownMenuItem(
-                        value: filter.year,
-                        child: Text('${filter.year}'),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<int>(
+                      value: filter.year,
+                      isDense: true,
+                      items: yearsAsync.when(
+                        data: (years) => years
+                            .map(
+                              (y) =>
+                                  DropdownMenuItem(value: y, child: Text('$y')),
+                            )
+                            .toList(),
+                        loading: () => [
+                          DropdownMenuItem(
+                            value: filter.year,
+                            child: Text('${filter.year}'),
+                          ),
+                        ],
+                        error: (_, __) => [
+                          DropdownMenuItem(
+                            value: filter.year,
+                            child: Text('${filter.year}'),
+                          ),
+                        ],
                       ),
-                    ],
-                    error: (_, __) => [
-                      DropdownMenuItem(
-                        value: filter.year,
-                        child: Text('${filter.year}'),
-                      ),
-                    ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          ref.read(reportsFilterProvider.notifier).state = ref
+                              .read(reportsFilterProvider)
+                              .copyWith(year: val);
+                        }
+                      },
+                    ),
                   ),
-                  onChanged: (val) {
-                    if (val != null) {
-                      ref.read(reportsFilterProvider.notifier).state = ref
-                          .read(reportsFilterProvider)
-                          .copyWith(year: val);
-                    }
-                  },
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: DropdownButtonFormField<String>(
+                child: InputDecorator(
                   decoration: const InputDecoration(
                     labelText: 'نوع الفترة',
                     border: OutlineInputBorder(),
@@ -123,32 +129,37 @@ class ReportsFilterWidget extends ConsumerWidget {
                       vertical: 8,
                     ),
                   ),
-                  value: filter.periodType,
-                  items: const [
-                    DropdownMenuItem(value: 'annual', child: Text('سنوي')),
-                    DropdownMenuItem(
-                      value: 'semi_annual',
-                      child: Text('نصف سنوي'),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: filter.periodType,
+                      isDense: true,
+                      items: const [
+                        DropdownMenuItem(value: 'annual', child: Text('سنوي')),
+                        DropdownMenuItem(
+                          value: 'semi_annual',
+                          child: Text('نصف سنوي'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'quarterly',
+                          child: Text('ربع سنوي'),
+                        ),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          ref.read(reportsFilterProvider.notifier).state = ref
+                              .read(reportsFilterProvider)
+                              .copyWith(periodType: val, periodValue: null);
+                        }
+                      },
                     ),
-                    DropdownMenuItem(
-                      value: 'quarterly',
-                      child: Text('ربع سنوي'),
-                    ),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) {
-                      ref.read(reportsFilterProvider.notifier).state = ref
-                          .read(reportsFilterProvider)
-                          .copyWith(periodType: val, periodValue: null);
-                    }
-                  },
+                  ),
                 ),
               ),
             ],
           ),
           if (filter.periodType != 'annual') ...[
             const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
+            InputDecorator(
               decoration: const InputDecoration(
                 labelText: 'الفترة',
                 border: OutlineInputBorder(),
@@ -157,13 +168,18 @@ class ReportsFilterWidget extends ConsumerWidget {
                   vertical: 8,
                 ),
               ),
-              value: filter.periodValue,
-              items: _getPeriodValues(filter.periodType),
-              onChanged: (val) {
-                ref.read(reportsFilterProvider.notifier).state = ref
-                    .read(reportsFilterProvider)
-                    .copyWith(periodValue: val);
-              },
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: filter.periodValue,
+                  isDense: true,
+                  items: _getPeriodValues(filter.periodType),
+                  onChanged: (val) {
+                    ref.read(reportsFilterProvider.notifier).state = ref
+                        .read(reportsFilterProvider)
+                        .copyWith(periodValue: val);
+                  },
+                ),
+              ),
             ),
           ],
         ],

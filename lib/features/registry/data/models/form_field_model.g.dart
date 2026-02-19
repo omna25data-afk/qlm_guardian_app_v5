@@ -18,6 +18,8 @@ FormFieldModel _$FormFieldModelFromJson(Map<String, dynamic> json) =>
       placeholder: json['placeholder'] as String?,
       helperText: json['helper_text'] as String?,
       defaultValue: json['default_value'],
+      subtype1: json['subtype_1'],
+      subtype2: json['subtype_2'],
     );
 
 Map<String, dynamic> _$FormFieldModelToJson(FormFieldModel instance) =>
@@ -30,4 +32,6 @@ Map<String, dynamic> _$FormFieldModelToJson(FormFieldModel instance) =>
       'placeholder': instance.placeholder,
       'helper_text': instance.helperText,
       'default_value': instance.defaultValue,
+      'subtype_1': instance.subtype1,
+      'subtype_2': instance.subtype2,
     };

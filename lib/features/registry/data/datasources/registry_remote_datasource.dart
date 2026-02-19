@@ -1,19 +1,19 @@
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
+import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart';
 import '../models/contract_type_model.dart';
 import '../models/form_field_model.dart';
-import '../models/registry_entry_model.dart';
 
 abstract class RegistryRemoteDataSource {
   Future<List<ContractTypeModel>> getContractTypes();
   Future<List<FormFieldModel>> getFormFields(int typeId);
-  Future<RegistryEntryModel> createEntry(
-    RegistryEntryModel entry, {
+  Future<RegistryEntrySections> createEntry(
+    RegistryEntrySections entry, {
     String? attachmentPath,
   });
-  Future<List<RegistryEntryModel>> fetchEntries({DateTime? lastSyncedAt});
-  Future<void> pushEntries(List<RegistryEntryModel> entries);
+  Future<List<RegistryEntrySections>> fetchEntries({DateTime? lastSyncedAt});
+  Future<void> pushEntries(List<RegistryEntrySections> entries);
 }
 
 class RegistryRemoteDataSourceImpl implements RegistryRemoteDataSource {
@@ -25,55 +25,65 @@ class RegistryRemoteDataSourceImpl implements RegistryRemoteDataSource {
   Future<List<ContractTypeModel>> getContractTypes() async {
     final response = await _client.get(ApiEndpoints.contractTypes);
     final data = response.data['data'] as List;
-    return data.map((json) => ContractTypeModel.fromJson(json)).toList();
+    return data
+        .map(
+          (json) => ContractTypeModel.fromJson(Map<String, dynamic>.from(json)),
+        )
+        .toList();
   }
 
   @override
   Future<List<FormFieldModel>> getFormFields(int typeId) async {
     final response = await _client.get(ApiEndpoints.formFields(typeId));
     final data = response.data['data'] as List;
-    return data.map((json) => FormFieldModel.fromJson(json)).toList();
+    return data
+        .map((json) => FormFieldModel.fromJson(Map<String, dynamic>.from(json)))
+        .toList();
   }
 
   @override
-  Future<RegistryEntryModel> createEntry(
-    RegistryEntryModel entry, {
+  Future<RegistryEntrySections> createEntry(
+    RegistryEntrySections entry, {
     String? attachmentPath,
   }) async {
-    dynamic data = entry.toJson();
+    Map<String, dynamic> data = entry.toJson();
 
-    // If we have an attachment, we must use FormData
+    // Flatten form_data if present, as the API expects flat fields for dynamic attributes
+    if (data.containsKey('form_data') && data['form_data'] is Map) {
+      final formData = data['form_data'] as Map<String, dynamic>;
+      data.remove('form_data');
+      data.addAll(formData);
+    }
+
     if (attachmentPath != null) {
       final mapData = Map<String, dynamic>.from(data);
-      if (entry.extraAttributes != null) {
-        mapData.addAll(entry.extraAttributes!);
-      }
-
       mapData['document'] = await MultipartFile.fromFile(
         attachmentPath,
         filename: attachmentPath.split('/').last,
       );
 
-      data = FormData.fromMap(mapData);
-    } else {
-      // Logic for standard JSON with extra attributes
-      if (entry.extraAttributes != null) {
-        final mapData = Map<String, dynamic>.from(data);
-        mapData.addAll(entry.extraAttributes!);
-        data = mapData;
-      }
-    }
+      final dioFormData = FormData.fromMap(mapData);
 
-    // Use general endpoint for creation
-    final response = await _client.post(
-      ApiEndpoints.registryEntries,
-      data: data,
-    );
-    return RegistryEntryModel.fromJson(response.data['data']);
+      final response = await _client.post(
+        ApiEndpoints.registryEntries,
+        data: dioFormData,
+      );
+      return RegistryEntrySections.fromJson(
+        Map<String, dynamic>.from(response.data['data']),
+      );
+    } else {
+      final response = await _client.post(
+        ApiEndpoints.registryEntries,
+        data: data,
+      );
+      return RegistryEntrySections.fromJson(
+        Map<String, dynamic>.from(response.data['data']),
+      );
+    }
   }
 
   @override
-  Future<List<RegistryEntryModel>> fetchEntries({
+  Future<List<RegistryEntrySections>> fetchEntries({
     DateTime? lastSyncedAt,
   }) async {
     final response = await _client.get(
@@ -84,14 +94,29 @@ class RegistryRemoteDataSourceImpl implements RegistryRemoteDataSource {
     );
 
     final data = response.data['registry_entries'] as List;
-    return data.map((json) => RegistryEntryModel.fromJson(json)).toList();
+    return data
+        .map(
+          (json) =>
+              RegistryEntrySections.fromJson(Map<String, dynamic>.from(json)),
+        )
+        .toList();
   }
 
   @override
-  Future<void> pushEntries(List<RegistryEntryModel> entries) async {
+  Future<void> pushEntries(List<RegistryEntrySections> entries) async {
+    final flattenedEntries = entries.map((e) {
+      final json = e.toJson();
+      if (json.containsKey('form_data') && json['form_data'] is Map) {
+        final formData = json['form_data'] as Map<String, dynamic>;
+        json.remove('form_data');
+        json.addAll(formData);
+      }
+      return json;
+    }).toList();
+
     await _client.post(
       ApiEndpoints.mobileSyncPush,
-      data: {'registry_entries': entries.map((e) => e.toJson()).toList()},
+      data: {'registry_entries': flattenedEntries},
     );
   }
 }

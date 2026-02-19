@@ -2,11 +2,11 @@ import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/network/network_info.dart';
 import '../../../../core/sync/sync_service.dart';
+import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart';
 import '../datasources/registry_local_datasource.dart';
 import '../datasources/registry_remote_datasource.dart';
 import '../models/contract_type_model.dart';
 import '../models/form_field_model.dart';
-import '../models/registry_entry_model.dart';
 import 'package:flutter/foundation.dart';
 
 class RegistryRepository {
@@ -29,7 +29,7 @@ class RegistryRepository {
        _syncService = syncService;
 
   /// Get all entries (offline-first)
-  Future<List<RegistryEntryModel>> getEntries() async {
+  Future<List<RegistryEntrySections>> getEntries() async {
     // 1. Try to sync if online
     if (await _networkInfo.isConnected) {
       try {
@@ -101,15 +101,40 @@ class RegistryRepository {
   }
 
   /// Create new entry (offline-first)
-  Future<RegistryEntryModel> createEntry(
-    RegistryEntryModel entry, {
+  Future<RegistryEntrySections> createEntry(
+    RegistryEntrySections entry, {
     String? attachmentPath,
   }) async {
     // 1. Generate UUID if not present
     final uuid = (entry.uuid?.isEmpty ?? true)
         ? const Uuid().v4()
         : entry.uuid!;
-    final entryWithUuid = entry.copyWith(uuid: uuid, status: 'draft');
+
+    // Create new entry with UUID and Draft status
+    // Utilizing copyWith-like logic (RegistryEntrySections is immutable)
+    // We need to create a new instance with updated uuid/status
+
+    final entryWithUuid = RegistryEntrySections(
+      id: entry.id,
+      uuid: uuid,
+      remoteId: entry.remoteId,
+      basicInfo: entry.basicInfo,
+      writerInfo: entry.writerInfo,
+      documentInfo: entry.documentInfo,
+      financialInfo: entry.financialInfo,
+      guardianInfo: entry.guardianInfo,
+      statusInfo: RegistryStatusInfo(
+        status: 'draft',
+        deliveryStatus: entry.statusInfo.deliveryStatus,
+        statusColor: entry.statusInfo.statusColor,
+        statusLabel: entry.statusInfo.statusLabel,
+        deliveryStatusColor: entry.statusInfo.deliveryStatusColor,
+        deliveryStatusLabel: entry.statusInfo.deliveryStatusLabel,
+        notes: entry.statusInfo.notes,
+      ),
+      metadata: entry.metadata,
+      formData: entry.formData,
+    );
 
     // 2. Save locally (Basic info only, extras/file might be lost if offline)
     await _localDataSource.insertEntry(entryWithUuid);
@@ -135,13 +160,21 @@ class RegistryRepository {
     }
 
     // 4. Queue for sync if offline or failed
+    // Ensure toJson() is compatible with what SyncService expects
+    final jsonData = entryWithUuid.toJson();
+    if (jsonData.containsKey('form_data') && jsonData['form_data'] is Map) {
+      final fd = jsonData['form_data'] as Map<String, dynamic>;
+      jsonData.remove('form_data');
+      jsonData.addAll(fd);
+    }
+
     await _syncService.enqueue(
       SyncOperation(
         uuid: uuid,
         entityType: 'registry_entry',
         operationType: SyncOperationType.create,
         data: {
-          ...entryWithUuid.toJson(),
+          ...jsonData,
           ...?attachmentPath != null
               ? {'_local_attachment_path': attachmentPath}
               : null,

@@ -1,18 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/di/injection.dart';
 
 class SystemRepository {
   final Dio _dio;
   final String _baseUrl;
 
-  SystemRepository(
-    this._dio, {
-    String baseUrl = 'https://darkturquoise-lark-306795.hostingersite.com/api',
-  }) : _baseUrl = baseUrl;
+  SystemRepository(this._dio, {String baseUrl = 'https://api.example.com'})
+    : _baseUrl = baseUrl;
 
   Future<Response> getAdminAreas(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/admin/areas',
+      '$_baseUrl/api/admin/areas',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -20,7 +19,7 @@ class SystemRepository {
 
   Future<Response> postAdminAreas(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/admin/areas',
+      '$_baseUrl/api/admin/areas',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -30,7 +29,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/admin/assignments',
+      '$_baseUrl/api/admin/assignments',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -38,7 +37,7 @@ class SystemRepository {
 
   Future<Response> postAdminAssignments(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/admin/assignments',
+      '$_baseUrl/api/admin/assignments',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -46,7 +45,7 @@ class SystemRepository {
 
   Future<Response> getAdminCards(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/admin/cards',
+      '$_baseUrl/api/admin/cards',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -54,7 +53,7 @@ class SystemRepository {
 
   Future<Response> getAdminDashboard(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/admin/dashboard',
+      '$_baseUrl/api/admin/dashboard',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -62,7 +61,7 @@ class SystemRepository {
 
   Future<Response> getAdminGuardians(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/admin/guardians',
+      '$_baseUrl/api/admin/guardians',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -73,7 +72,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/admin/guardians/$id/renew-card',
+      '$_baseUrl/api/admin/guardians/${id}/renew-card',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -84,7 +83,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/admin/guardians/$id/renew-license',
+      '$_baseUrl/api/admin/guardians/${id}/renew-license',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -92,7 +91,7 @@ class SystemRepository {
 
   Future<Response> getAdminLicenses(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/admin/licenses',
+      '$_baseUrl/api/admin/licenses',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -102,7 +101,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/admin/record-books',
+      '$_baseUrl/api/admin/record-books',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -110,7 +109,7 @@ class SystemRepository {
 
   Future<Response> getContractTypes(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/contract-types',
+      '$_baseUrl/api/contract-types',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -121,7 +120,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/contract-types/$id/subtypes',
+      '$_baseUrl/api/contract-types/${id}/subtypes',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -129,7 +128,7 @@ class SystemRepository {
 
   Future<Response> getDashboard(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/dashboard',
+      '$_baseUrl/api/dashboard',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -139,7 +138,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/electronic-card-renewals',
+      '$_baseUrl/api/electronic-card-renewals',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -147,7 +146,7 @@ class SystemRepository {
 
   Future<Response> postElectronicCardRenewals(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/electronic-card-renewals',
+      '$_baseUrl/api/electronic-card-renewals',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -158,7 +157,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/electronic-card-renewals/$electronic_card_renewal',
+      '$_baseUrl/api/electronic-card-renewals/${electronic_card_renewal}',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -169,7 +168,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/electronic-card-renewals/$electronic_card_renewal',
+      '$_baseUrl/api/electronic-card-renewals/${electronic_card_renewal}',
       options: Options(method: 'PUT'),
       data: data,
     );
@@ -180,7 +179,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/electronic-card-renewals/$electronic_card_renewal',
+      '$_baseUrl/api/electronic-card-renewals/${electronic_card_renewal}',
       options: Options(method: 'DELETE'),
       data: data,
     );
@@ -191,7 +190,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/form-fields/${contractTypeId}',
+      '$_baseUrl/api/form-fields/${contractTypeId}',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -199,7 +198,7 @@ class SystemRepository {
 
   Future<Response> getGeographicAreas(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/geographic-areas',
+      '$_baseUrl/api/geographic-areas',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -207,7 +206,7 @@ class SystemRepository {
 
   Future<Response> postGeographicAreas(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/geographic-areas',
+      '$_baseUrl/api/geographic-areas',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -218,7 +217,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/geographic-areas/${geographic_area}',
+      '$_baseUrl/api/geographic-areas/${geographic_area}',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -229,7 +228,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/geographic-areas/${geographic_area}',
+      '$_baseUrl/api/geographic-areas/${geographic_area}',
       options: Options(method: 'PUT'),
       data: data,
     );
@@ -240,7 +239,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/geographic-areas/${geographic_area}',
+      '$_baseUrl/api/geographic-areas/${geographic_area}',
       options: Options(method: 'DELETE'),
       data: data,
     );
@@ -250,7 +249,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardian-assignments',
+      '$_baseUrl/api/guardian-assignments',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -258,7 +257,7 @@ class SystemRepository {
 
   Future<Response> postGuardianAssignments(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/guardian-assignments',
+      '$_baseUrl/api/guardian-assignments',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -269,7 +268,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardian-assignments/${guardian_assignment}',
+      '$_baseUrl/api/guardian-assignments/${guardian_assignment}',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -280,7 +279,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardian-assignments/${guardian_assignment}',
+      '$_baseUrl/api/guardian-assignments/${guardian_assignment}',
       options: Options(method: 'PUT'),
       data: data,
     );
@@ -291,17 +290,17 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardian-assignments/${guardian_assignment}',
+      '$_baseUrl/api/guardian-assignments/${guardian_assignment}',
       options: Options(method: 'DELETE'),
       data: data,
     );
   }
 
-  Future<Response> getGuardianRecordBooksLegacy(
+  Future<Response> getGuardianRecordBooks(
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardian-record-books',
+      '$_baseUrl/api/guardian-record-books',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -309,7 +308,7 @@ class SystemRepository {
 
   Future<Response> postGuardianRecordBooks(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/guardian-record-books',
+      '$_baseUrl/api/guardian-record-books',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -320,7 +319,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardian-record-books/$guardian_record_book',
+      '$_baseUrl/api/guardian-record-books/${guardian_record_book}',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -331,7 +330,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardian-record-books/${guardian_record_book}',
+      '$_baseUrl/api/guardian-record-books/${guardian_record_book}',
       options: Options(method: 'PUT'),
       data: data,
     );
@@ -342,17 +341,17 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardian-record-books/${guardian_record_book}',
+      '$_baseUrl/api/guardian-record-books/${guardian_record_book}',
       options: Options(method: 'DELETE'),
       data: data,
     );
   }
 
-  Future<Response> getGuardianRecordBooks(
+  Future<Response> getGuardianRecordBooks2(
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardian/record-books',
+      '$_baseUrl/api/guardian/record-books',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -362,7 +361,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardian/record-books/notebooks',
+      '$_baseUrl/api/guardian/record-books/notebooks',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -373,7 +372,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardian/record-books/${id}',
+      '$_baseUrl/api/guardian/record-books/${id}',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -381,7 +380,7 @@ class SystemRepository {
 
   Future<Response> getGuardians(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/guardians',
+      '$_baseUrl/api/guardians',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -389,7 +388,7 @@ class SystemRepository {
 
   Future<Response> postGuardians(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/guardians',
+      '$_baseUrl/api/guardians',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -400,7 +399,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardians/${guardian}',
+      '$_baseUrl/api/guardians/${guardian}',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -408,7 +407,7 @@ class SystemRepository {
 
   Future<Response> putGuardiansGuardian(String guardian, dynamic data) async {
     return _dio.request(
-      '$_baseUrl/guardians/${guardian}',
+      '$_baseUrl/api/guardians/${guardian}',
       options: Options(method: 'PUT'),
       data: data,
     );
@@ -419,7 +418,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/guardians/${guardian}',
+      '$_baseUrl/api/guardians/${guardian}',
       options: Options(method: 'DELETE'),
       data: data,
     );
@@ -429,7 +428,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/license-managements',
+      '$_baseUrl/api/license-managements',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -437,7 +436,7 @@ class SystemRepository {
 
   Future<Response> postLicenseManagements(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/license-managements',
+      '$_baseUrl/api/license-managements',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -448,7 +447,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/license-managements/${license_management}',
+      '$_baseUrl/api/license-managements/${license_management}',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -459,7 +458,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/license-managements/${license_management}',
+      '$_baseUrl/api/license-managements/${license_management}',
       options: Options(method: 'PUT'),
       data: data,
     );
@@ -470,7 +469,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/license-managements/${license_management}',
+      '$_baseUrl/api/license-managements/${license_management}',
       options: Options(method: 'DELETE'),
       data: data,
     );
@@ -478,7 +477,7 @@ class SystemRepository {
 
   Future<Response> postLogin(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/login',
+      '$_baseUrl/api/login',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -486,7 +485,7 @@ class SystemRepository {
 
   Future<Response> postLogout(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/logout',
+      '$_baseUrl/api/logout',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -497,7 +496,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/my-record-books/${contractTypeId}',
+      '$_baseUrl/api/my-record-books/${contractTypeId}',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -505,7 +504,7 @@ class SystemRepository {
 
   Future<Response> getNotifications(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/notifications',
+      '$_baseUrl/api/notifications',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -513,7 +512,7 @@ class SystemRepository {
 
   Future<Response> getProfile(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/profile',
+      '$_baseUrl/api/profile',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -523,7 +522,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/record-book-templates',
+      '$_baseUrl/api/record-book-templates',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -531,7 +530,7 @@ class SystemRepository {
 
   Future<Response> getRecordBooks(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/record-books',
+      '$_baseUrl/api/record-books',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -539,7 +538,7 @@ class SystemRepository {
 
   Future<Response> postRecordBooksUpdatePhysicalNotebook(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/record-books/update-physical-notebook',
+      '$_baseUrl/api/record-books/update-physical-notebook',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -550,7 +549,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/record-books/${contractTypeId}/notebooks',
+      '$_baseUrl/api/record-books/${contractTypeId}/notebooks',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -561,7 +560,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/record-books/${record_book}',
+      '$_baseUrl/api/record-books/${record_book}',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -569,7 +568,7 @@ class SystemRepository {
 
   Future<Response> getRegistryEntries(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/registry-entries',
+      '$_baseUrl/api/registry-entries',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -577,7 +576,7 @@ class SystemRepository {
 
   Future<Response> postRegistryEntries(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/registry-entries',
+      '$_baseUrl/api/registry-entries',
       options: Options(method: 'POST'),
       data: data,
     );
@@ -588,7 +587,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/registry-entries/${id}/request-documentation',
+      '$_baseUrl/api/registry-entries/${id}/request-documentation',
       options: Options(method: 'PUT'),
       data: data,
     );
@@ -599,7 +598,7 @@ class SystemRepository {
     Map<String, dynamic>? queryParams,
   ) async {
     return _dio.request(
-      '$_baseUrl/registry-entries/${registry_entry}',
+      '$_baseUrl/api/registry-entries/${registry_entry}',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -610,7 +609,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/registry-entries/${registry_entry}',
+      '$_baseUrl/api/registry-entries/${registry_entry}',
       options: Options(method: 'PUT'),
       data: data,
     );
@@ -621,7 +620,7 @@ class SystemRepository {
     dynamic data,
   ) async {
     return _dio.request(
-      '$_baseUrl/registry-entries/${registry_entry}',
+      '$_baseUrl/api/registry-entries/${registry_entry}',
       options: Options(method: 'DELETE'),
       data: data,
     );
@@ -629,7 +628,7 @@ class SystemRepository {
 
   Future<Response> getUser(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/user',
+      '$_baseUrl/api/user',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -637,7 +636,7 @@ class SystemRepository {
 
   Future<Response> getV1MobileSync(Map<String, dynamic>? queryParams) async {
     return _dio.request(
-      '$_baseUrl/v1/mobile/sync',
+      '$_baseUrl/api/v1/mobile/sync',
       options: Options(method: 'GET'),
       queryParameters: queryParams,
     );
@@ -645,11 +644,12 @@ class SystemRepository {
 
   Future<Response> postV1MobileSync(dynamic data) async {
     return _dio.request(
-      '$_baseUrl/v1/mobile/sync',
+      '$_baseUrl/api/v1/mobile/sync',
       options: Options(method: 'POST'),
       data: data,
     );
   }
 }
 
-final systemRepositoryProvider = Provider((ref) => SystemRepository(Dio()));
+// Use GetIt instance to ensure singleton and correct configuration
+final systemRepositoryProvider = Provider((ref) => getIt<SystemRepository>());

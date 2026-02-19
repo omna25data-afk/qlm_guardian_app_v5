@@ -48,6 +48,8 @@ class AuthLocalDataSource {
   Future<void> clearAll() async {
     await _storage.delete(key: _tokenKey);
     await _storage.delete(key: _userKey);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   }
 
   /// Check if user is logged in

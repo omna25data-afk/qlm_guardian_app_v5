@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../records/data/models/record_book.dart';
-import '../../../records/presentation/providers/records_provider.dart';
 import '../providers/add_registry_entry_provider.dart';
 
 class AddRegistryEntryScreen extends ConsumerWidget {
@@ -578,7 +577,8 @@ class AddRegistryEntryScreen extends ConsumerWidget {
     AddRegistryEntryState state,
     AddRegistryEntryNotifier notifier,
   ) {
-    final recordBooksAsync = ref.watch(recordBooksProvider);
+    final books = state.filteredRecordBooks;
+    final isLoading = state.isLoadingRecordBooks;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -595,33 +595,10 @@ class AddRegistryEntryScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         Expanded(
-          child: recordBooksAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, color: Colors.red[300], size: 40),
-                  const SizedBox(height: 8),
-                  Text(
-                    'خطأ في تحميل دفاتر السجلات',
-                    style: TextStyle(fontFamily: 'Tajawal'),
-                  ),
-                  TextButton(
-                    onPressed: () => ref
-                        .read(recordBooksProvider.notifier)
-                        .fetchRecordBooks(),
-                    child: Text(
-                      'إعادة المحاولة',
-                      style: TextStyle(fontFamily: 'Tajawal'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            data: (books) {
-              if (books.isEmpty) {
-                return Center(
+          child: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : books.isEmpty
+              ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -649,18 +626,15 @@ class AddRegistryEntryScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                );
-              }
-              return ListView.builder(
-                itemCount: books.length,
-                itemBuilder: (context, index) {
-                  final book = books[index];
-                  final isSelected = state.selectedRecordBookId == book.id;
-                  return _buildRecordBookCard(book, isSelected, notifier);
-                },
-              );
-            },
-          ),
+                )
+              : ListView.builder(
+                  itemCount: books.length,
+                  itemBuilder: (context, index) {
+                    final book = books[index];
+                    final isSelected = state.selectedRecordBookId == book.id;
+                    return _buildRecordBookCard(book, isSelected, notifier);
+                  },
+                ),
         ),
         if (state.selectedRecordBookId != null)
           Padding(

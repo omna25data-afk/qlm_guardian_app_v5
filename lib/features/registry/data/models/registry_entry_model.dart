@@ -24,6 +24,15 @@ class RegistryEntryModel extends Equatable {
   final String? status; // draft, pending, documented, etc.
   @JsonKey(name: 'serial_number')
   final int? serialNumber;
+  @JsonKey(name: 'status_label')
+  final String? statusLabel;
+  @JsonKey(name: 'status_color')
+  final String? statusColor;
+  @JsonKey(name: 'delivery_status_label')
+  final String? deliveryStatusLabel;
+  @JsonKey(name: 'delivery_status_color')
+  final String? deliveryStatusColor;
+
   @JsonKey(name: 'register_number')
   final String? registerNumber;
 
@@ -36,7 +45,14 @@ class RegistryEntryModel extends Equatable {
 
   // --- Content ---
   final String? subject;
-  final String? content;
+  final String? content; // Kept for legacy/display if needed
+  final String? notes; // Mapped to backend 'notes'
+
+  // --- Subtypes ---
+  @JsonKey(name: 'subtype_1')
+  final int? subtype1;
+  @JsonKey(name: 'subtype_2')
+  final int? subtype2;
 
   // --- Parties (Flattened) ---
   @JsonKey(name: 'first_party_name')
@@ -98,6 +114,8 @@ class RegistryEntryModel extends Equatable {
   final double? authenticationFeeAmount;
   @JsonKey(name: 'transfer_fee_amount')
   final double? transferFeeAmount;
+  @JsonKey(name: 'other_fee_amount')
+  final double? otherFeeAmount;
   @JsonKey(name: 'support_amount')
   final double? supportAmount;
   @JsonKey(name: 'sustainability_amount')
@@ -110,6 +128,8 @@ class RegistryEntryModel extends Equatable {
   final String? receiptNumber;
   @JsonKey(name: 'exemption_type')
   final String? exemptionType;
+  @JsonKey(name: 'exemption_reason')
+  final String? exemptionReason;
 
   // --- Advanced Relations ---
   @JsonKey(name: 'constraintable_type')
@@ -122,6 +142,12 @@ class RegistryEntryModel extends Equatable {
   // --- System ---
   @JsonKey(name: 'created_at')
   final DateTime? createdAt;
+
+  // Use form_data for dynamic fields to match backend
+  @JsonKey(name: 'form_data')
+  final Map<String, dynamic>? formData;
+
+  // Deprecated: kept for backward compatibility if needed locally, but verified upstream uses form_data
   @JsonKey(name: 'extra_attributes')
   final Map<String, dynamic>? extraAttributes;
 
@@ -134,6 +160,10 @@ class RegistryEntryModel extends Equatable {
     this.contractType,
     this.constraintTypeId,
     this.status = 'draft',
+    this.statusLabel,
+    this.statusColor,
+    this.deliveryStatusLabel,
+    this.deliveryStatusColor,
     this.serialNumber,
     this.registerNumber,
     this.date,
@@ -141,6 +171,9 @@ class RegistryEntryModel extends Equatable {
     this.hijriDate,
     this.subject,
     this.content,
+    this.notes,
+    this.subtype1,
+    this.subtype2,
     this.firstPartyName,
     this.secondPartyName,
     this.writerType,
@@ -166,16 +199,19 @@ class RegistryEntryModel extends Equatable {
     this.penaltyAmount,
     this.authenticationFeeAmount,
     this.transferFeeAmount,
+    this.otherFeeAmount,
     this.supportAmount,
     this.sustainabilityAmount,
     this.totalAmount = 0.0,
     this.paidAmount = 0.0,
     this.receiptNumber,
     this.exemptionType,
+    this.exemptionReason,
     this.constraintableType,
     this.constraintableId,
     this.deliveryStatus,
     this.createdAt,
+    this.formData,
     this.extraAttributes,
   });
 
@@ -188,15 +224,31 @@ class RegistryEntryModel extends Equatable {
     uuid,
     remoteId,
     status,
+    statusLabel,
+    statusColor,
     serialNumber,
     guardianRecordBookId,
     contractTypeId,
     contractType,
     extraAttributes,
+    formData,
+    notes,
+    subtype1,
+    subtype2,
     firstPartyName,
     secondPartyName,
     writerType,
     totalAmount,
+    subject,
+    content,
+    hijriYear,
+    registerNumber,
+    feeAmount,
+    penaltyAmount,
+    authenticationFeeAmount,
+    transferFeeAmount,
+    otherFeeAmount,
+    exemptionReason,
   ];
 
   RegistryEntryModel copyWith({
@@ -208,6 +260,10 @@ class RegistryEntryModel extends Equatable {
     ContractTypeModel? contractType,
     int? constraintTypeId,
     String? status,
+    String? statusLabel,
+    String? statusColor,
+    String? deliveryStatusLabel,
+    String? deliveryStatusColor,
     int? serialNumber,
     String? registerNumber,
     DateTime? date,
@@ -215,6 +271,9 @@ class RegistryEntryModel extends Equatable {
     String? hijriDate,
     String? subject,
     String? content,
+    String? notes,
+    int? subtype1,
+    int? subtype2,
     String? firstPartyName,
     String? secondPartyName,
     String? writerType,
@@ -240,16 +299,19 @@ class RegistryEntryModel extends Equatable {
     double? penaltyAmount,
     double? authenticationFeeAmount,
     double? transferFeeAmount,
+    double? otherFeeAmount,
     double? supportAmount,
     double? sustainabilityAmount,
     double? totalAmount,
     double? paidAmount,
     String? receiptNumber,
     String? exemptionType,
+    String? exemptionReason,
     String? constraintableType,
     int? constraintableId,
     String? deliveryStatus,
     DateTime? createdAt,
+    Map<String, dynamic>? formData,
     Map<String, dynamic>? extraAttributes,
   }) {
     return RegistryEntryModel(
@@ -261,6 +323,10 @@ class RegistryEntryModel extends Equatable {
       contractType: contractType ?? this.contractType,
       constraintTypeId: constraintTypeId ?? this.constraintTypeId,
       status: status ?? this.status,
+      statusLabel: statusLabel ?? this.statusLabel,
+      statusColor: statusColor ?? this.statusColor,
+      deliveryStatusLabel: deliveryStatusLabel ?? this.deliveryStatusLabel,
+      deliveryStatusColor: deliveryStatusColor ?? this.deliveryStatusColor,
       serialNumber: serialNumber ?? this.serialNumber,
       registerNumber: registerNumber ?? this.registerNumber,
       date: date ?? this.date,
@@ -268,6 +334,9 @@ class RegistryEntryModel extends Equatable {
       hijriDate: hijriDate ?? this.hijriDate,
       subject: subject ?? this.subject,
       content: content ?? this.content,
+      notes: notes ?? this.notes,
+      subtype1: subtype1 ?? this.subtype1,
+      subtype2: subtype2 ?? this.subtype2,
       firstPartyName: firstPartyName ?? this.firstPartyName,
       secondPartyName: secondPartyName ?? this.secondPartyName,
       writerType: writerType ?? this.writerType,
@@ -296,16 +365,19 @@ class RegistryEntryModel extends Equatable {
       authenticationFeeAmount:
           authenticationFeeAmount ?? this.authenticationFeeAmount,
       transferFeeAmount: transferFeeAmount ?? this.transferFeeAmount,
+      otherFeeAmount: otherFeeAmount ?? this.otherFeeAmount,
       supportAmount: supportAmount ?? this.supportAmount,
       sustainabilityAmount: sustainabilityAmount ?? this.sustainabilityAmount,
       totalAmount: totalAmount ?? this.totalAmount,
       paidAmount: paidAmount ?? this.paidAmount,
       receiptNumber: receiptNumber ?? this.receiptNumber,
       exemptionType: exemptionType ?? this.exemptionType,
+      exemptionReason: exemptionReason ?? this.exemptionReason,
       constraintableType: constraintableType ?? this.constraintableType,
       constraintableId: constraintableId ?? this.constraintableId,
       deliveryStatus: deliveryStatus ?? this.deliveryStatus,
       createdAt: createdAt ?? this.createdAt,
+      formData: formData ?? this.formData,
       extraAttributes: extraAttributes ?? this.extraAttributes,
     );
   }

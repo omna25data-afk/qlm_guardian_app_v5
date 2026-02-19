@@ -75,10 +75,10 @@ Future<void> initDependencies() async {
   );
 
   // --- System Repository (Generated) ---
-  getIt.registerLazySingleton<SystemRepository>(
-    () =>
-        SystemRepository(getIt<ApiClient>().dio, baseUrl: AppConfig.apiBaseUrl),
-  );
+  getIt.registerLazySingleton<SystemRepository>(() {
+    final baseUrl = AppConfig.apiBaseUrl.replaceAll(RegExp(r'/api$'), '');
+    return SystemRepository(getIt<ApiClient>().dio, baseUrl: baseUrl);
+  });
 
   // --- Migrated Features (v4 → v5) ---
 
@@ -87,7 +87,11 @@ Future<void> initDependencies() async {
   );
 
   getIt.registerLazySingleton<RecordsRepository>(
-    () => RecordsRepository(getIt<ApiClient>()),
+    () => RecordsRepository(
+      getIt<ApiClient>(),
+      getIt<NetworkInfo>(),
+      getIt<Box<dynamic>>(instanceName: 'cacheBox'),
+    ),
   );
 
   getIt.registerLazySingleton<DashboardRepository>(

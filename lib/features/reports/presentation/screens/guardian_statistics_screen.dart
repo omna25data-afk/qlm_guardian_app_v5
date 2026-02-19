@@ -24,11 +24,13 @@ class GuardianStatisticsScreen extends ConsumerWidget {
               margin: const EdgeInsets.only(bottom: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: AppColors.primary.withOpacity(0.1)),
+                side: BorderSide(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                ),
               ),
               child: ExpansionTile(
                 leading: CircleAvatar(
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                   child: Text(
                     '${index + 1}',
                     style: TextStyle(
@@ -49,7 +51,7 @@ class GuardianStatisticsScreen extends ConsumerWidget {
                     Text(
                       '${guardian.totalAmount.toStringAsFixed(2)} ر.س',
                       style: TextStyle(
-                        color: AppColors.secondary,
+                        color: AppColors.accent,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),

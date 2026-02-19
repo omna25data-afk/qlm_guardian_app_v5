@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../presentation/providers/admin_dashboard_provider.dart';
-import '../../../registry/data/models/registry_entry_model.dart';
+import '../../../system/data/models/registry_entry_sections.dart';
 
 class AdminEntriesState {
-  final List<RegistryEntryModel> entries;
+  final List<RegistryEntrySections> entries;
   final bool isLoading;
   final String? error;
   final bool hasMore;
@@ -22,7 +22,7 @@ class AdminEntriesState {
   });
 
   AdminEntriesState copyWith({
-    List<RegistryEntryModel>? entries,
+    List<RegistryEntrySections>? entries,
     bool? isLoading,
     String? error,
     bool? hasMore,

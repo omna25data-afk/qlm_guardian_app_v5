@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../registry/data/models/registry_entry_model.dart';
+import '../../../system/data/models/registry_entry_sections.dart';
 
 class PremiumEntryCard extends StatelessWidget {
-  final RegistryEntryModel entry;
+  final RegistryEntrySections entry;
   final VoidCallback onTap;
 
   const PremiumEntryCard({super.key, required this.entry, required this.onTap});
@@ -44,7 +44,7 @@ class PremiumEntryCard extends StatelessWidget {
                   ),
                   child: Center(
                     child: Icon(
-                      _getContractIcon(entry.contractTypeId),
+                      _getContractIcon(entry.basicInfo.contractTypeId),
                       color: AppColors.primary,
                       size: 26,
                     ),
@@ -60,7 +60,8 @@ class PremiumEntryCard extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              entry.contractType?.name ?? 'نوع غير محدد',
+                              entry.basicInfo.contractType?.name ??
+                                  'نوع غير محدد',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
@@ -70,12 +71,12 @@ class PremiumEntryCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          _buildStatusBadge(entry.status),
+                          _buildStatusBadge(entry.statusInfo.status),
                         ],
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'أطراف العقد: ${entry.firstPartyName ?? "-"} / ${entry.secondPartyName ?? "-"}',
+                        'أطراف العقد: ${entry.basicInfo.firstPartyName} / ${entry.basicInfo.secondPartyName}',
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12,
@@ -94,7 +95,7 @@ class PremiumEntryCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            entry.documentHijriDate ?? entry.hijriDate ?? '---',
+                            entry.documentInfo.documentHijriDate ?? '---',
                             style: TextStyle(
                               color: Colors.grey[500],
                               fontSize: 12,
@@ -105,7 +106,7 @@ class PremiumEntryCard extends StatelessWidget {
                           Icon(Icons.tag, size: 14, color: Colors.grey[500]),
                           const SizedBox(width: 4),
                           Text(
-                            '#${entry.serialNumber ?? entry.registerNumber ?? "---"}',
+                            '#${entry.basicInfo.serialNumber != 0 ? entry.basicInfo.serialNumber : (entry.basicInfo.registerNumber ?? "---")}',
                             style: TextStyle(
                               color: Colors.grey[500],
                               fontSize: 12,
@@ -126,7 +127,7 @@ class PremiumEntryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(String? status) {
+  Widget _buildStatusBadge(String status) {
     Color color = _getStatusColor(status);
     String text = _getStatusText(status);
 
@@ -148,8 +149,8 @@ class PremiumEntryCard extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String? status) {
-    switch (status?.toLowerCase()) {
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
       case 'documented':
       case 'موثق':
         return AppColors.success;
@@ -166,8 +167,8 @@ class PremiumEntryCard extends StatelessWidget {
     }
   }
 
-  String _getStatusText(String? status) {
-    switch (status?.toLowerCase()) {
+  String _getStatusText(String status) {
+    switch (status.toLowerCase()) {
       case 'documented':
         return 'موثق';
       case 'pending':
@@ -177,7 +178,7 @@ class PremiumEntryCard extends StatelessWidget {
       case 'draft':
         return 'مسودة';
       default:
-        return status ?? '---';
+        return status;
     }
   }
 

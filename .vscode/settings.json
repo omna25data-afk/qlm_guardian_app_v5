@@ -1,0 +1,9 @@
+{
+    "dart.flutterSdkPath": "F:\\DevZone\\SDKs\\flutter",
+    "dart.sdkPath": "F:\\DevZone\\SDKs\\flutter\\bin\\cache\\dart-sdk",
+    "dart.env": {
+        "ANDROID_HOME": "F:\\DevZone\\SDKs\\android-sdk"
+    },
+    "dart.customDartDapPath": null,
+    "dart.customFlutterDapPath": null
+}

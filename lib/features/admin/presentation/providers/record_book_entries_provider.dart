@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:qlm_guardian_app_v5/features/registry/data/models/registry_entry_model.dart';
+import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart';
 import '../../data/repositories/admin_repository.dart';
 import '../../../../core/di/injection.dart';
 
@@ -7,14 +7,14 @@ import '../../../../core/di/injection.dart';
 final recordBookEntriesProvider = StateNotifierProvider.autoDispose
     .family<
       RecordBookEntriesNotifier,
-      AsyncValue<List<RegistryEntryModel>>,
+      AsyncValue<List<RegistryEntrySections>>,
       int
     >((ref, recordBookId) {
       return RecordBookEntriesNotifier(getIt<AdminRepository>(), recordBookId);
     });
 
 class RecordBookEntriesNotifier
-    extends StateNotifier<AsyncValue<List<RegistryEntryModel>>> {
+    extends StateNotifier<AsyncValue<List<RegistryEntrySections>>> {
   final AdminRepository _repository;
   final int recordBookId;
 

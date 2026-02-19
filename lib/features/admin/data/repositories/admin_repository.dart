@@ -7,7 +7,7 @@ import '../models/admin_dashboard_data.dart';
 import '../models/admin_guardian_model.dart';
 import '../models/admin_renewal_model.dart';
 import '../../../records/data/models/record_book.dart';
-import '../../../registry/data/models/registry_entry_model.dart';
+import '../../../system/data/models/registry_entry_sections.dart';
 
 import '../../../system/data/repositories/system_repository.dart';
 
@@ -313,7 +313,7 @@ class AdminRepository {
   // ─── Registry Entries ────────────────────────────────────
 
   /// Fetch registry entries (Admin)
-  Future<List<RegistryEntryModel>> getRegistryEntries({
+  Future<List<RegistryEntrySections>> getRegistryEntries({
     int page = 1,
     String? searchQuery,
     String? status,
@@ -342,7 +342,7 @@ class AdminRepository {
         ? response.data['data']
         : (response.data is List ? response.data : null);
 
-    return data?.map((e) => RegistryEntryModel.fromJson(e)).toList() ?? [];
+    return data?.map((e) => RegistryEntrySections.fromJson(e)).toList() ?? [];
   }
 
   // ─── Reports ─────────────────────────────────────────────
@@ -489,7 +489,7 @@ class AdminRepository {
   // ─── Registry Entry Actions ─────────────────────────────
 
   /// Fetch pending documentation entries
-  Future<List<RegistryEntryModel>> getPendingEntries({
+  Future<List<RegistryEntrySections>> getPendingEntries({
     int page = 1,
     String? search,
     int? year,
@@ -505,7 +505,7 @@ class AdminRepository {
       queryParameters: params,
     );
     return (response.data['data'] as List?)
-            ?.map((e) => RegistryEntryModel.fromJson(e))
+            ?.map((e) => RegistryEntrySections.fromJson(e))
             .toList() ??
         [];
   }
@@ -614,6 +614,17 @@ class AdminRepository {
   Future<List<Map<String, dynamic>>> getOtherWriters() async {
     final response = await _apiClient.get(ApiEndpoints.adminOtherWriters);
     return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
+  /// Fetch form fields for a contract type
+  Future<List<Map<String, dynamic>>> getFormFields(int contractTypeId) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.formFields(contractTypeId),
+    );
+    return (response.data['fields'] as List?)
             ?.map((e) => e as Map<String, dynamic>)
             .toList() ??
         [];
