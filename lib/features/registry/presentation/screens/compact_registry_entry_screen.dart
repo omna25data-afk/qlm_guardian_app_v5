@@ -5,7 +5,6 @@ import 'package:hijri/hijri_calendar.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../admin/presentation/providers/add_entry_provider.dart';
-import '../widgets/contract_type_selector.dart';
 import '../widgets/parties_section.dart';
 import '../widgets/documentation_section.dart';
 import '../widgets/guardian_section.dart';
@@ -64,6 +63,13 @@ class _CompactRegistryEntryScreenState
   final _guardianRecordBookNumberCtrl = TextEditingController();
   final _guardianPageNumberCtrl = TextEditingController();
   final _guardianEntryNumberCtrl = TextEditingController();
+  final _guardianHijriDateCtrl = TextEditingController();
+  final _guardianGregorianDateCtrl = TextEditingController();
+  final _taxAmountCtrl = TextEditingController();
+  final _taxReceiptNumberCtrl = TextEditingController();
+  final _zakatAmountCtrl = TextEditingController();
+  final _zakatReceiptNumberCtrl = TextEditingController();
+  final _exemptionReasonCtrl = TextEditingController();
   final Map<String, TextEditingController> _dynamicControllers = {};
 
   @override
@@ -87,6 +93,8 @@ class _CompactRegistryEntryScreenState
     _documentGregorianDateCtrl.text = DateTime.now().toString().split(' ')[0];
     _docHijriDateCtrl.text = todayHijri.toString();
     _docGregorianDateCtrl.text = DateTime.now().toString().split(' ')[0];
+    _guardianHijriDateCtrl.text = todayHijri.toString();
+    _guardianGregorianDateCtrl.text = DateTime.now().toString().split(' ')[0];
 
     // Monitor connectivity
     Connectivity().onConnectivityChanged.listen((results) {
@@ -118,6 +126,13 @@ class _CompactRegistryEntryScreenState
     _guardianRecordBookNumberCtrl.dispose();
     _guardianPageNumberCtrl.dispose();
     _guardianEntryNumberCtrl.dispose();
+    _guardianHijriDateCtrl.dispose();
+    _guardianGregorianDateCtrl.dispose();
+    _taxAmountCtrl.dispose();
+    _taxReceiptNumberCtrl.dispose();
+    _zakatAmountCtrl.dispose();
+    _zakatReceiptNumberCtrl.dispose();
+    _exemptionReasonCtrl.dispose();
     for (final c in _dynamicControllers.values) {
       c.dispose();
     }
@@ -127,6 +142,17 @@ class _CompactRegistryEntryScreenState
   // ── Fee Calculation ──
   void _calculateFees() {
     if (_selectedContractTypeId == null) return;
+
+    if (_isExempted) {
+      setState(() {
+        _feeAmountCtrl.text = '0.00';
+        _penaltyAmountCtrl.text = '0.00';
+        _supportAmountCtrl.text = '0.00';
+        _sustainabilityAmountCtrl.text = '0.00';
+        _totalAmountCtrl.text = '0.00';
+      });
+      return;
+    }
 
     final contractId = _selectedContractTypeId!;
     double baseFee = 0;
@@ -198,9 +224,14 @@ class _CompactRegistryEntryScreenState
           double.tryParse(_sustainabilityAmountCtrl.text) ?? 200,
       'total_amount': double.tryParse(_totalAmountCtrl.text) ?? 0,
       'is_exempted': _isExempted,
+      'exemption_reason': _isExempted ? _exemptionReasonCtrl.text : null,
       'has_authentication_fee': _hasAuthenticationFee,
       'has_transfer_fee': _hasTransferFee,
       'has_other_fee': _hasOtherFee,
+      'tax_amount': double.tryParse(_taxAmountCtrl.text),
+      'tax_receipt_number': _taxReceiptNumberCtrl.text,
+      'zakat_amount': double.tryParse(_zakatAmountCtrl.text),
+      'zakat_receipt_number': _zakatReceiptNumberCtrl.text,
     };
 
     if (_selectedDocRecordBookId != null) {
@@ -218,6 +249,8 @@ class _CompactRegistryEntryScreenState
       data['guardian_entry_number'] = int.tryParse(
         _guardianEntryNumberCtrl.text,
       );
+      data['guardian_hijri_date'] = _guardianHijriDateCtrl.text;
+      data['guardian_gregorian_date'] = _guardianGregorianDateCtrl.text;
     } else if (_writerType == 'documentation') {
       data['writer_id'] = _selectedWriterId;
     } else if (_writerType == 'external') {
@@ -283,23 +316,19 @@ class _CompactRegistryEntryScreenState
                       // Connectivity banner
                       if (!_isOnline) _buildOfflineBanner(),
 
-                      // Contract Type
-                      ContractTypeSelector(
-                        contractTypes: state.contractTypes,
-                        selectedId: _selectedContractTypeId,
-                        onSelected: _onContractTypeSelected,
-                      ),
-                      const SizedBox(height: 20),
-
                       // Parties & Writer
                       FormSectionCard(
                         title: 'الكاتب والأطراف',
                         icon: Icons.people_alt,
                         accentColor: AppColors.primary,
                         child: PartiesSection(
+                          contractTypes: state.contractTypes,
                           selectedContractTypeId: _selectedContractTypeId,
+                          onContractTypeSelected: _onContractTypeSelected,
                           writerType: _writerType,
                           selectedGuardianId: _selectedGuardianId,
+                          selectedWriterId: _selectedWriterId,
+                          selectedOtherWriterId: _selectedOtherWriterId,
                           firstPartyController: _firstPartyCtrl,
                           secondPartyController: _secondPartyCtrl,
                           documentHijriDateController: _documentHijriDateCtrl,
@@ -321,16 +350,71 @@ class _CompactRegistryEntryScreenState
                           },
                           onGuardianChanged: (v) =>
                               setState(() => _selectedGuardianId = v),
+                          onWriterChanged: (v) =>
+                              setState(() => _selectedWriterId = v),
+                          onOtherWriterChanged: (v) =>
+                              setState(() => _selectedOtherWriterId = v),
                           onFeesRecalculate: _calculateFees,
                         ),
                       ),
                       const SizedBox(height: 16),
 
-                      // Documentation
+                      // Guardian (if writer is guardian)
+                      if (_writerType == 'guardian')
+                        FormSectionCard(
+                          title: 'سجل قيد محررات الأمين',
+                          icon: Icons.verified_user,
+                          accentColor: AppColors.success,
+                          isCollapsible: true,
+                          child: GuardianSection(
+                            guardianRecordBookId: _guardianRecordBookId,
+                            recordBookNumberCtrl: _guardianRecordBookNumberCtrl,
+                            pageNumberCtrl: _guardianPageNumberCtrl,
+                            entryNumberCtrl: _guardianEntryNumberCtrl,
+                            hijriDateCtrl: _guardianHijriDateCtrl,
+                            gregorianDateCtrl: _guardianGregorianDateCtrl,
+                            onRecordBookIdChanged: (v) =>
+                                setState(() => _guardianRecordBookId = v),
+                          ),
+                        ),
+                      if (_writerType == 'guardian') const SizedBox(height: 16),
+
+                      // Documentation & Financial Fields
+                      if (_writerType == 'guardian' &&
+                          _selectedGuardianId != null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.blue.shade200),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.blue,
+                                size: 20,
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'بما أن القيد مقيد في سجل الأمين مسبقاً، يرجى استكمال بيانات التوثيق والرسوم المالية أدناه لإتمام المرحلة.',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       FormSectionCard(
-                        title: 'التوثيق',
-                        icon: Icons.description,
-                        accentColor: AppColors.accent,
+                        title: 'بيانات قلم التوثيق',
+                        icon: Icons.account_balance,
+                        accentColor: AppColors.success,
                         child: DocumentationSection(
                           selectedContractTypeId: _selectedContractTypeId,
                           selectedDocRecordBookId: _selectedDocRecordBookId,
@@ -345,6 +429,11 @@ class _CompactRegistryEntryScreenState
                           sustainabilityAmountCtrl: _sustainabilityAmountCtrl,
                           totalAmountCtrl: _totalAmountCtrl,
                           receiptNumberCtrl: _receiptNumberCtrl,
+                          taxAmountCtrl: _taxAmountCtrl,
+                          taxReceiptNumberCtrl: _taxReceiptNumberCtrl,
+                          zakatAmountCtrl: _zakatAmountCtrl,
+                          zakatReceiptNumberCtrl: _zakatReceiptNumberCtrl,
+                          exemptionReasonCtrl: _exemptionReasonCtrl,
                           isExempted: _isExempted,
                           hasAuthenticationFee: _hasAuthenticationFee,
                           hasTransferFee: _hasTransferFee,
@@ -373,24 +462,6 @@ class _CompactRegistryEntryScreenState
                         totalAmount: _totalAmountCtrl.text,
                         isExempted: _isExempted,
                       ),
-                      const SizedBox(height: 16),
-
-                      // Guardian (if writer is guardian)
-                      if (_writerType == 'guardian')
-                        FormSectionCard(
-                          title: 'بيانات سجل الأمين',
-                          icon: Icons.verified_user,
-                          accentColor: AppColors.success,
-                          isCollapsible: true,
-                          child: GuardianSection(
-                            guardianRecordBookId: _guardianRecordBookId,
-                            recordBookNumberCtrl: _guardianRecordBookNumberCtrl,
-                            pageNumberCtrl: _guardianPageNumberCtrl,
-                            entryNumberCtrl: _guardianEntryNumberCtrl,
-                            onRecordBookIdChanged: (v) =>
-                                setState(() => _guardianRecordBookId = v),
-                          ),
-                        ),
                       const SizedBox(height: 24),
 
                       // Submit Button

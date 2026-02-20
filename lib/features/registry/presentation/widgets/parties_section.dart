@@ -6,6 +6,7 @@ import 'package:hijri_picker/hijri_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/searchable_dropdown.dart';
 import '../../../admin/presentation/providers/add_entry_provider.dart';
+import 'contract_type_selector.dart';
 import 'dynamic_field_builder.dart';
 
 /// Contract type party labels
@@ -20,9 +21,13 @@ const Map<int, Map<String, String>> contractPartyLabels = {
 };
 
 class PartiesSection extends ConsumerStatefulWidget {
+  final List<Map<String, dynamic>> contractTypes;
   final int? selectedContractTypeId;
+  final ValueChanged<int> onContractTypeSelected;
   final String writerType;
   final int? selectedGuardianId;
+  final int? selectedWriterId;
+  final int? selectedOtherWriterId;
   final TextEditingController firstPartyController;
   final TextEditingController secondPartyController;
   final TextEditingController documentHijriDateController;
@@ -36,13 +41,19 @@ class PartiesSection extends ConsumerStatefulWidget {
   final ValueChanged<String?> onSubtype2Changed;
   final ValueChanged<String> onWriterTypeChanged;
   final ValueChanged<int?> onGuardianChanged;
+  final ValueChanged<int?> onWriterChanged;
+  final ValueChanged<int?> onOtherWriterChanged;
   final VoidCallback onFeesRecalculate;
 
   const PartiesSection({
     super.key,
+    required this.contractTypes,
     required this.selectedContractTypeId,
+    required this.onContractTypeSelected,
     required this.writerType,
     required this.selectedGuardianId,
+    required this.selectedWriterId,
+    required this.selectedOtherWriterId,
     required this.firstPartyController,
     required this.secondPartyController,
     required this.documentHijriDateController,
@@ -56,6 +67,8 @@ class PartiesSection extends ConsumerStatefulWidget {
     required this.onSubtype2Changed,
     required this.onWriterTypeChanged,
     required this.onGuardianChanged,
+    required this.onWriterChanged,
+    required this.onOtherWriterChanged,
     required this.onFeesRecalculate,
   });
 
@@ -101,49 +114,15 @@ class _PartiesSectionState extends ConsumerState<PartiesSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Writer Type
-        _buildWriterTypeSelector(),
-        const SizedBox(height: 16),
-
-        // Guardian Selector (if guardian writer type)
-        if (widget.writerType == 'guardian') ...[
-          SearchableDropdown(
-            items: state.guardians,
-            label: 'اسم الأمين',
-            value: widget.selectedGuardianId != null
-                ? state.guardians.firstWhere(
-                    (e) => e['id'] == widget.selectedGuardianId,
-                    orElse: () => {},
-                  )
-                : null,
-            itemLabelBuilder: (i) => i['name'],
-            onChanged: (v) => widget.onGuardianChanged(v?['id']),
-          ),
-          const SizedBox(height: 16),
-        ],
-
-        // Dynamic subtypes + parties
-        if (widget.selectedContractTypeId != null) ...[
-          ..._buildSubtypes(state),
-          ..._buildPartyFields(),
-          ..._buildContractSpecificFields(),
-          DynamicFieldBuilder(
-            fields: state.filteredFields,
-            isLoading: state.isLoadingFields,
-            controllers: widget.dynamicControllers,
-            onFieldChanged: (entry) {
-              ref
-                  .read(addEntryProvider.notifier)
-                  .updateFormData(entry.key, entry.value);
-              if (entry.key == 'sale_price') {
-                Future.delayed(Duration.zero, widget.onFeesRecalculate);
-              }
-            },
-          ),
-        ],
+        // Contract Type
+        ContractTypeSelector(
+          contractTypes: widget.contractTypes,
+          selectedId: widget.selectedContractTypeId,
+          onSelected: widget.onContractTypeSelected,
+        ),
+        const SizedBox(height: 24),
 
         // Document Date
-        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -174,6 +153,35 @@ class _PartiesSectionState extends ConsumerState<PartiesSection> {
             ),
           ],
         ),
+        const SizedBox(height: 24),
+
+        // Writer Type
+        _buildWriterTypeSelector(),
+        const SizedBox(height: 16),
+
+        // Writer Selector based on type
+        _buildWriterSelector(state),
+        const SizedBox(height: 16),
+
+        // Dynamic subtypes + parties
+        if (widget.selectedContractTypeId != null) ...[
+          ..._buildSubtypes(state),
+          ..._buildPartyFields(),
+          ..._buildContractSpecificFields(),
+          DynamicFieldBuilder(
+            fields: state.filteredFields,
+            isLoading: state.isLoadingFields,
+            controllers: widget.dynamicControllers,
+            onFieldChanged: (entry) {
+              ref
+                  .read(addEntryProvider.notifier)
+                  .updateFormData(entry.key, entry.value);
+              if (entry.key == 'sale_price') {
+                Future.delayed(Duration.zero, widget.onFeesRecalculate);
+              }
+            },
+          ),
+        ],
       ],
     );
   }
@@ -196,13 +204,81 @@ class _PartiesSectionState extends ConsumerState<PartiesSection> {
           children: [
             _writerChip('guardian', 'أمين شرعي', Icons.verified_user),
             const SizedBox(width: 8),
-            _writerChip('documentation', 'موظف توثيق', Icons.badge),
+            _writerChip('documentation', 'قلم التوثيق', Icons.badge),
             const SizedBox(width: 8),
-            _writerChip('external', 'كاتب خارجي', Icons.person_outline),
+            _writerChip('external', 'كاتب آخر', Icons.person_outline),
           ],
         ),
       ],
     );
+  }
+
+  Widget _buildWriterSelector(AddEntryState state) {
+    if (widget.writerType == 'guardian') {
+      return SearchableDropdown<Map<String, dynamic>>(
+        items: state.guardians,
+        label: 'اختر الأمين *',
+        hint: 'ابحث عن اسم الأمين...',
+        value: widget.selectedGuardianId != null
+            ? state.guardians.firstWhere(
+                (g) => g['id'] == widget.selectedGuardianId,
+                orElse: () => {},
+              )
+            : null,
+        itemLabelBuilder: (item) => item['name']?.toString() ?? '',
+        onChanged: (item) {
+          if (item != null) widget.onGuardianChanged(item['id'] as int);
+        },
+        validator: (item) =>
+            widget.writerType == 'guardian' && (item == null || item.isEmpty)
+            ? 'مطلوب'
+            : null,
+      );
+    } else if (widget.writerType == 'documentation') {
+      return SearchableDropdown<Map<String, dynamic>>(
+        items: state.writers,
+        label: 'اختر الموثق *',
+        hint: 'ابحث عن الموثق في قلم التوثيق...',
+        value: widget.selectedWriterId != null
+            ? state.writers.firstWhere(
+                (w) => w['id'] == widget.selectedWriterId,
+                orElse: () => {},
+              )
+            : null,
+        itemLabelBuilder: (item) => item['name']?.toString() ?? '',
+        onChanged: (item) {
+          if (item != null) {
+            widget.onWriterChanged(item['id'] as int);
+            widget.onFeesRecalculate();
+          }
+        },
+        validator: (item) =>
+            widget.writerType == 'documentation' &&
+                (item == null || item.isEmpty)
+            ? 'مطلوب'
+            : null,
+      );
+    } else {
+      return SearchableDropdown<Map<String, dynamic>>(
+        items: state.otherWriters,
+        label: 'اختر الكاتب *',
+        hint: 'ابحث عن كاتب آخر...',
+        value: widget.selectedOtherWriterId != null
+            ? state.otherWriters.firstWhere(
+                (w) => w['id'] == widget.selectedOtherWriterId,
+                orElse: () => {},
+              )
+            : null,
+        itemLabelBuilder: (item) => item['name']?.toString() ?? '',
+        onChanged: (item) {
+          if (item != null) widget.onOtherWriterChanged(item['id'] as int);
+        },
+        validator: (item) =>
+            widget.writerType == 'external' && (item == null || item.isEmpty)
+            ? 'مطلوب'
+            : null,
+      );
+    }
   }
 
   Widget _writerChip(String value, String label, IconData icon) {

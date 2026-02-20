@@ -53,27 +53,63 @@ class FeeCustomization {
 
   factory FeeCustomization.fromJson(Map<String, dynamic> json) {
     return FeeCustomization(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      contractTypeId: json['contract_type_id'] != null ? (json['contract_type_id'] is int ? json['contract_type_id'] : int.tryParse(json['contract_type_id'].toString()) ?? null) : null,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      contractTypeId: json['contract_type_id'] != null
+          ? (json['contract_type_id'] is int
+                ? json['contract_type_id']
+                : int.tryParse(json['contract_type_id'].toString()) ?? null)
+          : null,
       writerType: json['writer_type'] ?? null,
-      constraintTypeId: json['constraint_type_id'] != null ? (json['constraint_type_id'] is int ? json['constraint_type_id'] : int.tryParse(json['constraint_type_id'].toString()) ?? null) : null,
+      constraintTypeId: json['constraint_type_id'] != null
+          ? (json['constraint_type_id'] is int
+                ? json['constraint_type_id']
+                : int.tryParse(json['constraint_type_id'].toString()) ?? null)
+          : null,
       constraintType: json['constraint_type'] ?? '',
       feeType: json['fee_type'] ?? '',
       feeName: json['fee_name'] ?? '',
-      baseAmount: json['base_amount'] != null ? (json['base_amount'] is num ? json['base_amount'].toDouble() : double.tryParse(json['base_amount'].toString()) ?? null) : null,
-      percentageRate: json['percentage_rate'] != null ? (json['percentage_rate'] is num ? json['percentage_rate'].toDouble() : double.tryParse(json['percentage_rate'].toString()) ?? null) : null,
-      maxAmount: json['max_amount'] != null ? (json['max_amount'] is num ? json['max_amount'].toDouble() : double.tryParse(json['max_amount'].toString()) ?? null) : null,
+      baseAmount: json['base_amount'] != null
+          ? (json['base_amount'] is num
+                ? json['base_amount'].toDouble()
+                : double.tryParse(json['base_amount'].toString()) ?? null)
+          : null,
+      percentageRate: json['percentage_rate'] != null
+          ? (json['percentage_rate'] is num
+                ? json['percentage_rate'].toDouble()
+                : double.tryParse(json['percentage_rate'].toString()) ?? null)
+          : null,
+      maxAmount: json['max_amount'] != null
+          ? (json['max_amount'] is num
+                ? json['max_amount'].toDouble()
+                : double.tryParse(json['max_amount'].toString()) ?? null)
+          : null,
       calculationBasis: json['calculation_basis'] ?? '',
       distributionRules: json['distribution_rules'] ?? null,
       taxRules: json['tax_rules'] ?? null,
       penaltyRules: json['penalty_rules'] ?? null,
       supportRules: json['support_rules'] ?? null,
-      sustainabilityFee: json['sustainability_fee'] != null ? (json['sustainability_fee'] is num ? json['sustainability_fee'].toDouble() : double.tryParse(json['sustainability_fee'].toString()) ?? null) : null,
+      sustainabilityFee: json['sustainability_fee'] != null
+          ? (json['sustainability_fee'] is num
+                ? json['sustainability_fee'].toDouble()
+                : double.tryParse(json['sustainability_fee'].toString()) ??
+                      null)
+          : null,
       conditions: json['conditions'] ?? null,
-      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
+      isActive:
+          json['is_active'] == 1 ||
+          json['is_active'] == true ||
+          json['is_active'] == '1',
       effectiveDate: json['effective_date'] ?? '',
       expiryDate: json['expiry_date'] ?? null,
-      createdBy: json['created_by'] != null ? (json['created_by'] is int ? json['created_by'] : int.tryParse(json['created_by'].toString()) ?? 0) : 0,
+      createdBy: json['created_by'] != null
+          ? (json['created_by'] is int
+                ? json['created_by']
+                : int.tryParse(json['created_by'].toString()) ?? 0)
+          : 0,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,

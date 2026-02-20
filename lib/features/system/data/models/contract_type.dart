@@ -39,23 +39,42 @@ class ContractType {
 
   factory ContractType.fromJson(Map<String, dynamic> json) {
     return ContractType(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       name: json['name'] ?? '',
       nameEn: json['name_en'] ?? null,
       description: json['description'] ?? null,
       code: json['code'] ?? '',
       settings: json['settings'] ?? null,
-      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
-      sortOrder: json['sort_order'] != null ? (json['sort_order'] is int ? json['sort_order'] : int.tryParse(json['sort_order'].toString()) ?? 0) : 0,
+      isActive:
+          json['is_active'] == 1 ||
+          json['is_active'] == true ||
+          json['is_active'] == '1',
+      sortOrder: json['sort_order'] != null
+          ? (json['sort_order'] is int
+                ? json['sort_order']
+                : int.tryParse(json['sort_order'].toString()) ?? 0)
+          : 0,
       category: json['category'] ?? null,
-      defaultFee: json['default_fee'] != null ? (json['default_fee'] is num ? json['default_fee'].toDouble() : double.tryParse(json['default_fee'].toString()) ?? null) : null,
+      defaultFee: json['default_fee'] != null
+          ? (json['default_fee'] is num
+                ? json['default_fee'].toDouble()
+                : double.tryParse(json['default_fee'].toString()) ?? null)
+          : null,
       requiredDocuments: json['required_documents'] ?? null,
       validationRules: json['validation_rules'] ?? null,
       formSchema: json['form_schema'] ?? null,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,
-      constraintTypeId: json['constraint_type_id'] != null ? (json['constraint_type_id'] is int ? json['constraint_type_id'] : int.tryParse(json['constraint_type_id'].toString()) ?? null) : null,
+      constraintTypeId: json['constraint_type_id'] != null
+          ? (json['constraint_type_id'] is int
+                ? json['constraint_type_id']
+                : int.tryParse(json['constraint_type_id'].toString()) ?? null)
+          : null,
     );
   }
 

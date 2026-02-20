@@ -19,7 +19,11 @@ class Permission {
 
   factory Permission.fromJson(Map<String, dynamic> json) {
     return Permission(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       name: json['name'] ?? '',
       nameAr: json['name_ar'] ?? null,
       guardName: json['guard_name'] ?? '',

@@ -31,16 +31,36 @@ class GuardianLicenseRenewal {
 
   factory GuardianLicenseRenewal.fromJson(Map<String, dynamic> json) {
     return GuardianLicenseRenewal(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      legitimateGuardianId: json['legitimate_guardian_id'] != null ? (json['legitimate_guardian_id'] is int ? json['legitimate_guardian_id'] : int.tryParse(json['legitimate_guardian_id'].toString()) ?? 0) : 0,
-      renewalNumber: json['renewal_number'] != null ? (json['renewal_number'] is int ? json['renewal_number'] : int.tryParse(json['renewal_number'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      legitimateGuardianId: json['legitimate_guardian_id'] != null
+          ? (json['legitimate_guardian_id'] is int
+                ? json['legitimate_guardian_id']
+                : int.tryParse(json['legitimate_guardian_id'].toString()) ?? 0)
+          : 0,
+      renewalNumber: json['renewal_number'] != null
+          ? (json['renewal_number'] is int
+                ? json['renewal_number']
+                : int.tryParse(json['renewal_number'].toString()) ?? 0)
+          : 0,
       renewalDate: json['renewal_date'] ?? '',
       receiptNumber: json['receipt_number'] ?? null,
-      receiptAmount: json['receipt_amount'] != null ? (json['receipt_amount'] is num ? json['receipt_amount'].toDouble() : double.tryParse(json['receipt_amount'].toString()) ?? null) : null,
+      receiptAmount: json['receipt_amount'] != null
+          ? (json['receipt_amount'] is num
+                ? json['receipt_amount'].toDouble()
+                : double.tryParse(json['receipt_amount'].toString()) ?? null)
+          : null,
       receiptDate: json['receipt_date'] ?? null,
       expiryDate: json['expiry_date'] ?? '',
       notes: json['notes'] ?? null,
-      createdBy: json['created_by'] != null ? (json['created_by'] is int ? json['created_by'] : int.tryParse(json['created_by'].toString()) ?? 0) : 0,
+      createdBy: json['created_by'] != null
+          ? (json['created_by'] is int
+                ? json['created_by']
+                : int.tryParse(json['created_by'].toString()) ?? 0)
+          : 0,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,

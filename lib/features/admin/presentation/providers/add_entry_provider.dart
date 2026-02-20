@@ -22,6 +22,7 @@ class AddEntryState {
   final List<Map<String, dynamic>> writers;
   final List<Map<String, dynamic>> otherWriters;
   final List<RecordBook> documentationRecordBooks;
+  final List<RecordBook> guardianRecordBooks;
   final Map<String, dynamic>? calculatedFees;
 
   // Dynamic Fields
@@ -46,6 +47,7 @@ class AddEntryState {
     this.writers = const [],
     this.otherWriters = const [],
     this.documentationRecordBooks = const [],
+    this.guardianRecordBooks = const [],
     this.calculatedFees,
     this.allFields = const [],
     this.filteredFields = const [],
@@ -67,6 +69,7 @@ class AddEntryState {
     List<Map<String, dynamic>>? writers,
     List<Map<String, dynamic>>? otherWriters,
     List<RecordBook>? documentationRecordBooks,
+    List<RecordBook>? guardianRecordBooks,
     Map<String, dynamic>? calculatedFees,
     List<Map<String, dynamic>>? allFields,
     List<Map<String, dynamic>>? filteredFields,
@@ -88,6 +91,7 @@ class AddEntryState {
       otherWriters: otherWriters ?? this.otherWriters,
       documentationRecordBooks:
           documentationRecordBooks ?? this.documentationRecordBooks,
+      guardianRecordBooks: guardianRecordBooks ?? this.guardianRecordBooks,
       calculatedFees: calculatedFees ?? this.calculatedFees,
       allFields: allFields ?? this.allFields,
       filteredFields: filteredFields ?? this.filteredFields,
@@ -223,7 +227,10 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
   }
 
   void clearRecordBooks() {
-    state = state.copyWith(documentationRecordBooks: []);
+    state = state.copyWith(
+      documentationRecordBooks: [],
+      guardianRecordBooks: [],
+    );
   }
 
   Future<void> loadDocumentationRecordBooks(int contractTypeId) async {
@@ -236,6 +243,23 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
       state = state.copyWith(documentationRecordBooks: books);
     } catch (e) {
       state = state.copyWith(documentationRecordBooks: []);
+    }
+  }
+
+  Future<void> loadGuardianRecordBooks(
+    int contractTypeId,
+    int guardianId,
+  ) async {
+    try {
+      final books = await _repo.getRecordBooks(
+        contractTypeId: contractTypeId,
+        category: 'guardian_recording',
+        guardianId: guardianId.toString(),
+        status: 'open',
+      );
+      state = state.copyWith(guardianRecordBooks: books);
+    } catch (e) {
+      state = state.copyWith(guardianRecordBooks: []);
     }
   }
 

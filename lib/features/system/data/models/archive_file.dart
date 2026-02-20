@@ -29,15 +29,27 @@ class ArchiveFile {
 
   factory ArchiveFile.fromJson(Map<String, dynamic> json) {
     return ArchiveFile(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       name: json['name'] ?? '',
       originalName: json['original_name'] ?? '',
       type: json['type'] ?? null,
       status: json['status'] ?? '',
       path: json['path'] ?? '',
-      rowsCount: json['rows_count'] != null ? (json['rows_count'] is int ? json['rows_count'] : int.tryParse(json['rows_count'].toString()) ?? 0) : 0,
+      rowsCount: json['rows_count'] != null
+          ? (json['rows_count'] is int
+                ? json['rows_count']
+                : int.tryParse(json['rows_count'].toString()) ?? 0)
+          : 0,
       errorMessage: json['error_message'] ?? null,
-      uploadedBy: json['uploaded_by'] != null ? (json['uploaded_by'] is int ? json['uploaded_by'] : int.tryParse(json['uploaded_by'].toString()) ?? null) : null,
+      uploadedBy: json['uploaded_by'] != null
+          ? (json['uploaded_by'] is int
+                ? json['uploaded_by']
+                : int.tryParse(json['uploaded_by'].toString()) ?? null)
+          : null,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,

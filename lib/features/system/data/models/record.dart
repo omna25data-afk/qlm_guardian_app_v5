@@ -37,19 +37,34 @@ class Record {
 
   factory Record.fromJson(Map<String, dynamic> json) {
     return Record(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       name: json['name'] ?? '',
       description: json['description'] ?? null,
       recordType: json['record_type'] ?? '',
       status: json['status'] ?? '',
       priority: json['priority'] ?? '',
-      assignedTo: json['assigned_to'] != null ? (json['assigned_to'] is int ? json['assigned_to'] : int.tryParse(json['assigned_to'].toString()) ?? null) : null,
-      createdBy: json['created_by'] != null ? (json['created_by'] is int ? json['created_by'] : int.tryParse(json['created_by'].toString()) ?? 0) : 0,
+      assignedTo: json['assigned_to'] != null
+          ? (json['assigned_to'] is int
+                ? json['assigned_to']
+                : int.tryParse(json['assigned_to'].toString()) ?? null)
+          : null,
+      createdBy: json['created_by'] != null
+          ? (json['created_by'] is int
+                ? json['created_by']
+                : int.tryParse(json['created_by'].toString()) ?? 0)
+          : 0,
       notes: json['notes'] ?? null,
       attachments: json['attachments'] ?? null,
       recordDate: json['record_date'] ?? null,
       expiryDate: json['expiry_date'] ?? null,
-      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
+      isActive:
+          json['is_active'] == 1 ||
+          json['is_active'] == true ||
+          json['is_active'] == '1',
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,

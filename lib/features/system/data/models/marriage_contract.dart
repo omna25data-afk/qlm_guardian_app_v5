@@ -49,22 +49,54 @@ class MarriageContract {
 
   factory MarriageContract.fromJson(Map<String, dynamic> json) {
     return MarriageContract(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      registryEntryId: json['registry_entry_id'] != null ? (json['registry_entry_id'] is int ? json['registry_entry_id'] : int.tryParse(json['registry_entry_id'].toString()) ?? null) : null,
-      constraintId: json['constraint_id'] != null ? (json['constraint_id'] is int ? json['constraint_id'] : int.tryParse(json['constraint_id'].toString()) ?? null) : null,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      registryEntryId: json['registry_entry_id'] != null
+          ? (json['registry_entry_id'] is int
+                ? json['registry_entry_id']
+                : int.tryParse(json['registry_entry_id'].toString()) ?? null)
+          : null,
+      constraintId: json['constraint_id'] != null
+          ? (json['constraint_id'] is int
+                ? json['constraint_id']
+                : int.tryParse(json['constraint_id'].toString()) ?? null)
+          : null,
       husbandName: json['husband_name'] ?? '',
       groomNationalId: json['groom_national_id'] ?? null,
       wifeName: json['wife_name'] ?? '',
       brideNationalId: json['bride_national_id'] ?? null,
       husbandBirthDate: json['husband_birth_date'] ?? null,
-      groomAge: json['groom_age'] != null ? (json['groom_age'] is int ? json['groom_age'] : int.tryParse(json['groom_age'].toString()) ?? null) : null,
+      groomAge: json['groom_age'] != null
+          ? (json['groom_age'] is int
+                ? json['groom_age']
+                : int.tryParse(json['groom_age'].toString()) ?? null)
+          : null,
       wifeBirthDate: json['wife_birth_date'] ?? null,
-      brideAge: json['bride_age'] != null ? (json['bride_age'] is int ? json['bride_age'] : int.tryParse(json['bride_age'].toString()) ?? null) : null,
-      wifeAge: json['wife_age'] != null ? (json['wife_age'] is int ? json['wife_age'] : int.tryParse(json['wife_age'].toString()) ?? 0) : 0,
+      brideAge: json['bride_age'] != null
+          ? (json['bride_age'] is int
+                ? json['bride_age']
+                : int.tryParse(json['bride_age'].toString()) ?? null)
+          : null,
+      wifeAge: json['wife_age'] != null
+          ? (json['wife_age'] is int
+                ? json['wife_age']
+                : int.tryParse(json['wife_age'].toString()) ?? 0)
+          : 0,
       guardianName: json['guardian_name'] ?? null,
       guardianRelation: json['guardian_relation'] ?? null,
-      dowryAmount: json['dowry_amount'] != null ? (json['dowry_amount'] is num ? json['dowry_amount'].toDouble() : double.tryParse(json['dowry_amount'].toString()) ?? null) : null,
-      dowryPaid: json['dowry_paid'] != null ? (json['dowry_paid'] is num ? json['dowry_paid'].toDouble() : double.tryParse(json['dowry_paid'].toString()) ?? null) : null,
+      dowryAmount: json['dowry_amount'] != null
+          ? (json['dowry_amount'] is num
+                ? json['dowry_amount'].toDouble()
+                : double.tryParse(json['dowry_amount'].toString()) ?? null)
+          : null,
+      dowryPaid: json['dowry_paid'] != null
+          ? (json['dowry_paid'] is num
+                ? json['dowry_paid'].toDouble()
+                : double.tryParse(json['dowry_paid'].toString()) ?? null)
+          : null,
       witnesses: json['witnesses'] ?? null,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,

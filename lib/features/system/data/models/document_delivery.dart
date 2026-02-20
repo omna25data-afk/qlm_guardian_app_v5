@@ -33,8 +33,16 @@ class DocumentDelivery {
 
   factory DocumentDelivery.fromJson(Map<String, dynamic> json) {
     return DocumentDelivery(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      constraintId: json['constraint_id'] != null ? (json['constraint_id'] is int ? json['constraint_id'] : int.tryParse(json['constraint_id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      constraintId: json['constraint_id'] != null
+          ? (json['constraint_id'] is int
+                ? json['constraint_id']
+                : int.tryParse(json['constraint_id'].toString()) ?? 0)
+          : 0,
       deliveredTo: json['delivered_to'] ?? '',
       receiverNationalId: json['receiver_national_id'] ?? null,
       receiverPhone: json['receiver_phone'] ?? null,
@@ -42,9 +50,20 @@ class DocumentDelivery {
       deliveryMethod: json['delivery_method'] ?? '',
       deliveryNotes: json['delivery_notes'] ?? null,
       deliveryDocumentPath: json['delivery_document_path'] ?? null,
-      deliveredBy: json['delivered_by'] != null ? (json['delivered_by'] is int ? json['delivered_by'] : int.tryParse(json['delivered_by'].toString()) ?? null) : null,
-      receivedBy: json['received_by'] != null ? (json['received_by'] is int ? json['received_by'] : int.tryParse(json['received_by'].toString()) ?? null) : null,
-      isDelivered: json['is_delivered'] == 1 || json['is_delivered'] == true || json['is_delivered'] == '1',
+      deliveredBy: json['delivered_by'] != null
+          ? (json['delivered_by'] is int
+                ? json['delivered_by']
+                : int.tryParse(json['delivered_by'].toString()) ?? null)
+          : null,
+      receivedBy: json['received_by'] != null
+          ? (json['received_by'] is int
+                ? json['received_by']
+                : int.tryParse(json['received_by'].toString()) ?? null)
+          : null,
+      isDelivered:
+          json['is_delivered'] == 1 ||
+          json['is_delivered'] == true ||
+          json['is_delivered'] == '1',
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
     );

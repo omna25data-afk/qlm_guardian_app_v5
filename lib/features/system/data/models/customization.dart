@@ -35,18 +35,41 @@ class Customization {
 
   factory Customization.fromJson(Map<String, dynamic> json) {
     return Customization(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       customizationType: json['customization_type'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? null,
       settings: json['settings'] ?? null,
-      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
-      createdBy: json['created_by'] != null ? (json['created_by'] is int ? json['created_by'] : int.tryParse(json['created_by'].toString()) ?? null) : null,
+      isActive:
+          json['is_active'] == 1 ||
+          json['is_active'] == true ||
+          json['is_active'] == '1',
+      createdBy: json['created_by'] != null
+          ? (json['created_by'] is int
+                ? json['created_by']
+                : int.tryParse(json['created_by'].toString()) ?? null)
+          : null,
       appliesTo: json['applies_to'] ?? '',
       targetType: json['target_type'] ?? null,
-      targetId: json['target_id'] != null ? (json['target_id'] is int ? json['target_id'] : int.tryParse(json['target_id'].toString()) ?? null) : null,
-      contractTypeId: json['contract_type_id'] != null ? (json['contract_type_id'] is int ? json['contract_type_id'] : int.tryParse(json['contract_type_id'].toString()) ?? null) : null,
-      displayOrder: json['display_order'] != null ? (json['display_order'] is int ? json['display_order'] : int.tryParse(json['display_order'].toString()) ?? 0) : 0,
+      targetId: json['target_id'] != null
+          ? (json['target_id'] is int
+                ? json['target_id']
+                : int.tryParse(json['target_id'].toString()) ?? null)
+          : null,
+      contractTypeId: json['contract_type_id'] != null
+          ? (json['contract_type_id'] is int
+                ? json['contract_type_id']
+                : int.tryParse(json['contract_type_id'].toString()) ?? null)
+          : null,
+      displayOrder: json['display_order'] != null
+          ? (json['display_order'] is int
+                ? json['display_order']
+                : int.tryParse(json['display_order'].toString()) ?? 0)
+          : 0,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,

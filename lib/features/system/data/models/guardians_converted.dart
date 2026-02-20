@@ -71,7 +71,11 @@ class GuardiansConverted {
       birthDate: json['birth_date'] ?? null,
       birthPlace: json['birth_place'] ?? null,
       phoneNumber: json['phone_number'] ?? null,
-      homePhone: json['home_phone'] != null ? (json['home_phone'] is int ? json['home_phone'] : int.tryParse(json['home_phone'].toString()) ?? null) : null,
+      homePhone: json['home_phone'] != null
+          ? (json['home_phone'] is int
+                ? json['home_phone']
+                : int.tryParse(json['home_phone'].toString()) ?? null)
+          : null,
       address: json['address'] ?? null,
       proofType: json['proof_type'] ?? null,
       proofNumber: json['proof_number'] ?? null,

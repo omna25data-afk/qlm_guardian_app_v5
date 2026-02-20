@@ -17,8 +17,6 @@ const Map<int, Color> _contractColors = {
   4: Color(0xFF795548), // بني
   5: Color(0xFF009688), // أخضر مزرق
   6: Color(0xFF673AB7), // بنفسجي
-  7: Color(0xFFFF5722), // أحمر برتقالي
-  8: Color(0xFF2196F3), // أزرق
   10: Color(0xFFFF9800), // برتقالي
 };
 

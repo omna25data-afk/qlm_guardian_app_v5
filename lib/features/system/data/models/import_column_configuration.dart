@@ -55,15 +55,32 @@ class ImportColumnConfiguration {
 
   factory ImportColumnConfiguration.fromJson(Map<String, dynamic> json) {
     return ImportColumnConfiguration(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       importType: json['import_type'] ?? '',
       columnName: json['column_name'] ?? '',
       displayName: json['display_name'] ?? '',
       description: json['description'] ?? null,
-      isVisible: json['is_visible'] == 1 || json['is_visible'] == true || json['is_visible'] == '1',
-      isRequired: json['is_required'] == 1 || json['is_required'] == true || json['is_required'] == '1',
-      isUnique: json['is_unique'] == 1 || json['is_unique'] == true || json['is_unique'] == '1',
-      order: json['order'] != null ? (json['order'] is int ? json['order'] : int.tryParse(json['order'].toString()) ?? 0) : 0,
+      isVisible:
+          json['is_visible'] == 1 ||
+          json['is_visible'] == true ||
+          json['is_visible'] == '1',
+      isRequired:
+          json['is_required'] == 1 ||
+          json['is_required'] == true ||
+          json['is_required'] == '1',
+      isUnique:
+          json['is_unique'] == 1 ||
+          json['is_unique'] == true ||
+          json['is_unique'] == '1',
+      order: json['order'] != null
+          ? (json['order'] is int
+                ? json['order']
+                : int.tryParse(json['order'].toString()) ?? 0)
+          : 0,
       dataType: json['data_type'] ?? '',
       validationRules: json['validation_rules'] ?? null,
       options: json['options'] ?? null,
@@ -71,13 +88,33 @@ class ImportColumnConfiguration {
       exampleValue: json['example_value'] ?? null,
       format: json['format'] ?? null,
       mappingOptions: json['mapping_options'] ?? null,
-      isSearchable: json['is_searchable'] == 1 || json['is_searchable'] == true || json['is_searchable'] == '1',
-      isSortable: json['is_sortable'] == 1 || json['is_sortable'] == true || json['is_sortable'] == '1',
-      isFilterable: json['is_filterable'] == 1 || json['is_filterable'] == true || json['is_filterable'] == '1',
-      width: json['width'] != null ? (json['width'] is int ? json['width'] : int.tryParse(json['width'].toString()) ?? null) : null,
+      isSearchable:
+          json['is_searchable'] == 1 ||
+          json['is_searchable'] == true ||
+          json['is_searchable'] == '1',
+      isSortable:
+          json['is_sortable'] == 1 ||
+          json['is_sortable'] == true ||
+          json['is_sortable'] == '1',
+      isFilterable:
+          json['is_filterable'] == 1 ||
+          json['is_filterable'] == true ||
+          json['is_filterable'] == '1',
+      width: json['width'] != null
+          ? (json['width'] is int
+                ? json['width']
+                : int.tryParse(json['width'].toString()) ?? null)
+          : null,
       alignment: json['alignment'] ?? '',
-      userId: json['user_id'] != null ? (json['user_id'] is int ? json['user_id'] : int.tryParse(json['user_id'].toString()) ?? null) : null,
-      isDefault: json['is_default'] == 1 || json['is_default'] == true || json['is_default'] == '1',
+      userId: json['user_id'] != null
+          ? (json['user_id'] is int
+                ? json['user_id']
+                : int.tryParse(json['user_id'].toString()) ?? null)
+          : null,
+      isDefault:
+          json['is_default'] == 1 ||
+          json['is_default'] == true ||
+          json['is_default'] == '1',
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
     );

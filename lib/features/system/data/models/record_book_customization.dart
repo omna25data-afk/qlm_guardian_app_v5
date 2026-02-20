@@ -41,21 +41,46 @@ class RecordBookCustomization {
 
   factory RecordBookCustomization.fromJson(Map<String, dynamic> json) {
     return RecordBookCustomization(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      recordBookTypeId: json['record_book_type_id'] != null ? (json['record_book_type_id'] is int ? json['record_book_type_id'] : int.tryParse(json['record_book_type_id'].toString()) ?? null) : null,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      recordBookTypeId: json['record_book_type_id'] != null
+          ? (json['record_book_type_id'] is int
+                ? json['record_book_type_id']
+                : int.tryParse(json['record_book_type_id'].toString()) ?? null)
+          : null,
       recordType: json['record_type'] ?? '',
       fieldName: json['field_name'] ?? '',
       fieldLabel: json['field_label'] ?? '',
       fieldType: json['field_type'] ?? '',
       fieldOptions: json['field_options'] ?? null,
-      isRequired: json['is_required'] == 1 || json['is_required'] == true || json['is_required'] == '1',
-      isVisible: json['is_visible'] == 1 || json['is_visible'] == true || json['is_visible'] == '1',
-      displayOrder: json['display_order'] != null ? (json['display_order'] is int ? json['display_order'] : int.tryParse(json['display_order'].toString()) ?? 0) : 0,
+      isRequired:
+          json['is_required'] == 1 ||
+          json['is_required'] == true ||
+          json['is_required'] == '1',
+      isVisible:
+          json['is_visible'] == 1 ||
+          json['is_visible'] == true ||
+          json['is_visible'] == '1',
+      displayOrder: json['display_order'] != null
+          ? (json['display_order'] is int
+                ? json['display_order']
+                : int.tryParse(json['display_order'].toString()) ?? 0)
+          : 0,
       validationRules: json['validation_rules'] ?? null,
       defaultValue: json['default_value'] ?? null,
       fieldGroup: json['field_group'] ?? '',
-      createdBy: json['created_by'] != null ? (json['created_by'] is int ? json['created_by'] : int.tryParse(json['created_by'].toString()) ?? 0) : 0,
-      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
+      createdBy: json['created_by'] != null
+          ? (json['created_by'] is int
+                ? json['created_by']
+                : int.tryParse(json['created_by'].toString()) ?? 0)
+          : 0,
+      isActive:
+          json['is_active'] == 1 ||
+          json['is_active'] == true ||
+          json['is_active'] == '1',
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,

@@ -11,9 +11,9 @@ class ContractTypeSummaryItem {
 
   factory ContractTypeSummaryItem.fromJson(Map<String, dynamic> json) {
     return ContractTypeSummaryItem(
-      count: json['count'] ?? 0,
-      fees: (json['fees'] ?? 0).toDouble(),
-      penalties: (json['penalties'] ?? 0).toDouble(),
+      count: int.tryParse(json['count']?.toString() ?? '0') ?? 0,
+      fees: double.tryParse(json['fees']?.toString() ?? '0') ?? 0.0,
+      penalties: double.tryParse(json['penalties']?.toString() ?? '0') ?? 0.0,
     );
   }
 }

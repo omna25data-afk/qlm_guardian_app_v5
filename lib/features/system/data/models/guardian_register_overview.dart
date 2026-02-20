@@ -35,16 +35,64 @@ class GuardianRegisterOverview {
 
   factory GuardianRegisterOverview.fromJson(Map<String, dynamic> json) {
     return GuardianRegisterOverview(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      guardianId: json['guardian_id'] != null ? (json['guardian_id'] is int ? json['guardian_id'] : int.tryParse(json['guardian_id'].toString()) ?? 0) : 0,
-      evaluationPeriodId: json['evaluation_period_id'] != null ? (json['evaluation_period_id'] is int ? json['evaluation_period_id'] : int.tryParse(json['evaluation_period_id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      guardianId: json['guardian_id'] != null
+          ? (json['guardian_id'] is int
+                ? json['guardian_id']
+                : int.tryParse(json['guardian_id'].toString()) ?? 0)
+          : 0,
+      evaluationPeriodId: json['evaluation_period_id'] != null
+          ? (json['evaluation_period_id'] is int
+                ? json['evaluation_period_id']
+                : int.tryParse(json['evaluation_period_id'].toString()) ?? 0)
+          : 0,
       registerType: json['register_type'] ?? '',
-      totalRecordBooksUsed: json['total_record_books_used'] != null ? (json['total_record_books_used'] is int ? json['total_record_books_used'] : int.tryParse(json['total_record_books_used'].toString()) ?? 0) : 0,
-      totalDocumentsRegistered: json['total_documents_registered'] != null ? (json['total_documents_registered'] is int ? json['total_documents_registered'] : int.tryParse(json['total_documents_registered'].toString()) ?? 0) : 0,
-      reviewedRecordBooksCount: json['reviewed_record_books_count'] != null ? (json['reviewed_record_books_count'] is int ? json['reviewed_record_books_count'] : int.tryParse(json['reviewed_record_books_count'].toString()) ?? 0) : 0,
-      reviewedPagesCount: json['reviewed_pages_count'] != null ? (json['reviewed_pages_count'] is int ? json['reviewed_pages_count'] : int.tryParse(json['reviewed_pages_count'].toString()) ?? 0) : 0,
-      reviewedIssuedDocumentsCount: json['reviewed_issued_documents_count'] != null ? (json['reviewed_issued_documents_count'] is int ? json['reviewed_issued_documents_count'] : int.tryParse(json['reviewed_issued_documents_count'].toString()) ?? 0) : 0,
-      reviewedRegisteredDocumentsCount: json['reviewed_registered_documents_count'] != null ? (json['reviewed_registered_documents_count'] is int ? json['reviewed_registered_documents_count'] : int.tryParse(json['reviewed_registered_documents_count'].toString()) ?? 0) : 0,
+      totalRecordBooksUsed: json['total_record_books_used'] != null
+          ? (json['total_record_books_used'] is int
+                ? json['total_record_books_used']
+                : int.tryParse(json['total_record_books_used'].toString()) ?? 0)
+          : 0,
+      totalDocumentsRegistered: json['total_documents_registered'] != null
+          ? (json['total_documents_registered'] is int
+                ? json['total_documents_registered']
+                : int.tryParse(json['total_documents_registered'].toString()) ??
+                      0)
+          : 0,
+      reviewedRecordBooksCount: json['reviewed_record_books_count'] != null
+          ? (json['reviewed_record_books_count'] is int
+                ? json['reviewed_record_books_count']
+                : int.tryParse(
+                        json['reviewed_record_books_count'].toString(),
+                      ) ??
+                      0)
+          : 0,
+      reviewedPagesCount: json['reviewed_pages_count'] != null
+          ? (json['reviewed_pages_count'] is int
+                ? json['reviewed_pages_count']
+                : int.tryParse(json['reviewed_pages_count'].toString()) ?? 0)
+          : 0,
+      reviewedIssuedDocumentsCount:
+          json['reviewed_issued_documents_count'] != null
+          ? (json['reviewed_issued_documents_count'] is int
+                ? json['reviewed_issued_documents_count']
+                : int.tryParse(
+                        json['reviewed_issued_documents_count'].toString(),
+                      ) ??
+                      0)
+          : 0,
+      reviewedRegisteredDocumentsCount:
+          json['reviewed_registered_documents_count'] != null
+          ? (json['reviewed_registered_documents_count'] is int
+                ? json['reviewed_registered_documents_count']
+                : int.tryParse(
+                        json['reviewed_registered_documents_count'].toString(),
+                      ) ??
+                      0)
+          : 0,
       firstEntryDate: json['first_entry_date'] ?? null,
       lastEntryDate: json['last_entry_date'] ?? null,
       notes: json['notes'] ?? null,

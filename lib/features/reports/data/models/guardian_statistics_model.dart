@@ -25,15 +25,20 @@ class GuardianStatisticsModel {
 
   factory GuardianStatisticsModel.fromJson(Map<String, dynamic> json) {
     return GuardianStatisticsModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      serialNumber: json['serial_number'] ?? '',
-      totalEntries: json['total_entries'] ?? 0,
-      totalFees: (json['total_fees'] ?? 0).toDouble(),
-      totalPenalties: (json['total_penalties'] ?? 0).toDouble(),
-      totalSupport: (json['total_support'] ?? 0).toDouble(),
-      totalSustainability: (json['total_sustainability'] ?? 0).toDouble(),
-      totalAmount: (json['total_amount'] ?? 0).toDouble(),
+      id: int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      name: json['name']?.toString() ?? '',
+      serialNumber: json['serial_number']?.toString() ?? '',
+      totalEntries: int.tryParse(json['total_entries']?.toString() ?? '0') ?? 0,
+      totalFees: double.tryParse(json['total_fees']?.toString() ?? '0') ?? 0.0,
+      totalPenalties:
+          double.tryParse(json['total_penalties']?.toString() ?? '0') ?? 0.0,
+      totalSupport:
+          double.tryParse(json['total_support']?.toString() ?? '0') ?? 0.0,
+      totalSustainability:
+          double.tryParse(json['total_sustainability']?.toString() ?? '0') ??
+          0.0,
+      totalAmount:
+          double.tryParse(json['total_amount']?.toString() ?? '0') ?? 0.0,
       byType: Map<String, int>.from(json['by_type'] ?? {}),
     );
   }

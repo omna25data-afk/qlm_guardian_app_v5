@@ -31,7 +31,11 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       name: json['name'] ?? '',
       email: json['email'] ?? null,
       phoneNumber: json['phone_number'] ?? null,
@@ -41,8 +45,18 @@ class User {
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,
-      legitimateGuardianId: json['legitimate_guardian_id'] != null ? (json['legitimate_guardian_id'] is int ? json['legitimate_guardian_id'] : int.tryParse(json['legitimate_guardian_id'].toString()) ?? null) : null,
-      documentationEmployeeId: json['documentation_employee_id'] != null ? (json['documentation_employee_id'] is int ? json['documentation_employee_id'] : int.tryParse(json['documentation_employee_id'].toString()) ?? null) : null,
+      legitimateGuardianId: json['legitimate_guardian_id'] != null
+          ? (json['legitimate_guardian_id'] is int
+                ? json['legitimate_guardian_id']
+                : int.tryParse(json['legitimate_guardian_id'].toString()) ??
+                      null)
+          : null,
+      documentationEmployeeId: json['documentation_employee_id'] != null
+          ? (json['documentation_employee_id'] is int
+                ? json['documentation_employee_id']
+                : int.tryParse(json['documentation_employee_id'].toString()) ??
+                      null)
+          : null,
       unit: json['unit'] ?? null,
     );
   }

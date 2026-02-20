@@ -25,13 +25,29 @@ class EmployeeCost {
 
   factory EmployeeCost.fromJson(Map<String, dynamic> json) {
     return EmployeeCost(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      employeeId: json['employee_id'] != null ? (json['employee_id'] is int ? json['employee_id'] : int.tryParse(json['employee_id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      employeeId: json['employee_id'] != null
+          ? (json['employee_id'] is int
+                ? json['employee_id']
+                : int.tryParse(json['employee_id'].toString()) ?? 0)
+          : 0,
       costType: json['cost_type'] ?? '',
-      amount: json['amount'] != null ? (json['amount'] is num ? json['amount'].toDouble() : double.tryParse(json['amount'].toString()) ?? 0.0) : 0.0,
+      amount: json['amount'] != null
+          ? (json['amount'] is num
+                ? json['amount'].toDouble()
+                : double.tryParse(json['amount'].toString()) ?? 0.0)
+          : 0.0,
       date: json['date'] ?? '',
       description: json['description'] ?? null,
-      approvedBy: json['approved_by'] != null ? (json['approved_by'] is int ? json['approved_by'] : int.tryParse(json['approved_by'].toString()) ?? null) : null,
+      approvedBy: json['approved_by'] != null
+          ? (json['approved_by'] is int
+                ? json['approved_by']
+                : int.tryParse(json['approved_by'].toString()) ?? null)
+          : null,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,

@@ -39,8 +39,16 @@ class RecordBookType {
 
   factory RecordBookType.fromJson(Map<String, dynamic> json) {
     return RecordBookType(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      contractTypeId: json['contract_type_id'] != null ? (json['contract_type_id'] is int ? json['contract_type_id'] : int.tryParse(json['contract_type_id'].toString()) ?? null) : null,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      contractTypeId: json['contract_type_id'] != null
+          ? (json['contract_type_id'] is int
+                ? json['contract_type_id']
+                : int.tryParse(json['contract_type_id'].toString()) ?? null)
+          : null,
       name: json['name'] ?? '',
       code: json['code'] ?? '',
       category: json['category'] ?? '',
@@ -48,14 +56,28 @@ class RecordBookType {
       descriptionEn: json['description_en'] ?? null,
       icon: json['icon'] ?? null,
       color: json['color'] ?? null,
-      isDefault: json['is_default'] == 1 || json['is_default'] == true || json['is_default'] == '1',
-      sortOrder: json['sort_order'] != null ? (json['sort_order'] is int ? json['sort_order'] : int.tryParse(json['sort_order'].toString()) ?? 0) : 0,
+      isDefault:
+          json['is_default'] == 1 ||
+          json['is_default'] == true ||
+          json['is_default'] == '1',
+      sortOrder: json['sort_order'] != null
+          ? (json['sort_order'] is int
+                ? json['sort_order']
+                : int.tryParse(json['sort_order'].toString()) ?? 0)
+          : 0,
       description: json['description'] ?? null,
-      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
+      isActive:
+          json['is_active'] == 1 ||
+          json['is_active'] == true ||
+          json['is_active'] == '1',
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,
-      constraintTypeId: json['constraint_type_id'] != null ? (json['constraint_type_id'] is int ? json['constraint_type_id'] : int.tryParse(json['constraint_type_id'].toString()) ?? null) : null,
+      constraintTypeId: json['constraint_type_id'] != null
+          ? (json['constraint_type_id'] is int
+                ? json['constraint_type_id']
+                : int.tryParse(json['constraint_type_id'].toString()) ?? null)
+          : null,
     );
   }
 

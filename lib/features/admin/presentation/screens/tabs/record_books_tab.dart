@@ -6,7 +6,8 @@ import '../../../../../features/admin/presentation/providers/admin_record_books_
 import '../record_book_entries_screen.dart';
 import '../../../../../features/admin/presentation/providers/admin_record_book_actions_provider.dart';
 import '../../../../admin/presentation/widgets/premium_record_book_card.dart';
-import '../../../../../features/admin/presentation/providers/admin_dashboard_provider.dart'; // Fixed import
+import '../../../../../features/admin/presentation/providers/admin_dashboard_provider.dart';
+import '../../../../admin/presentation/widgets/record_book_correction_dialog.dart';
 
 class RecordBooksTab extends ConsumerStatefulWidget {
   const RecordBooksTab({super.key});
@@ -604,7 +605,10 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
             final card = PremiumRecordBookCard(
               book: book,
               onTap: () {
-                // Navigate to details
+                showDialog(
+                  context: context,
+                  builder: (context) => RecordBookCorrectionDialog(book: book),
+                );
               },
               onOpen: () => _showOpenConfirmation(book),
               onClose: () => _showCloseConfirmation(book),

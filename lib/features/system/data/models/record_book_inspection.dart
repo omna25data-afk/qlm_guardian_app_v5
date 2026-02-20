@@ -33,13 +33,33 @@ class RecordBookInspection {
 
   factory RecordBookInspection.fromJson(Map<String, dynamic> json) {
     return RecordBookInspection(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      recordBookId: json['record_book_id'] != null ? (json['record_book_id'] is int ? json['record_book_id'] : int.tryParse(json['record_book_id'].toString()) ?? 0) : 0,
-      inspectorUserId: json['inspector_user_id'] != null ? (json['inspector_user_id'] is int ? json['inspector_user_id'] : int.tryParse(json['inspector_user_id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      recordBookId: json['record_book_id'] != null
+          ? (json['record_book_id'] is int
+                ? json['record_book_id']
+                : int.tryParse(json['record_book_id'].toString()) ?? 0)
+          : 0,
+      inspectorUserId: json['inspector_user_id'] != null
+          ? (json['inspector_user_id'] is int
+                ? json['inspector_user_id']
+                : int.tryParse(json['inspector_user_id'].toString()) ?? 0)
+          : 0,
       inspectionDate: json['inspection_date'] ?? '',
       inspectionNumber: json['inspection_number'] ?? null,
-      hijriYear: json['hijri_year'] != null ? (json['hijri_year'] is int ? json['hijri_year'] : int.tryParse(json['hijri_year'].toString()) ?? 0) : 0,
-      quarter: json['quarter'] != null ? (json['quarter'] is int ? json['quarter'] : int.tryParse(json['quarter'].toString()) ?? 0) : 0,
+      hijriYear: json['hijri_year'] != null
+          ? (json['hijri_year'] is int
+                ? json['hijri_year']
+                : int.tryParse(json['hijri_year'].toString()) ?? 0)
+          : 0,
+      quarter: json['quarter'] != null
+          ? (json['quarter'] is int
+                ? json['quarter']
+                : int.tryParse(json['quarter'].toString()) ?? 0)
+          : 0,
       quarterStartDate: json['quarter_start_date'] ?? null,
       quarterEndDate: json['quarter_end_date'] ?? null,
       generalNotes: json['general_notes'] ?? null,

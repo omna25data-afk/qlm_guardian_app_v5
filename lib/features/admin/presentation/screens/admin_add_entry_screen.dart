@@ -459,6 +459,18 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
                           ),
                         const SizedBox(height: 16),
 
+                        // Guardian Record
+                        if (_writerType == 'guardian')
+                          FormSectionCard(
+                            title: 'سجل قيد محررات الأمين',
+                            icon: Icons.verified_user,
+                            accentColor: AppColors.success,
+                            isCollapsible: true,
+                            child: _buildGuardianRecordSection(),
+                          ),
+                        if (_writerType == 'guardian')
+                          const SizedBox(height: 16),
+
                         // Documentation Record
                         FormSectionCard(
                           title: 'بيانات القيد في قلم التوثيق',
@@ -486,17 +498,6 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
                           totalAmount: _totalAmountCtrl.text,
                           isExempted: _isExempted,
                         ),
-                        const SizedBox(height: 16),
-
-                        // Guardian Record
-                        if (_writerType == 'guardian')
-                          FormSectionCard(
-                            title: 'بيانات سجل الأمين',
-                            icon: Icons.verified_user,
-                            accentColor: AppColors.success,
-                            isCollapsible: true,
-                            child: _buildGuardianRecordSection(),
-                          ),
                         const SizedBox(height: 24),
 
                         _buildSubmitButton(state),

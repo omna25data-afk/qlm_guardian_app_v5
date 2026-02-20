@@ -8,6 +8,8 @@ import '../../../../admin/presentation/widgets/premium_entry_card.dart';
 import '../../../../admin/data/repositories/admin_repository.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/di/injection.dart';
+import '../../../../admin/presentation/widgets/registry_entry_correction_dialog.dart';
+import '../../../../registry/presentation/screens/compact_registry_entry_screen.dart';
 import '../admin_add_entry_screen.dart';
 
 // Create a provider for All Entries specifically
@@ -76,21 +78,54 @@ class AllEntriesTab extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AdminAddEntryScreen()),
-          );
-        },
-        icon: const Icon(Icons.add_circle, size: 20),
-        label: const Text(
-          'إضافة قيد جديد',
-          style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 4,
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: 'add_entry_compact_btn',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CompactRegistryEntryScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.architecture, size: 20),
+            label: const Text(
+              'النموذج المقسم (تجريبي)',
+              style: TextStyle(
+                fontFamily: 'Tajawal',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            backgroundColor: AppColors.accent,
+            foregroundColor: Colors.white,
+            elevation: 4,
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.extended(
+            heroTag: 'add_entry_normal_btn',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminAddEntryScreen()),
+              );
+            },
+            icon: const Icon(Icons.add_circle, size: 20),
+            label: const Text(
+              'إضافة قيد جديد',
+              style: TextStyle(
+                fontFamily: 'Tajawal',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            elevation: 4,
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -190,7 +225,11 @@ class AllEntriesTab extends ConsumerWidget {
                     return PremiumEntryCard(
                       entry: entry,
                       onTap: () {
-                        // Navigate to details if needed
+                        showDialog(
+                          context: context,
+                          builder: (context) =>
+                              RegistryEntryCorrectionDialog(entry: entry),
+                        );
                       },
                     );
                   },

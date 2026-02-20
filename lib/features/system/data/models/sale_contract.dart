@@ -63,9 +63,21 @@ class SaleContract {
 
   factory SaleContract.fromJson(Map<String, dynamic> json) {
     return SaleContract(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      registryEntryId: json['registry_entry_id'] != null ? (json['registry_entry_id'] is int ? json['registry_entry_id'] : int.tryParse(json['registry_entry_id'].toString()) ?? null) : null,
-      constraintId: json['constraint_id'] != null ? (json['constraint_id'] is int ? json['constraint_id'] : int.tryParse(json['constraint_id'].toString()) ?? null) : null,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      registryEntryId: json['registry_entry_id'] != null
+          ? (json['registry_entry_id'] is int
+                ? json['registry_entry_id']
+                : int.tryParse(json['registry_entry_id'].toString()) ?? null)
+          : null,
+      constraintId: json['constraint_id'] != null
+          ? (json['constraint_id'] is int
+                ? json['constraint_id']
+                : int.tryParse(json['constraint_id'].toString()) ?? null)
+          : null,
       sellerName: json['seller_name'] ?? '',
       sellerNationalId: json['seller_national_id'] ?? null,
       buyerName: json['buyer_name'] ?? '',
@@ -75,14 +87,30 @@ class SaleContract {
       itemDescription: json['item_description'] ?? null,
       saleArea: json['sale_area'] ?? null,
       saleAreaQasab: json['sale_area_qasab'] ?? null,
-      saleAreaSqm: json['sale_area_sqm'] != null ? (json['sale_area_sqm'] is num ? json['sale_area_sqm'].toDouble() : double.tryParse(json['sale_area_sqm'].toString()) ?? null) : null,
+      saleAreaSqm: json['sale_area_sqm'] != null
+          ? (json['sale_area_sqm'] is num
+                ? json['sale_area_sqm'].toDouble()
+                : double.tryParse(json['sale_area_sqm'].toString()) ?? null)
+          : null,
       propertyType: json['property_type'] ?? null,
       propertyLocation: json['property_location'] ?? null,
       propertyBoundaries: json['property_boundaries'] ?? null,
-      salePrice: json['sale_price'] != null ? (json['sale_price'] is num ? json['sale_price'].toDouble() : double.tryParse(json['sale_price'].toString()) ?? 0.0) : 0.0,
-      taxAmount: json['tax_amount'] != null ? (json['tax_amount'] is num ? json['tax_amount'].toDouble() : double.tryParse(json['tax_amount'].toString()) ?? null) : null,
+      salePrice: json['sale_price'] != null
+          ? (json['sale_price'] is num
+                ? json['sale_price'].toDouble()
+                : double.tryParse(json['sale_price'].toString()) ?? 0.0)
+          : 0.0,
+      taxAmount: json['tax_amount'] != null
+          ? (json['tax_amount'] is num
+                ? json['tax_amount'].toDouble()
+                : double.tryParse(json['tax_amount'].toString()) ?? null)
+          : null,
       taxReceiptNumber: json['tax_receipt_number'] ?? null,
-      zakatAmount: json['zakat_amount'] != null ? (json['zakat_amount'] is num ? json['zakat_amount'].toDouble() : double.tryParse(json['zakat_amount'].toString()) ?? null) : null,
+      zakatAmount: json['zakat_amount'] != null
+          ? (json['zakat_amount'] is num
+                ? json['zakat_amount'].toDouble()
+                : double.tryParse(json['zakat_amount'].toString()) ?? null)
+          : null,
       zakatReceiptNumber: json['zakat_receipt_number'] ?? null,
       paymentMethod: json['payment_method'] ?? null,
       witnesses: json['witnesses'] ?? null,

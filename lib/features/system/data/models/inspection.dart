@@ -33,17 +33,41 @@ class Inspection {
 
   factory Inspection.fromJson(Map<String, dynamic> json) {
     return Inspection(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      guardianId: json['guardian_id'] != null ? (json['guardian_id'] is int ? json['guardian_id'] : int.tryParse(json['guardian_id'].toString()) ?? 0) : 0,
-      evaluationPeriodId: json['evaluation_period_id'] != null ? (json['evaluation_period_id'] is int ? json['evaluation_period_id'] : int.tryParse(json['evaluation_period_id'].toString()) ?? null) : null,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      guardianId: json['guardian_id'] != null
+          ? (json['guardian_id'] is int
+                ? json['guardian_id']
+                : int.tryParse(json['guardian_id'].toString()) ?? 0)
+          : 0,
+      evaluationPeriodId: json['evaluation_period_id'] != null
+          ? (json['evaluation_period_id'] is int
+                ? json['evaluation_period_id']
+                : int.tryParse(json['evaluation_period_id'].toString()) ?? null)
+          : null,
       inspectionDate: json['inspection_date'] ?? null,
-      inspectorId: json['inspector_id'] != null ? (json['inspector_id'] is int ? json['inspector_id'] : int.tryParse(json['inspector_id'].toString()) ?? null) : null,
-      inspectionType: json['inspection_type'] != null ? (json['inspection_type'] is int ? json['inspection_type'] : int.tryParse(json['inspection_type'].toString()) ?? 0) : 0,
+      inspectorId: json['inspector_id'] != null
+          ? (json['inspector_id'] is int
+                ? json['inspector_id']
+                : int.tryParse(json['inspector_id'].toString()) ?? null)
+          : null,
+      inspectionType: json['inspection_type'] != null
+          ? (json['inspection_type'] is int
+                ? json['inspection_type']
+                : int.tryParse(json['inspection_type'].toString()) ?? 0)
+          : 0,
       result: json['result'] ?? '',
       findings: json['findings'] ?? null,
       recommendations: json['recommendations'] ?? null,
       nextInspectionDate: json['next_inspection_date'] ?? null,
-      createdBy: json['created_by'] != null ? (json['created_by'] is int ? json['created_by'] : int.tryParse(json['created_by'].toString()) ?? null) : null,
+      createdBy: json['created_by'] != null
+          ? (json['created_by'] is int
+                ? json['created_by']
+                : int.tryParse(json['created_by'].toString()) ?? null)
+          : null,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,

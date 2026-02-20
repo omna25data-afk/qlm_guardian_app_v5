@@ -35,15 +35,47 @@ class EmployeeEvaluation {
 
   factory EmployeeEvaluation.fromJson(Map<String, dynamic> json) {
     return EmployeeEvaluation(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      employeeId: json['employee_id'] != null ? (json['employee_id'] is int ? json['employee_id'] : int.tryParse(json['employee_id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      employeeId: json['employee_id'] != null
+          ? (json['employee_id'] is int
+                ? json['employee_id']
+                : int.tryParse(json['employee_id'].toString()) ?? 0)
+          : 0,
       evaluationDate: json['evaluation_date'] ?? '',
-      evaluatorId: json['evaluator_id'] != null ? (json['evaluator_id'] is int ? json['evaluator_id'] : int.tryParse(json['evaluator_id'].toString()) ?? 0) : 0,
-      performanceRating: json['performance_rating'] != null ? (json['performance_rating'] is int ? json['performance_rating'] : int.tryParse(json['performance_rating'].toString()) ?? 0) : 0,
-      attendanceRating: json['attendance_rating'] != null ? (json['attendance_rating'] is int ? json['attendance_rating'] : int.tryParse(json['attendance_rating'].toString()) ?? 0) : 0,
-      qualityRating: json['quality_rating'] != null ? (json['quality_rating'] is int ? json['quality_rating'] : int.tryParse(json['quality_rating'].toString()) ?? 0) : 0,
-      teamworkRating: json['teamwork_rating'] != null ? (json['teamwork_rating'] is int ? json['teamwork_rating'] : int.tryParse(json['teamwork_rating'].toString()) ?? 0) : 0,
-      totalScore: json['total_score'] != null ? (json['total_score'] is int ? json['total_score'] : int.tryParse(json['total_score'].toString()) ?? null) : null,
+      evaluatorId: json['evaluator_id'] != null
+          ? (json['evaluator_id'] is int
+                ? json['evaluator_id']
+                : int.tryParse(json['evaluator_id'].toString()) ?? 0)
+          : 0,
+      performanceRating: json['performance_rating'] != null
+          ? (json['performance_rating'] is int
+                ? json['performance_rating']
+                : int.tryParse(json['performance_rating'].toString()) ?? 0)
+          : 0,
+      attendanceRating: json['attendance_rating'] != null
+          ? (json['attendance_rating'] is int
+                ? json['attendance_rating']
+                : int.tryParse(json['attendance_rating'].toString()) ?? 0)
+          : 0,
+      qualityRating: json['quality_rating'] != null
+          ? (json['quality_rating'] is int
+                ? json['quality_rating']
+                : int.tryParse(json['quality_rating'].toString()) ?? 0)
+          : 0,
+      teamworkRating: json['teamwork_rating'] != null
+          ? (json['teamwork_rating'] is int
+                ? json['teamwork_rating']
+                : int.tryParse(json['teamwork_rating'].toString()) ?? 0)
+          : 0,
+      totalScore: json['total_score'] != null
+          ? (json['total_score'] is int
+                ? json['total_score']
+                : int.tryParse(json['total_score'].toString()) ?? null)
+          : null,
       comments: json['comments'] ?? null,
       recommendations: json['recommendations'] ?? null,
       nextEvaluationDate: json['next_evaluation_date'] ?? null,

@@ -59,9 +59,21 @@ class FormFieldConfig {
 
   factory FormFieldConfig.fromJson(Map<String, dynamic> json) {
     return FormFieldConfig(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      tableSchemaId: json['table_schema_id'] != null ? (json['table_schema_id'] is int ? json['table_schema_id'] : int.tryParse(json['table_schema_id'].toString()) ?? 0) : 0,
-      contractTypeId: json['contract_type_id'] != null ? (json['contract_type_id'] is int ? json['contract_type_id'] : int.tryParse(json['contract_type_id'].toString()) ?? null) : null,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      tableSchemaId: json['table_schema_id'] != null
+          ? (json['table_schema_id'] is int
+                ? json['table_schema_id']
+                : int.tryParse(json['table_schema_id'].toString()) ?? 0)
+          : 0,
+      contractTypeId: json['contract_type_id'] != null
+          ? (json['contract_type_id'] is int
+                ? json['contract_type_id']
+                : int.tryParse(json['contract_type_id'].toString()) ?? null)
+          : null,
       subtype1: json['subtype_1'] ?? null,
       subtype2: json['subtype_2'] ?? null,
       columnName: json['column_name'] ?? '',
@@ -69,18 +81,39 @@ class FormFieldConfig {
       fieldType: json['field_type'] ?? '',
       placeholder: json['placeholder'] ?? null,
       helperText: json['helper_text'] ?? null,
-      isRequired: json['is_required'] == 1 || json['is_required'] == true || json['is_required'] == '1',
-      isVisible: json['is_visible'] == 1 || json['is_visible'] == true || json['is_visible'] == '1',
-      isDisabled: json['is_disabled'] == 1 || json['is_disabled'] == true || json['is_disabled'] == '1',
+      isRequired:
+          json['is_required'] == 1 ||
+          json['is_required'] == true ||
+          json['is_required'] == '1',
+      isVisible:
+          json['is_visible'] == 1 ||
+          json['is_visible'] == true ||
+          json['is_visible'] == '1',
+      isDisabled:
+          json['is_disabled'] == 1 ||
+          json['is_disabled'] == true ||
+          json['is_disabled'] == '1',
       columnSpan: json['column_span'] ?? '',
       sectionName: json['section_name'] ?? null,
-      sectionOrder: json['section_order'] != null ? (json['section_order'] is int ? json['section_order'] : int.tryParse(json['section_order'].toString()) ?? 0) : 0,
+      sectionOrder: json['section_order'] != null
+          ? (json['section_order'] is int
+                ? json['section_order']
+                : int.tryParse(json['section_order'].toString()) ?? 0)
+          : 0,
       sectionIcon: json['section_icon'] ?? null,
       wizardStep: json['wizard_step'] ?? null,
-      stepOrder: json['step_order'] != null ? (json['step_order'] is int ? json['step_order'] : int.tryParse(json['step_order'].toString()) ?? 0) : 0,
+      stepOrder: json['step_order'] != null
+          ? (json['step_order'] is int
+                ? json['step_order']
+                : int.tryParse(json['step_order'].toString()) ?? 0)
+          : 0,
       badgeColor: json['badge_color'] ?? null,
       customConfig: json['custom_config'] ?? null,
-      sortOrder: json['sort_order'] != null ? (json['sort_order'] is int ? json['sort_order'] : int.tryParse(json['sort_order'].toString()) ?? 0) : 0,
+      sortOrder: json['sort_order'] != null
+          ? (json['sort_order'] is int
+                ? json['sort_order']
+                : int.tryParse(json['sort_order'].toString()) ?? 0)
+          : 0,
       options: json['options'] ?? null,
       validationRules: json['validation_rules'] ?? null,
       conditionalLogic: json['conditional_logic'] ?? null,

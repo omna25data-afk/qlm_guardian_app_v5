@@ -5,7 +5,7 @@ import 'package:hijri_picker/hijri_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/searchable_dropdown.dart';
-import '../../../admin/presentation/providers/add_entry_provider.dart';
+import '../providers/add_registry_entry_provider.dart';
 import '../../../records/data/models/record_book.dart';
 
 class DocumentationSection extends ConsumerWidget {
@@ -22,6 +22,11 @@ class DocumentationSection extends ConsumerWidget {
   final TextEditingController sustainabilityAmountCtrl;
   final TextEditingController totalAmountCtrl;
   final TextEditingController receiptNumberCtrl;
+  final TextEditingController taxAmountCtrl;
+  final TextEditingController taxReceiptNumberCtrl;
+  final TextEditingController zakatAmountCtrl;
+  final TextEditingController zakatReceiptNumberCtrl;
+  final TextEditingController exemptionReasonCtrl;
   final bool isExempted;
   final bool hasAuthenticationFee;
   final bool hasTransferFee;
@@ -48,6 +53,11 @@ class DocumentationSection extends ConsumerWidget {
     required this.sustainabilityAmountCtrl,
     required this.totalAmountCtrl,
     required this.receiptNumberCtrl,
+    required this.taxAmountCtrl,
+    required this.taxReceiptNumberCtrl,
+    required this.zakatAmountCtrl,
+    required this.zakatReceiptNumberCtrl,
+    required this.exemptionReasonCtrl,
     required this.isExempted,
     required this.hasAuthenticationFee,
     required this.hasTransferFee,
@@ -62,23 +72,24 @@ class DocumentationSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(addEntryProvider);
+    final state = ref.watch(addRegistryEntryProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Doc Record Book Selector
-        if (state.documentationRecordBooks.isNotEmpty) ...[
+        if (state.filteredRecordBooks.isNotEmpty) ...[
           SearchableDropdown<RecordBook>(
-            items: state.documentationRecordBooks,
-            label: 'سجل التوثيق',
+            items: state.filteredRecordBooks,
+            label: 'سجل التوثيق النهائي',
             value: selectedDocRecordBookId != null
-                ? state.documentationRecordBooks.firstWhere(
+                ? state.filteredRecordBooks.firstWhere(
                     (b) => b.id == selectedDocRecordBookId,
-                    orElse: () => state.documentationRecordBooks.first,
+                    orElse: () => state.filteredRecordBooks.first,
                   )
                 : null,
-            itemLabelBuilder: (b) => 'سجل ${b.bookNumber} - ${b.hijriYear}هـ',
+            itemLabelBuilder: (b) =>
+                '${b.categoryLabel ?? b.category} - ${b.name} - رقم ${b.bookNumber} لسنة ${b.hijriYear}هـ',
             onChanged: (v) => onDocRecordBookChanged(v?.id),
           ),
           const SizedBox(height: 16),
@@ -150,7 +161,74 @@ class DocumentationSection extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
+
+        // Tax and Zakat Section
+        const Text(
+          'البيانات المالية (الضريبة والزكاة)',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: taxAmountCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'مبلغ الضريبة',
+                  prefixIcon: Icon(Icons.attach_money, size: 20),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextFormField(
+                controller: taxReceiptNumberCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'رقم السند (الضريبة)',
+                  prefixIcon: Icon(Icons.receipt_long, size: 20),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: zakatAmountCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'مبلغ الزكاة',
+                  prefixIcon: Icon(Icons.attach_money, size: 20),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextFormField(
+                controller: zakatReceiptNumberCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'رقم السند (الزكاة)',
+                  prefixIcon: Icon(Icons.receipt_long, size: 20),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        const Divider(),
+        const SizedBox(height: 16),
+
+        const Text(
+          'الرسوم وتوزيعاتها',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        const SizedBox(height: 12),
 
         // Fee Options
         _buildFeeOptions(),
@@ -195,78 +273,197 @@ class DocumentationSection extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
 
-        // Fee Fields
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: feeAmountCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'الرسوم',
-                  prefixIcon: Icon(Icons.attach_money, size: 20),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (_) => onFeesRecalculate(),
-              ),
+        if (isExempted) ...[
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: exemptionReasonCtrl,
+            decoration: const InputDecoration(
+              labelText: 'سبب الإعفاء',
+              prefixIcon: Icon(Icons.edit_note, size: 20),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextFormField(
-                controller: penaltyAmountCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'الغرامة',
-                  prefixIcon: Icon(Icons.warning_amber, size: 20),
+            maxLines: 2,
+          ),
+        ] else ...[
+          // Fee Fields
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: feeAmountCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'رسوم التوثيق',
+                    prefixIcon: Icon(Icons.attach_money, size: 20),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => onFeesRecalculate(),
                 ),
-                keyboardType: TextInputType.number,
-                onChanged: (_) => onFeesRecalculate(),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextFormField(
+                  controller: penaltyAmountCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'الغرامة (مع التأخير)',
+                    prefixIcon: Icon(Icons.warning_amber, size: 20),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => onFeesRecalculate(),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: supportAmountCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'الدعم',
+                    prefixIcon: Icon(Icons.volunteer_activism, size: 20),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => onFeesRecalculate(),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextFormField(
+                  controller: sustainabilityAmountCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'الاستدامة',
+                    prefixIcon: Icon(Icons.eco, size: 20),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => onFeesRecalculate(),
+                ),
+              ),
+            ],
+          ),
+        ],
+
+        const SizedBox(height: 24),
+        // Fee Summary Expansion
+        ExpansionTile(
+          title: const Text(
+            'ملخص إجمالي الرسوم',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+          ),
+          initiallyExpanded: true,
+          childrenPadding: const EdgeInsets.all(16),
+          backgroundColor: AppColors.primary.withValues(alpha: 0.02),
+          collapsedBackgroundColor: AppColors.surfaceVariant,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(color: AppColors.border),
+          ),
+          collapsedShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(color: AppColors.border),
+          ),
+          children: [
+            TextFormField(
+              controller: totalAmountCtrl,
+              readOnly: true,
+              decoration: const InputDecoration(
+                labelText: 'الإجمالي الكلي للرسوم',
+                prefixIcon: Icon(Icons.calculate, size: 20),
+              ),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: AppColors.primary,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: supportAmountCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'الدعم',
-                  prefixIcon: Icon(Icons.volunteer_activism, size: 20),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (_) => onFeesRecalculate(),
-              ),
+
+        const SizedBox(height: 16),
+        // Fee Distribution (Read Only)
+        ExpansionTile(
+          title: const Text(
+            'تفاصيل توزيع الرسوم',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textSecondary,
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextFormField(
-                controller: sustainabilityAmountCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'الاستدامة',
-                  prefixIcon: Icon(Icons.eco, size: 20),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (_) => onFeesRecalculate(),
-              ),
+          ),
+          initiallyExpanded: false,
+          childrenPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
+          backgroundColor: AppColors.surface,
+          collapsedBackgroundColor: AppColors.surfaceVariant,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(color: AppColors.border),
+          ),
+          collapsedShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(color: AppColors.border),
+          ),
+          children: [
+            _buildDistributionRow('إيراد محلي (80%)', _calculatePercent(0.80)),
+            const Divider(height: 16),
+            _buildDistributionRow('حافز (5%)', _calculatePercent(0.05)),
+            const Divider(height: 16),
+            _buildDistributionRow('تجهيز محاكم (15%)', _calculatePercent(0.15)),
+            const Divider(height: 16),
+            _buildDistributionRow(
+              'دعم قضاء (12.5% من الإجمالي الإضافي)',
+              _calculateAdditionalPercent(0.125),
+            ),
+            const Divider(height: 16),
+            _buildDistributionRow(
+              'حافز تطوير (12.5% من الإجمالي الإضافي)',
+              _calculateAdditionalPercent(0.125),
             ),
           ],
-        ),
-        const SizedBox(height: 12),
-        TextFormField(
-          controller: totalAmountCtrl,
-          readOnly: true,
-          decoration: InputDecoration(
-            labelText: 'الإجمالي',
-            prefixIcon: const Icon(Icons.calculate, size: 20),
-            fillColor: AppColors.primary.withValues(alpha: 0.05),
-          ),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            color: AppColors.primary,
-          ),
         ),
       ],
+    );
+  }
+
+  String _calculatePercent(double pct) {
+    if (isExempted) return '0.00';
+    final fee = double.tryParse(feeAmountCtrl.text) ?? 0.0;
+    return (fee * pct).toStringAsFixed(2);
+  }
+
+  String _calculateAdditionalPercent(double pct) {
+    if (isExempted) return '0.00';
+    final fee = double.tryParse(feeAmountCtrl.text) ?? 0.0;
+    return (fee * pct).toStringAsFixed(2);
+  }
+
+  Widget _buildDistributionRow(String label, String amount) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          Text(
+            '$amount ر.ي',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

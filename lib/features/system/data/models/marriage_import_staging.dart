@@ -67,7 +67,11 @@ class MarriageImportStaging {
 
   factory MarriageImportStaging.fromJson(Map<String, dynamic> json) {
     return MarriageImportStaging(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       serialNumber: json['serial_number'] ?? null,
       husbandName: json['husband_name'] ?? null,
       wifeName: json['wife_name'] ?? null,
@@ -95,7 +99,11 @@ class MarriageImportStaging {
       dowryDeferred: json['dowry_deferred'] ?? null,
       status: json['status'] ?? '',
       errorMessage: json['error_message'] ?? null,
-      registryEntryId: json['registry_entry_id'] != null ? (json['registry_entry_id'] is int ? json['registry_entry_id'] : int.tryParse(json['registry_entry_id'].toString()) ?? null) : null,
+      registryEntryId: json['registry_entry_id'] != null
+          ? (json['registry_entry_id'] is int
+                ? json['registry_entry_id']
+                : int.tryParse(json['registry_entry_id'].toString()) ?? null)
+          : null,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
     );

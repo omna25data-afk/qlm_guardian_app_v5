@@ -85,24 +85,71 @@ class Constraint {
 
   factory Constraint.fromJson(Map<String, dynamic> json) {
     return Constraint(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      originalConstraintId: json['original_constraint_id'] != null ? (json['original_constraint_id'] is int ? json['original_constraint_id'] : int.tryParse(json['original_constraint_id'].toString()) ?? null) : null,
-      recordBookId: json['record_book_id'] != null ? (json['record_book_id'] is int ? json['record_book_id'] : int.tryParse(json['record_book_id'].toString()) ?? 0) : 0,
-      recordBookProcedureId: json['record_book_procedure_id'] != null ? (json['record_book_procedure_id'] is int ? json['record_book_procedure_id'] : int.tryParse(json['record_book_procedure_id'].toString()) ?? null) : null,
-      recordBookTypeId: json['record_book_type_id'] != null ? (json['record_book_type_id'] is int ? json['record_book_type_id'] : int.tryParse(json['record_book_type_id'].toString()) ?? null) : null,
-      constraintNumber: json['constraint_number'] != null ? (json['constraint_number'] is int ? json['constraint_number'] : int.tryParse(json['constraint_number'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      originalConstraintId: json['original_constraint_id'] != null
+          ? (json['original_constraint_id'] is int
+                ? json['original_constraint_id']
+                : int.tryParse(json['original_constraint_id'].toString()) ??
+                      null)
+          : null,
+      recordBookId: json['record_book_id'] != null
+          ? (json['record_book_id'] is int
+                ? json['record_book_id']
+                : int.tryParse(json['record_book_id'].toString()) ?? 0)
+          : 0,
+      recordBookProcedureId: json['record_book_procedure_id'] != null
+          ? (json['record_book_procedure_id'] is int
+                ? json['record_book_procedure_id']
+                : int.tryParse(json['record_book_procedure_id'].toString()) ??
+                      null)
+          : null,
+      recordBookTypeId: json['record_book_type_id'] != null
+          ? (json['record_book_type_id'] is int
+                ? json['record_book_type_id']
+                : int.tryParse(json['record_book_type_id'].toString()) ?? null)
+          : null,
+      constraintNumber: json['constraint_number'] != null
+          ? (json['constraint_number'] is int
+                ? json['constraint_number']
+                : int.tryParse(json['constraint_number'].toString()) ?? 0)
+          : 0,
       documentNumber: json['document_number'] ?? null,
       documentDate: json['document_date'] ?? '',
       documentationDate: json['documentation_date'] ?? null,
       hijriDate: json['hijri_date'] ?? '',
       category: json['category'] ?? null,
-      pageNumber: json['page_number'] != null ? (json['page_number'] is int ? json['page_number'] : int.tryParse(json['page_number'].toString()) ?? 0) : 0,
-      boxNumber: json['box_number'] != null ? (json['box_number'] is int ? json['box_number'] : int.tryParse(json['box_number'].toString()) ?? null) : null,
-      contractTypeId: json['contract_type_id'] != null ? (json['contract_type_id'] is int ? json['contract_type_id'] : int.tryParse(json['contract_type_id'].toString()) ?? null) : null,
-      legitimateGuardianId: json['legitimate_guardian_id'] != null ? (json['legitimate_guardian_id'] is int ? json['legitimate_guardian_id'] : int.tryParse(json['legitimate_guardian_id'].toString()) ?? null) : null,
+      pageNumber: json['page_number'] != null
+          ? (json['page_number'] is int
+                ? json['page_number']
+                : int.tryParse(json['page_number'].toString()) ?? 0)
+          : 0,
+      boxNumber: json['box_number'] != null
+          ? (json['box_number'] is int
+                ? json['box_number']
+                : int.tryParse(json['box_number'].toString()) ?? null)
+          : null,
+      contractTypeId: json['contract_type_id'] != null
+          ? (json['contract_type_id'] is int
+                ? json['contract_type_id']
+                : int.tryParse(json['contract_type_id'].toString()) ?? null)
+          : null,
+      legitimateGuardianId: json['legitimate_guardian_id'] != null
+          ? (json['legitimate_guardian_id'] is int
+                ? json['legitimate_guardian_id']
+                : int.tryParse(json['legitimate_guardian_id'].toString()) ??
+                      null)
+          : null,
       documentType: json['document_type'] ?? null,
       writerType: json['writer_type'] ?? '',
-      writerId: json['writer_id'] != null ? (json['writer_id'] is int ? json['writer_id'] : int.tryParse(json['writer_id'].toString()) ?? null) : null,
+      writerId: json['writer_id'] != null
+          ? (json['writer_id'] is int
+                ? json['writer_id']
+                : int.tryParse(json['writer_id'].toString()) ?? null)
+          : null,
       writerName: json['writer_name'] ?? null,
       partiesData: json['parties_data'] ?? null,
       financialData: json['financial_data'] ?? null,
@@ -117,14 +164,29 @@ class Constraint {
       notes: json['notes'] ?? null,
       reviewNotes: json['review_notes'] ?? null,
       attachments: json['attachments'] ?? null,
-      createdBy: json['created_by'] != null ? (json['created_by'] is int ? json['created_by'] : int.tryParse(json['created_by'].toString()) ?? 0) : 0,
-      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
+      createdBy: json['created_by'] != null
+          ? (json['created_by'] is int
+                ? json['created_by']
+                : int.tryParse(json['created_by'].toString()) ?? 0)
+          : 0,
+      isActive:
+          json['is_active'] == 1 ||
+          json['is_active'] == true ||
+          json['is_active'] == '1',
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,
-      constraintTypeId: json['constraint_type_id'] != null ? (json['constraint_type_id'] is int ? json['constraint_type_id'] : int.tryParse(json['constraint_type_id'].toString()) ?? null) : null,
+      constraintTypeId: json['constraint_type_id'] != null
+          ? (json['constraint_type_id'] is int
+                ? json['constraint_type_id']
+                : int.tryParse(json['constraint_type_id'].toString()) ?? null)
+          : null,
       constraintableType: json['constraintable_type'] ?? null,
-      constraintableId: json['constraintable_id'] != null ? (json['constraintable_id'] is int ? json['constraintable_id'] : int.tryParse(json['constraintable_id'].toString()) ?? null) : null,
+      constraintableId: json['constraintable_id'] != null
+          ? (json['constraintable_id'] is int
+                ? json['constraintable_id']
+                : int.tryParse(json['constraintable_id'].toString()) ?? null)
+          : null,
     );
   }
 

@@ -21,8 +21,16 @@ class ScheduleHistory {
 
   factory ScheduleHistory.fromJson(Map<String, dynamic> json) {
     return ScheduleHistory(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      scheduleId: json['schedule_id'] != null ? (json['schedule_id'] is int ? json['schedule_id'] : int.tryParse(json['schedule_id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      scheduleId: json['schedule_id'] != null
+          ? (json['schedule_id'] is int
+                ? json['schedule_id']
+                : int.tryParse(json['schedule_id'].toString()) ?? 0)
+          : 0,
       command: json['command'] ?? '',
       params: json['params'] ?? null,
       output: json['output'] ?? '',

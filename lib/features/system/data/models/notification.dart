@@ -24,7 +24,11 @@ class Notification {
       id: json['id'] ?? '',
       type: json['type'] ?? '',
       notifiableType: json['notifiable_type'] ?? '',
-      notifiableId: json['notifiable_id'] != null ? (json['notifiable_id'] is int ? json['notifiable_id'] : int.tryParse(json['notifiable_id'].toString()) ?? 0) : 0,
+      notifiableId: json['notifiable_id'] != null
+          ? (json['notifiable_id'] is int
+                ? json['notifiable_id']
+                : int.tryParse(json['notifiable_id'].toString()) ?? 0)
+          : 0,
       data: json['data'] ?? '',
       readAt: json['read_at'] ?? null,
       createdAt: json['created_at'] ?? null,

@@ -15,7 +15,11 @@ class Role {
 
   factory Role.fromJson(Map<String, dynamic> json) {
     return Role(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       name: json['name'] ?? '',
       guardName: json['guard_name'] ?? '',
       createdAt: json['created_at'] ?? null,

@@ -19,7 +19,11 @@ class FailedJob {
 
   factory FailedJob.fromJson(Map<String, dynamic> json) {
     return FailedJob(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       uuid: json['uuid'] ?? '',
       connection: json['connection'] ?? '',
       queue: json['queue'] ?? '',

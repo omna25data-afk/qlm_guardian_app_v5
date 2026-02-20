@@ -18,10 +18,6 @@ class PasswordResetToken {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'email': email,
-      'token': token,
-      'created_at': createdAt,
-    };
+    return {'email': email, 'token': token, 'created_at': createdAt};
   }
 }

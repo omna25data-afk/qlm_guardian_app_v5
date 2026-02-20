@@ -4,7 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../admin/presentation/screens/admin_entries_screen.dart';
-import '../../../reports/presentation/screens/reports_dashboard_screen.dart';
+import '../../../reports/presentation/screens/main_dashboard_screen.dart';
 import '../providers/dashboard_provider.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -220,7 +220,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const ReportsDashboardScreen(),
+                              builder: (_) => const MainDashboardScreen(),
                             ),
                           );
                         },

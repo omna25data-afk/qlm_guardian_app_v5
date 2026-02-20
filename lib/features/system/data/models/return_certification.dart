@@ -31,9 +31,21 @@ class ReturnCertification {
 
   factory ReturnCertification.fromJson(Map<String, dynamic> json) {
     return ReturnCertification(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      registryEntryId: json['registry_entry_id'] != null ? (json['registry_entry_id'] is int ? json['registry_entry_id'] : int.tryParse(json['registry_entry_id'].toString()) ?? null) : null,
-      constraintId: json['constraint_id'] != null ? (json['constraint_id'] is int ? json['constraint_id'] : int.tryParse(json['constraint_id'].toString()) ?? null) : null,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      registryEntryId: json['registry_entry_id'] != null
+          ? (json['registry_entry_id'] is int
+                ? json['registry_entry_id']
+                : int.tryParse(json['registry_entry_id'].toString()) ?? null)
+          : null,
+      constraintId: json['constraint_id'] != null
+          ? (json['constraint_id'] is int
+                ? json['constraint_id']
+                : int.tryParse(json['constraint_id'].toString()) ?? null)
+          : null,
       husbandName: json['husband_name'] ?? '',
       wifeName: json['wife_name'] ?? '',
       divorceCertificateNumber: json['divorce_certificate_number'] ?? null,

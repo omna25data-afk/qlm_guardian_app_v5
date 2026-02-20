@@ -21,11 +21,23 @@ class ConstraintStatusHistory {
 
   factory ConstraintStatusHistory.fromJson(Map<String, dynamic> json) {
     return ConstraintStatusHistory(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      constraintId: json['constraint_id'] != null ? (json['constraint_id'] is int ? json['constraint_id'] : int.tryParse(json['constraint_id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      constraintId: json['constraint_id'] != null
+          ? (json['constraint_id'] is int
+                ? json['constraint_id']
+                : int.tryParse(json['constraint_id'].toString()) ?? 0)
+          : 0,
       fromStatus: json['from_status'] ?? null,
       toStatus: json['to_status'] ?? '',
-      changedBy: json['changed_by'] != null ? (json['changed_by'] is int ? json['changed_by'] : int.tryParse(json['changed_by'].toString()) ?? 0) : 0,
+      changedBy: json['changed_by'] != null
+          ? (json['changed_by'] is int
+                ? json['changed_by']
+                : int.tryParse(json['changed_by'].toString()) ?? 0)
+          : 0,
       changeReason: json['change_reason'] ?? null,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,

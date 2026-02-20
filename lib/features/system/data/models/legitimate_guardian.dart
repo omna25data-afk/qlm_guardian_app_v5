@@ -87,7 +87,11 @@ class LegitimateGuardian {
 
   factory LegitimateGuardian.fromJson(Map<String, dynamic> json) {
     return LegitimateGuardian(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       serialNumber: json['serial_number'] ?? '',
       firstName: json['first_name'] ?? '',
       fatherName: json['father_name'] ?? '',
@@ -95,7 +99,11 @@ class LegitimateGuardian {
       familyName: json['family_name'] ?? '',
       greatGrandfatherName: json['great_grandfather_name'] ?? null,
       nickname: json['nickname'] ?? null,
-      mainDistrictId: json['main_district_id'] != null ? (json['main_district_id'] is int ? json['main_district_id'] : int.tryParse(json['main_district_id'].toString()) ?? null) : null,
+      mainDistrictId: json['main_district_id'] != null
+          ? (json['main_district_id'] is int
+                ? json['main_district_id']
+                : int.tryParse(json['main_district_id'].toString()) ?? null)
+          : null,
       birthDate: json['birth_date'] ?? '',
       birthPlace: json['birth_place'] ?? '',
       phoneNumber: json['phone_number'] ?? '',
@@ -123,10 +131,19 @@ class LegitimateGuardian {
       stopReason: json['stop_reason'] ?? null,
       stopDate: json['stop_date'] ?? null,
       notes: json['notes'] ?? null,
-      specializationAreaId: json['specialization_area_id'] != null ? (json['specialization_area_id'] is int ? json['specialization_area_id'] : int.tryParse(json['specialization_area_id'].toString()) ?? null) : null,
+      specializationAreaId: json['specialization_area_id'] != null
+          ? (json['specialization_area_id'] is int
+                ? json['specialization_area_id']
+                : int.tryParse(json['specialization_area_id'].toString()) ??
+                      null)
+          : null,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
-      userId: json['User id'] != null ? (json['User id'] is int ? json['User id'] : int.tryParse(json['User id'].toString()) ?? null) : null,
+      userId: json['User id'] != null
+          ? (json['User id'] is int
+                ? json['User id']
+                : int.tryParse(json['User id'].toString()) ?? null)
+          : null,
       deletedAt: json['deleted_at'] ?? null,
     );
   }

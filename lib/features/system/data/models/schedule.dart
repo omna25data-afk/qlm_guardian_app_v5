@@ -57,7 +57,11 @@ class Schedule {
 
   factory Schedule.fromJson(Map<String, dynamic> json) {
     return Schedule(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       command: json['command'] ?? '',
       commandCustom: json['command_custom'] ?? null,
       params: json['params'] ?? null,
@@ -66,23 +70,64 @@ class Schedule {
       options: json['options'] ?? null,
       optionsWithValue: json['options_with_value'] ?? null,
       logFilename: json['log_filename'] ?? null,
-      evenInMaintenanceMode: json['even_in_maintenance_mode'] != null ? (json['even_in_maintenance_mode'] is int ? json['even_in_maintenance_mode'] : int.tryParse(json['even_in_maintenance_mode'].toString()) ?? 0) : 0,
-      withoutOverlapping: json['without_overlapping'] != null ? (json['without_overlapping'] is int ? json['without_overlapping'] : int.tryParse(json['without_overlapping'].toString()) ?? 0) : 0,
-      onOneServer: json['on_one_server'] != null ? (json['on_one_server'] is int ? json['on_one_server'] : int.tryParse(json['on_one_server'].toString()) ?? 0) : 0,
+      evenInMaintenanceMode: json['even_in_maintenance_mode'] != null
+          ? (json['even_in_maintenance_mode'] is int
+                ? json['even_in_maintenance_mode']
+                : int.tryParse(json['even_in_maintenance_mode'].toString()) ??
+                      0)
+          : 0,
+      withoutOverlapping: json['without_overlapping'] != null
+          ? (json['without_overlapping'] is int
+                ? json['without_overlapping']
+                : int.tryParse(json['without_overlapping'].toString()) ?? 0)
+          : 0,
+      onOneServer: json['on_one_server'] != null
+          ? (json['on_one_server'] is int
+                ? json['on_one_server']
+                : int.tryParse(json['on_one_server'].toString()) ?? 0)
+          : 0,
       webhookBefore: json['webhook_before'] ?? null,
       webhookAfter: json['webhook_after'] ?? null,
       emailOutput: json['email_output'] ?? null,
-      sendmailError: json['sendmail_error'] != null ? (json['sendmail_error'] is int ? json['sendmail_error'] : int.tryParse(json['sendmail_error'].toString()) ?? 0) : 0,
-      logSuccess: json['log_success'] != null ? (json['log_success'] is int ? json['log_success'] : int.tryParse(json['log_success'].toString()) ?? 0) : 0,
-      logError: json['log_error'] != null ? (json['log_error'] is int ? json['log_error'] : int.tryParse(json['log_error'].toString()) ?? 0) : 0,
+      sendmailError: json['sendmail_error'] != null
+          ? (json['sendmail_error'] is int
+                ? json['sendmail_error']
+                : int.tryParse(json['sendmail_error'].toString()) ?? 0)
+          : 0,
+      logSuccess: json['log_success'] != null
+          ? (json['log_success'] is int
+                ? json['log_success']
+                : int.tryParse(json['log_success'].toString()) ?? 0)
+          : 0,
+      logError: json['log_error'] != null
+          ? (json['log_error'] is int
+                ? json['log_error']
+                : int.tryParse(json['log_error'].toString()) ?? 0)
+          : 0,
       status: json['status'] ?? '',
-      runInBackground: json['run_in_background'] != null ? (json['run_in_background'] is int ? json['run_in_background'] : int.tryParse(json['run_in_background'].toString()) ?? 0) : 0,
-      sendmailSuccess: json['sendmail_success'] != null ? (json['sendmail_success'] is int ? json['sendmail_success'] : int.tryParse(json['sendmail_success'].toString()) ?? 0) : 0,
+      runInBackground: json['run_in_background'] != null
+          ? (json['run_in_background'] is int
+                ? json['run_in_background']
+                : int.tryParse(json['run_in_background'].toString()) ?? 0)
+          : 0,
+      sendmailSuccess: json['sendmail_success'] != null
+          ? (json['sendmail_success'] is int
+                ? json['sendmail_success']
+                : int.tryParse(json['sendmail_success'].toString()) ?? 0)
+          : 0,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,
-      limitHistoryCount: json['limit_history_count'] != null ? (json['limit_history_count'] is int ? json['limit_history_count'] : int.tryParse(json['limit_history_count'].toString()) ?? 0) : 0,
-      maxHistoryCount: json['max_history_count'] != null ? (json['max_history_count'] is int ? json['max_history_count'] : int.tryParse(json['max_history_count'].toString()) ?? 0) : 0,
+      limitHistoryCount: json['limit_history_count'] != null
+          ? (json['limit_history_count'] is int
+                ? json['limit_history_count']
+                : int.tryParse(json['limit_history_count'].toString()) ?? 0)
+          : 0,
+      maxHistoryCount: json['max_history_count'] != null
+          ? (json['max_history_count'] is int
+                ? json['max_history_count']
+                : int.tryParse(json['max_history_count'].toString()) ?? 0)
+          : 0,
     );
   }
 

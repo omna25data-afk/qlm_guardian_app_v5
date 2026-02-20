@@ -71,7 +71,11 @@ class ImportJob {
 
   factory ImportJob.fromJson(Map<String, dynamic> json) {
     return ImportJob(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       uuid: json['uuid'] ?? '',
       type: json['type'] ?? '',
       status: json['status'] ?? '',
@@ -80,12 +84,36 @@ class ImportJob {
       filePath: json['file_path'] ?? '',
       originalFilename: json['original_filename'] ?? '',
       mimeType: json['mime_type'] ?? '',
-      fileSize: json['file_size'] != null ? (json['file_size'] is int ? json['file_size'] : int.tryParse(json['file_size'].toString()) ?? 0) : 0,
-      totalRows: json['total_rows'] != null ? (json['total_rows'] is int ? json['total_rows'] : int.tryParse(json['total_rows'].toString()) ?? 0) : 0,
-      processedRows: json['processed_rows'] != null ? (json['processed_rows'] is int ? json['processed_rows'] : int.tryParse(json['processed_rows'].toString()) ?? 0) : 0,
-      successfulRows: json['successful_rows'] != null ? (json['successful_rows'] is int ? json['successful_rows'] : int.tryParse(json['successful_rows'].toString()) ?? 0) : 0,
-      failedRows: json['failed_rows'] != null ? (json['failed_rows'] is int ? json['failed_rows'] : int.tryParse(json['failed_rows'].toString()) ?? 0) : 0,
-      skippedRows: json['skipped_rows'] != null ? (json['skipped_rows'] is int ? json['skipped_rows'] : int.tryParse(json['skipped_rows'].toString()) ?? 0) : 0,
+      fileSize: json['file_size'] != null
+          ? (json['file_size'] is int
+                ? json['file_size']
+                : int.tryParse(json['file_size'].toString()) ?? 0)
+          : 0,
+      totalRows: json['total_rows'] != null
+          ? (json['total_rows'] is int
+                ? json['total_rows']
+                : int.tryParse(json['total_rows'].toString()) ?? 0)
+          : 0,
+      processedRows: json['processed_rows'] != null
+          ? (json['processed_rows'] is int
+                ? json['processed_rows']
+                : int.tryParse(json['processed_rows'].toString()) ?? 0)
+          : 0,
+      successfulRows: json['successful_rows'] != null
+          ? (json['successful_rows'] is int
+                ? json['successful_rows']
+                : int.tryParse(json['successful_rows'].toString()) ?? 0)
+          : 0,
+      failedRows: json['failed_rows'] != null
+          ? (json['failed_rows'] is int
+                ? json['failed_rows']
+                : int.tryParse(json['failed_rows'].toString()) ?? 0)
+          : 0,
+      skippedRows: json['skipped_rows'] != null
+          ? (json['skipped_rows'] is int
+                ? json['skipped_rows']
+                : int.tryParse(json['skipped_rows'].toString()) ?? 0)
+          : 0,
       headers: json['headers'] ?? null,
       columnMapping: json['column_mapping'] ?? null,
       validationRules: json['validation_rules'] ?? null,
@@ -97,11 +125,29 @@ class ImportJob {
       completedAt: json['completed_at'] ?? null,
       failedAt: json['failed_at'] ?? null,
       cancelledAt: json['cancelled_at'] ?? null,
-      progressPercentage: json['progress_percentage'] != null ? (json['progress_percentage'] is num ? json['progress_percentage'].toDouble() : double.tryParse(json['progress_percentage'].toString()) ?? 0.0) : 0.0,
-      estimatedTimeRemaining: json['estimated_time_remaining'] != null ? (json['estimated_time_remaining'] is int ? json['estimated_time_remaining'] : int.tryParse(json['estimated_time_remaining'].toString()) ?? null) : null,
+      progressPercentage: json['progress_percentage'] != null
+          ? (json['progress_percentage'] is num
+                ? json['progress_percentage'].toDouble()
+                : double.tryParse(json['progress_percentage'].toString()) ??
+                      0.0)
+          : 0.0,
+      estimatedTimeRemaining: json['estimated_time_remaining'] != null
+          ? (json['estimated_time_remaining'] is int
+                ? json['estimated_time_remaining']
+                : int.tryParse(json['estimated_time_remaining'].toString()) ??
+                      null)
+          : null,
       batchId: json['batch_id'] ?? null,
-      userId: json['user_id'] != null ? (json['user_id'] is int ? json['user_id'] : int.tryParse(json['user_id'].toString()) ?? 0) : 0,
-      cancelledById: json['cancelled_by_id'] != null ? (json['cancelled_by_id'] is int ? json['cancelled_by_id'] : int.tryParse(json['cancelled_by_id'].toString()) ?? null) : null,
+      userId: json['user_id'] != null
+          ? (json['user_id'] is int
+                ? json['user_id']
+                : int.tryParse(json['user_id'].toString()) ?? 0)
+          : 0,
+      cancelledById: json['cancelled_by_id'] != null
+          ? (json['cancelled_by_id'] is int
+                ? json['cancelled_by_id']
+                : int.tryParse(json['cancelled_by_id'].toString()) ?? null)
+          : null,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
     );

@@ -9,7 +9,7 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import 'tabs/admin_dashboard_tab.dart';
 import 'tabs/guardians_tab.dart';
 import 'tabs/records_tab.dart';
-import '../../features/reports/presentation/screens/reports_dashboard_screen.dart';
+import '../../features/reports/presentation/screens/main_dashboard_screen.dart';
 import 'tabs/admin_settings_tab.dart';
 
 /// Admin Shell — واجهة رئيس القلم
@@ -28,7 +28,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     AdminDashboardTab(),
     GuardiansTab(),
     RecordsTab(),
-    ReportsDashboardScreen(),
+    MainDashboardScreen(),
     AdminSettingsTab(),
   ];
 

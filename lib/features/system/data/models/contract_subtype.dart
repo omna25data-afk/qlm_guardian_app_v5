@@ -27,14 +27,37 @@ class ContractSubtype {
 
   factory ContractSubtype.fromJson(Map<String, dynamic> json) {
     return ContractSubtype(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       name: json['name'] ?? '',
       code: json['code'] ?? '',
-      contractTypeId: json['contract_type_id'] != null ? (json['contract_type_id'] is int ? json['contract_type_id'] : int.tryParse(json['contract_type_id'].toString()) ?? null) : null,
-      parentId: json['parent_id'] != null ? (json['parent_id'] is int ? json['parent_id'] : int.tryParse(json['parent_id'].toString()) ?? null) : null,
-      level: json['level'] != null ? (json['level'] is int ? json['level'] : int.tryParse(json['level'].toString()) ?? 0) : 0,
-      sortOrder: json['sort_order'] != null ? (json['sort_order'] is int ? json['sort_order'] : int.tryParse(json['sort_order'].toString()) ?? 0) : 0,
-      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
+      contractTypeId: json['contract_type_id'] != null
+          ? (json['contract_type_id'] is int
+                ? json['contract_type_id']
+                : int.tryParse(json['contract_type_id'].toString()) ?? null)
+          : null,
+      parentId: json['parent_id'] != null
+          ? (json['parent_id'] is int
+                ? json['parent_id']
+                : int.tryParse(json['parent_id'].toString()) ?? null)
+          : null,
+      level: json['level'] != null
+          ? (json['level'] is int
+                ? json['level']
+                : int.tryParse(json['level'].toString()) ?? 0)
+          : 0,
+      sortOrder: json['sort_order'] != null
+          ? (json['sort_order'] is int
+                ? json['sort_order']
+                : int.tryParse(json['sort_order'].toString()) ?? 0)
+          : 0,
+      isActive:
+          json['is_active'] == 1 ||
+          json['is_active'] == true ||
+          json['is_active'] == '1',
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,

@@ -542,6 +542,11 @@ class AdminRepository {
         : {'status': true};
   }
 
+  /// Update a registry entry (Correction)
+  Future<void> updateRegistryEntry(int id, Map<String, dynamic> data) async {
+    await _apiClient.put(ApiEndpoints.registryEntry(id), data: data);
+  }
+
   /// Fetch contract types list
   Future<List<Map<String, dynamic>>> getContractTypes() async {
     final response = await _apiClient.get(ApiEndpoints.contractTypes);

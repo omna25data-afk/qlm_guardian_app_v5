@@ -3,56 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/reports_provider.dart';
 import 'fees_report_screen.dart';
-import 'guardian_statistics_screen.dart';
 
-class ReportsDashboardScreen extends ConsumerStatefulWidget {
-  const ReportsDashboardScreen({super.key});
-
-  @override
-  ConsumerState<ReportsDashboardScreen> createState() =>
-      _ReportsDashboardScreenState();
-}
-
-class _ReportsDashboardScreenState extends ConsumerState<ReportsDashboardScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+class ReportsTabWidget extends StatelessWidget {
+  const ReportsTabWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('التقارير والإحصائيات'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'إحصائيات الأمناء'),
-            Tab(text: 'تقرير الرسوم'),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          const ReportsFilterWidget(),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: const [GuardianStatisticsScreen(), FeesReportScreen()],
-            ),
-          ),
-        ],
-      ),
+    return const Column(
+      children: [
+        ReportsFilterWidget(),
+        Expanded(child: FeesReportScreen()),
+      ],
     );
   }
 }
@@ -88,12 +49,25 @@ class ReportsFilterWidget extends ConsumerWidget {
                       value: filter.year,
                       isDense: true,
                       items: yearsAsync.when(
-                        data: (years) => years
-                            .map(
-                              (y) =>
-                                  DropdownMenuItem(value: y, child: Text('$y')),
-                            )
-                            .toList(),
+                        data: (years) {
+                          final uniqueYears = years.toSet().toList();
+                          // Ensure the current filter year is in the list
+                          if (!uniqueYears.contains(filter.year)) {
+                            uniqueYears.add(filter.year);
+                          }
+                          uniqueYears.sort(
+                            (a, b) => b.compareTo(a),
+                          ); // Descending
+
+                          return uniqueYears
+                              .map(
+                                (y) => DropdownMenuItem(
+                                  value: y,
+                                  child: Text('$y'),
+                                ),
+                              )
+                              .toList();
+                        },
                         loading: () => [
                           DropdownMenuItem(
                             value: filter.year,
@@ -170,7 +144,13 @@ class ReportsFilterWidget extends ConsumerWidget {
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
-                  value: filter.periodValue,
+                  value:
+                      _getPeriodValues(
+                            filter.periodType,
+                          )?.any((item) => item.value == filter.periodValue) ==
+                          true
+                      ? filter.periodValue
+                      : null,
                   isDense: true,
                   items: _getPeriodValues(filter.periodType),
                   onChanged: (val) {

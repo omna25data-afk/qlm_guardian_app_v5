@@ -39,6 +39,7 @@ class AddRegistryEntryState {
   // Record Books
   final List<RecordBook> allRecordBooks;
   final List<RecordBook> filteredRecordBooks;
+  final List<RecordBook> guardianRecordBooks;
   final RecordBook? selectedRecordBook;
   final bool isLoadingRecordBooks;
 
@@ -79,6 +80,7 @@ class AddRegistryEntryState {
     this.formData = const {},
     this.allRecordBooks = const [],
     this.filteredRecordBooks = const [],
+    this.guardianRecordBooks = const [],
     this.selectedRecordBook,
     this.isLoadingRecordBooks = false,
     this.deliveryStatus = 'preserved',
@@ -113,6 +115,7 @@ class AddRegistryEntryState {
     Map<String, dynamic>? formData,
     List<RecordBook>? allRecordBooks,
     List<RecordBook>? filteredRecordBooks,
+    List<RecordBook>? guardianRecordBooks,
     RecordBook? selectedRecordBook,
     bool clearSelectedRecordBook = false,
     bool? isLoadingRecordBooks,
@@ -150,6 +153,7 @@ class AddRegistryEntryState {
       formData: formData ?? this.formData,
       allRecordBooks: allRecordBooks ?? this.allRecordBooks,
       filteredRecordBooks: filteredRecordBooks ?? this.filteredRecordBooks,
+      guardianRecordBooks: guardianRecordBooks ?? this.guardianRecordBooks,
       selectedRecordBook: clearSelectedRecordBook
           ? null
           : (selectedRecordBook ?? this.selectedRecordBook),
@@ -398,6 +402,7 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
       state = state.copyWith(
         allRecordBooks: books,
         filteredRecordBooks: filtered,
+        guardianRecordBooks: guardianBooks,
         selectedRecordBook: autoSelected,
         isLoadingRecordBooks: false,
       );

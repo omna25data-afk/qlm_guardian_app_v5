@@ -17,9 +17,17 @@ class FailedImportRow {
 
   factory FailedImportRow.fromJson(Map<String, dynamic> json) {
     return FailedImportRow(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       data: json['data'] ?? '',
-      importId: json['import_id'] != null ? (json['import_id'] is int ? json['import_id'] : int.tryParse(json['import_id'].toString()) ?? 0) : 0,
+      importId: json['import_id'] != null
+          ? (json['import_id'] is int
+                ? json['import_id']
+                : int.tryParse(json['import_id'].toString()) ?? 0)
+          : 0,
       validationError: json['validation_error'] ?? null,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,

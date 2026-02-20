@@ -19,10 +19,17 @@ class ConstraintType {
 
   factory ConstraintType.fromJson(Map<String, dynamic> json) {
     return ConstraintType(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       name: json['name'] ?? '',
       code: json['code'] ?? '',
-      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
+      isActive:
+          json['is_active'] == 1 ||
+          json['is_active'] == true ||
+          json['is_active'] == '1',
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
       deletedAt: json['deleted_at'] ?? null,

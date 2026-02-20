@@ -15,9 +15,17 @@ class ModelHasRole {
 
   factory ModelHasRole.fromJson(Map<String, dynamic> json) {
     return ModelHasRole(
-      roleId: json['role_id'] != null ? (json['role_id'] is int ? json['role_id'] : int.tryParse(json['role_id'].toString()) ?? 0) : 0,
+      roleId: json['role_id'] != null
+          ? (json['role_id'] is int
+                ? json['role_id']
+                : int.tryParse(json['role_id'].toString()) ?? 0)
+          : 0,
       modelType: json['model_type'] ?? '',
-      modelId: json['model_id'] != null ? (json['model_id'] is int ? json['model_id'] : int.tryParse(json['model_id'].toString()) ?? 0) : 0,
+      modelId: json['model_id'] != null
+          ? (json['model_id'] is int
+                ? json['model_id']
+                : int.tryParse(json['model_id'].toString()) ?? 0)
+          : 0,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
     );

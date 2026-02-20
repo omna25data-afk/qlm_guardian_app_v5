@@ -31,16 +31,39 @@ class GuardianAssignment {
 
   factory GuardianAssignment.fromJson(Map<String, dynamic> json) {
     return GuardianAssignment(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
-      assignedGuardianId: json['assigned_guardian_id'] != null ? (json['assigned_guardian_id'] is int ? json['assigned_guardian_id'] : int.tryParse(json['assigned_guardian_id'].toString()) ?? 0) : 0,
-      originalGuardianId: json['original_guardian_id'] != null ? (json['original_guardian_id'] is int ? json['original_guardian_id'] : int.tryParse(json['original_guardian_id'].toString()) ?? 0) : 0,
-      geographicAreaId: json['geographic_area_id'] != null ? (json['geographic_area_id'] is int ? json['geographic_area_id'] : int.tryParse(json['geographic_area_id'].toString()) ?? 0) : 0,
-      assignedBy: json['assigned_by'] != null ? (json['assigned_by'] is int ? json['assigned_by'] : int.tryParse(json['assigned_by'].toString()) ?? null) : null,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
+      assignedGuardianId: json['assigned_guardian_id'] != null
+          ? (json['assigned_guardian_id'] is int
+                ? json['assigned_guardian_id']
+                : int.tryParse(json['assigned_guardian_id'].toString()) ?? 0)
+          : 0,
+      originalGuardianId: json['original_guardian_id'] != null
+          ? (json['original_guardian_id'] is int
+                ? json['original_guardian_id']
+                : int.tryParse(json['original_guardian_id'].toString()) ?? 0)
+          : 0,
+      geographicAreaId: json['geographic_area_id'] != null
+          ? (json['geographic_area_id'] is int
+                ? json['geographic_area_id']
+                : int.tryParse(json['geographic_area_id'].toString()) ?? 0)
+          : 0,
+      assignedBy: json['assigned_by'] != null
+          ? (json['assigned_by'] is int
+                ? json['assigned_by']
+                : int.tryParse(json['assigned_by'].toString()) ?? null)
+          : null,
       assignmentType: json['assignment_type'] ?? '',
       startDate: json['start_date'] ?? '',
       endDate: json['end_date'] ?? null,
       reason: json['reason'] ?? null,
-      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
+      isActive:
+          json['is_active'] == 1 ||
+          json['is_active'] == true ||
+          json['is_active'] == '1',
       notes: json['notes'] ?? null,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,

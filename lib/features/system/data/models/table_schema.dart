@@ -25,14 +25,28 @@ class TableSchema {
 
   factory TableSchema.fromJson(Map<String, dynamic> json) {
     return TableSchema(
-      id: json['id'] != null ? (json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0) : 0,
+      id: json['id'] != null
+          ? (json['id'] is int
+                ? json['id']
+                : int.tryParse(json['id'].toString()) ?? 0)
+          : 0,
       name: json['name'] ?? '',
       label: json['label'] ?? '',
       description: json['description'] ?? null,
       modelClass: json['model_class'] ?? '',
-      isCentral: json['is_central'] == 1 || json['is_central'] == true || json['is_central'] == '1',
-      isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
-      sortOrder: json['sort_order'] != null ? (json['sort_order'] is int ? json['sort_order'] : int.tryParse(json['sort_order'].toString()) ?? 0) : 0,
+      isCentral:
+          json['is_central'] == 1 ||
+          json['is_central'] == true ||
+          json['is_central'] == '1',
+      isActive:
+          json['is_active'] == 1 ||
+          json['is_active'] == true ||
+          json['is_active'] == '1',
+      sortOrder: json['sort_order'] != null
+          ? (json['sort_order'] is int
+                ? json['sort_order']
+                : int.tryParse(json['sort_order'].toString()) ?? 0)
+          : 0,
       createdAt: json['created_at'] ?? null,
       updatedAt: json['updated_at'] ?? null,
     );

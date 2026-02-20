@@ -20,7 +20,9 @@ class AppTheme {
       error: AppColors.error,
     ),
     scaffoldBackgroundColor: AppColors.background,
-
+    fontFamilyFallback: const [
+      'sans-serif',
+    ], // Prevents CanvasKit Noto font crash for missing characters
     // Typography - Arabic-friendly
     textTheme: const TextTheme(
       displayLarge: TextStyle(

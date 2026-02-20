@@ -23,15 +23,16 @@ class FeesReportItem {
 
   factory FeesReportItem.fromJson(Map<String, dynamic> json) {
     return FeesReportItem(
-      contractTypeId: json['id'] ?? 0,
-      contractTypeName: json['name'] ?? '',
-      contractTypeCode: json['code'] ?? '',
-      count: json['count'] ?? 0,
-      fees: (json['fees'] ?? 0).toDouble(),
-      penalties: (json['penalties'] ?? 0).toDouble(),
-      support: (json['support'] ?? 0).toDouble(),
-      sustainability: (json['sustainability'] ?? 0).toDouble(),
-      total: (json['total'] ?? 0).toDouble(),
+      contractTypeId: int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      contractTypeName: json['name']?.toString() ?? '',
+      contractTypeCode: json['code']?.toString() ?? '',
+      count: int.tryParse(json['count']?.toString() ?? '0') ?? 0,
+      fees: double.tryParse(json['fees']?.toString() ?? '0') ?? 0.0,
+      penalties: double.tryParse(json['penalties']?.toString() ?? '0') ?? 0.0,
+      support: double.tryParse(json['support']?.toString() ?? '0') ?? 0.0,
+      sustainability:
+          double.tryParse(json['sustainability']?.toString() ?? '0') ?? 0.0,
+      total: double.tryParse(json['total']?.toString() ?? '0') ?? 0.0,
     );
   }
 }
@@ -55,12 +56,13 @@ class FeesReportSummary {
 
   factory FeesReportSummary.fromJson(Map<String, dynamic> json) {
     return FeesReportSummary(
-      count: json['count'] ?? 0,
-      fees: (json['fees'] ?? 0).toDouble(),
-      penalties: (json['penalties'] ?? 0).toDouble(),
-      support: (json['support'] ?? 0).toDouble(),
-      sustainability: (json['sustainability'] ?? 0).toDouble(),
-      total: (json['total'] ?? 0).toDouble(),
+      count: int.tryParse(json['count']?.toString() ?? '0') ?? 0,
+      fees: double.tryParse(json['fees']?.toString() ?? '0') ?? 0.0,
+      penalties: double.tryParse(json['penalties']?.toString() ?? '0') ?? 0.0,
+      support: double.tryParse(json['support']?.toString() ?? '0') ?? 0.0,
+      sustainability:
+          double.tryParse(json['sustainability']?.toString() ?? '0') ?? 0.0,
+      total: double.tryParse(json['total']?.toString() ?? '0') ?? 0.0,
     );
   }
 }
