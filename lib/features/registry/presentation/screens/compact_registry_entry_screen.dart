@@ -5,14 +5,18 @@ import 'package:hijri/hijri_calendar.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../admin/presentation/providers/add_entry_provider.dart';
+import '../../../../features/system/data/models/registry_entry_sections.dart';
 import '../widgets/parties_section.dart';
 import '../widgets/documentation_section.dart';
 import '../widgets/guardian_section.dart';
 import '../widgets/fees_summary_card.dart';
 import '../widgets/form_section_card.dart';
+import '../widgets/dynamic_field_builder.dart';
 
 class CompactRegistryEntryScreen extends ConsumerStatefulWidget {
-  const CompactRegistryEntryScreen({super.key});
+  final RegistryEntrySections? initialData;
+
+  const CompactRegistryEntryScreen({super.key, this.initialData});
 
   @override
   ConsumerState<CompactRegistryEntryScreen> createState() =>
@@ -87,20 +91,79 @@ class _CompactRegistryEntryScreenState
     );
     _fadeController.forward();
 
-    // Set default dates
-    final todayHijri = HijriCalendar.now();
-    _documentHijriDateCtrl.text = todayHijri.toString();
-    _documentGregorianDateCtrl.text = DateTime.now().toString().split(' ')[0];
-    _docHijriDateCtrl.text = todayHijri.toString();
-    _docGregorianDateCtrl.text = DateTime.now().toString().split(' ')[0];
-    _guardianHijriDateCtrl.text = todayHijri.toString();
-    _guardianGregorianDateCtrl.text = DateTime.now().toString().split(' ')[0];
+    _initializeData();
 
     // Monitor connectivity
     Connectivity().onConnectivityChanged.listen((results) {
       final hasConnection = results.any((r) => r != ConnectivityResult.none);
       if (mounted) setState(() => _isOnline = hasConnection);
     });
+  }
+
+  void _initializeData() {
+    if (widget.initialData != null) {
+      final data = widget.initialData!;
+      _selectedContractTypeId = data.basicInfo.contractTypeId;
+      _firstPartyCtrl.text = data.basicInfo.firstPartyName;
+      _secondPartyCtrl.text = data.basicInfo.secondPartyName;
+      _documentHijriDateCtrl.text = data.documentInfo.documentHijriDate ?? '';
+
+      _writerType = data.writerInfo.writerType ?? 'guardian';
+
+      if (_writerType == 'guardian') {
+        _selectedGuardianId = data.writerInfo.writerId;
+      } else if (_writerType == 'documentation') {
+        _selectedWriterId = data.writerInfo.writerId;
+      }
+
+      // Financial
+      _feeAmountCtrl.text = data.financialInfo.feeAmount?.toString() ?? '0';
+      _totalAmountCtrl.text = data.financialInfo.totalAmount.toString();
+
+      // Documentation Book
+      _selectedDocRecordBookId = data.documentInfo.docRecordBookId;
+      _docRecordBookNumberCtrl.text =
+          data.documentInfo.docRecordBookNumber?.toString() ?? '';
+      _docPageNumberCtrl.text =
+          data.documentInfo.docPageNumber?.toString() ?? '';
+      _docEntryNumberCtrl.text =
+          data.documentInfo.docEntryNumber?.toString() ?? '';
+
+      // Guardian Book
+      _guardianRecordBookNumberCtrl.text =
+          data.guardianInfo.guardianRecordBookNumber?.toString() ?? '';
+      _guardianPageNumberCtrl.text =
+          data.guardianInfo.guardianPageNumber?.toString() ?? '';
+      _guardianEntryNumberCtrl.text =
+          data.guardianInfo.guardianEntryNumber?.toString() ?? '';
+      _guardianHijriDateCtrl.text = data.guardianInfo.guardianHijriDate ?? '';
+
+      // Load specific dependencies (needs notifier)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_selectedContractTypeId != null) {
+          final notifier = ref.read(addEntryProvider.notifier);
+          notifier.loadDocumentationRecordBooks(_selectedContractTypeId!);
+          notifier.loadFormFields(_selectedContractTypeId!);
+          notifier.loadSubtypes(_selectedContractTypeId!);
+
+          if (_writerType == 'guardian' && _selectedGuardianId != null) {
+            notifier.loadGuardianRecordBooks(
+              _selectedContractTypeId!,
+              _selectedGuardianId!,
+            );
+          }
+        }
+      });
+    } else {
+      // Set default dates
+      final todayHijri = HijriCalendar.now();
+      _documentHijriDateCtrl.text = todayHijri.toString();
+      _documentGregorianDateCtrl.text = DateTime.now().toString().split(' ')[0];
+      _docHijriDateCtrl.text = todayHijri.toString();
+      _docGregorianDateCtrl.text = DateTime.now().toString().split(' ')[0];
+      _guardianHijriDateCtrl.text = todayHijri.toString();
+      _guardianGregorianDateCtrl.text = DateTime.now().toString().split(' ')[0];
+    }
   }
 
   @override
@@ -316,101 +379,136 @@ class _CompactRegistryEntryScreenState
                       // Connectivity banner
                       if (!_isOnline) _buildOfflineBanner(),
 
-                      // Parties & Writer
+                      // ══════════════════════════════════════
+                      // القسم الأول: نوع المحرر وبيانات الكاتب
+                      // ══════════════════════════════════════
                       FormSectionCard(
-                        title: 'الكاتب والأطراف',
-                        icon: Icons.people_alt,
+                        title: 'نوع المحرر وبيانات الكاتب',
+                        icon: Icons.edit_document,
                         accentColor: AppColors.primary,
-                        child: PartiesSection(
-                          contractTypes: state.contractTypes,
-                          selectedContractTypeId: _selectedContractTypeId,
-                          onContractTypeSelected: _onContractTypeSelected,
-                          writerType: _writerType,
-                          selectedGuardianId: _selectedGuardianId,
-                          selectedWriterId: _selectedWriterId,
-                          selectedOtherWriterId: _selectedOtherWriterId,
-                          firstPartyController: _firstPartyCtrl,
-                          secondPartyController: _secondPartyCtrl,
-                          documentHijriDateController: _documentHijriDateCtrl,
-                          documentGregorianDateController:
-                              _documentGregorianDateCtrl,
-                          divorceContractNumberController:
-                              _divorceContractNumberCtrl,
-                          returnDateController: _returnDateCtrl,
-                          dynamicControllers: _dynamicControllers,
-                          selectedSubtype1: _selectedSubtype1,
-                          selectedSubtype2: _selectedSubtype2,
-                          onSubtype1Changed: (v) =>
-                              setState(() => _selectedSubtype1 = v),
-                          onSubtype2Changed: (v) =>
-                              setState(() => _selectedSubtype2 = v),
-                          onWriterTypeChanged: (v) {
-                            setState(() => _writerType = v);
-                            _calculateFees();
-                          },
-                          onGuardianChanged: (v) =>
-                              setState(() => _selectedGuardianId = v),
-                          onWriterChanged: (v) =>
-                              setState(() => _selectedWriterId = v),
-                          onOtherWriterChanged: (v) =>
-                              setState(() => _selectedOtherWriterId = v),
-                          onFeesRecalculate: _calculateFees,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            PartiesSection(
+                              contractTypes: state.contractTypes,
+                              selectedContractTypeId: _selectedContractTypeId,
+                              onContractTypeSelected: _onContractTypeSelected,
+                              writerType: _writerType,
+                              selectedGuardianId: _selectedGuardianId,
+                              selectedWriterId: _selectedWriterId,
+                              selectedOtherWriterId: _selectedOtherWriterId,
+                              firstPartyController: _firstPartyCtrl,
+                              secondPartyController: _secondPartyCtrl,
+                              documentHijriDateController:
+                                  _documentHijriDateCtrl,
+                              documentGregorianDateController:
+                                  _documentGregorianDateCtrl,
+                              divorceContractNumberController:
+                                  _divorceContractNumberCtrl,
+                              returnDateController: _returnDateCtrl,
+                              dynamicControllers: _dynamicControllers,
+                              selectedSubtype1: _selectedSubtype1,
+                              selectedSubtype2: _selectedSubtype2,
+                              onSubtype1Changed: (v) =>
+                                  setState(() => _selectedSubtype1 = v),
+                              onSubtype2Changed: (v) =>
+                                  setState(() => _selectedSubtype2 = v),
+                              onWriterTypeChanged: (v) {
+                                setState(() => _writerType = v);
+                                _calculateFees();
+                              },
+                              onGuardianChanged: (v) {
+                                setState(() => _selectedGuardianId = v);
+                                // Load guardian record books when guardian selected
+                                if (v != null &&
+                                    _selectedContractTypeId != null) {
+                                  ref
+                                      .read(addEntryProvider.notifier)
+                                      .loadGuardianRecordBooks(
+                                        _selectedContractTypeId!,
+                                        v,
+                                      );
+                                }
+                              },
+                              onWriterChanged: (v) =>
+                                  setState(() => _selectedWriterId = v),
+                              onOtherWriterChanged: (v) =>
+                                  setState(() => _selectedOtherWriterId = v),
+                              onFeesRecalculate: _calculateFees,
+                            ),
+
+                            // Guardian Record (inside Section 1 if writer is guardian)
+                            if (_writerType == 'guardian') ...[
+                              const SizedBox(height: 16),
+                              const Divider(),
+                              const SizedBox(height: 12),
+                              GuardianSection(
+                                guardianRecordBookId: _guardianRecordBookId,
+                                guardianRecordBooks: state.guardianRecordBooks,
+                                recordBookNumberCtrl:
+                                    _guardianRecordBookNumberCtrl,
+                                pageNumberCtrl: _guardianPageNumberCtrl,
+                                entryNumberCtrl: _guardianEntryNumberCtrl,
+                                hijriDateCtrl: _guardianHijriDateCtrl,
+                                gregorianDateCtrl: _guardianGregorianDateCtrl,
+                                onRecordBookIdChanged: (v) =>
+                                    setState(() => _guardianRecordBookId = v),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                       const SizedBox(height: 16),
 
-                      // Guardian (if writer is guardian)
-                      if (_writerType == 'guardian')
-                        FormSectionCard(
-                          title: 'سجل قيد محررات الأمين',
-                          icon: Icons.verified_user,
-                          accentColor: AppColors.success,
-                          isCollapsible: true,
-                          child: GuardianSection(
-                            guardianRecordBookId: _guardianRecordBookId,
-                            recordBookNumberCtrl: _guardianRecordBookNumberCtrl,
-                            pageNumberCtrl: _guardianPageNumberCtrl,
-                            entryNumberCtrl: _guardianEntryNumberCtrl,
-                            hijriDateCtrl: _guardianHijriDateCtrl,
-                            gregorianDateCtrl: _guardianGregorianDateCtrl,
-                            onRecordBookIdChanged: (v) =>
-                                setState(() => _guardianRecordBookId = v),
-                          ),
-                        ),
-                      if (_writerType == 'guardian') const SizedBox(height: 16),
-
-                      // Documentation & Financial Fields
-                      if (_writerType == 'guardian' &&
-                          _selectedGuardianId != null) ...[
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.blue.shade200),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                color: Colors.blue,
-                                size: 20,
-                              ),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  'بما أن القيد مقيد في سجل الأمين مسبقاً، يرجى استكمال بيانات التوثيق والرسوم المالية أدناه لإتمام المرحلة.',
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontSize: 13,
+                      // ══════════════════════════════════════
+                      // القسم الثاني: بيانات القيد/العقد
+                      // ══════════════════════════════════════
+                      if (_selectedContractTypeId != null) ...[
+                        // Auto-documentation notice
+                        if (_writerType == 'guardian' &&
+                            _selectedGuardianId != null) ...[
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.blue.shade200),
+                            ),
+                            child: const Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Colors.blue,
+                                  size: 20,
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'بما أن القيد مقيد في سجل الأمين مسبقاً، يرجى استكمال بيانات التوثيق والرسوم المالية أدناه لإتمام المرحلة.',
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
+                          const SizedBox(height: 16),
+                        ],
+
+                        FormSectionCard(
+                          title: 'بيانات القيد والعقد',
+                          icon: Icons.people_alt,
+                          accentColor: AppColors.accent,
+                          child: _buildContractDataSection(state),
                         ),
                         const SizedBox(height: 16),
                       ],
+
+                      // ══════════════════════════════════════
+                      // القسم الثالث: بيانات قلم التوثيق
+                      // ══════════════════════════════════════
                       FormSectionCard(
                         title: 'بيانات قلم التوثيق',
                         icon: Icons.account_balance,
@@ -418,6 +516,7 @@ class _CompactRegistryEntryScreenState
                         child: DocumentationSection(
                           selectedContractTypeId: _selectedContractTypeId,
                           selectedDocRecordBookId: _selectedDocRecordBookId,
+                          filteredRecordBooks: state.documentationRecordBooks,
                           docHijriDateCtrl: _docHijriDateCtrl,
                           docGregorianDateCtrl: _docGregorianDateCtrl,
                           docRecordBookNumberCtrl: _docRecordBookNumberCtrl,
@@ -472,6 +571,108 @@ class _CompactRegistryEntryScreenState
                 ),
               ),
       ),
+    );
+  }
+
+  // ── القسم الثاني: بيانات القيد والعقد ──
+  Widget _buildContractDataSection(AddEntryState state) {
+    final labels =
+        contractPartyLabels[_selectedContractTypeId] ??
+        {'first': 'الطرف الأول', 'second': 'الطرف الثاني'};
+
+    final isDivision = _selectedContractTypeId == 6;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Party fields
+        if (isDivision) ...[
+          TextFormField(
+            controller: _firstPartyCtrl,
+            decoration: const InputDecoration(
+              labelText: 'اسم المؤرث',
+              prefixIcon: Icon(Icons.person, size: 20),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _secondPartyCtrl,
+            decoration: const InputDecoration(
+              labelText: 'أسماء الورثة (مفصولين بفاصلة)',
+              prefixIcon: Icon(Icons.people, size: 20),
+            ),
+            maxLines: 2,
+          ),
+        ] else ...[
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _firstPartyCtrl,
+                  decoration: InputDecoration(
+                    labelText: labels['first'],
+                    prefixIcon: const Icon(Icons.person, size: 20),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextFormField(
+                  controller: _secondPartyCtrl,
+                  decoration: InputDecoration(
+                    labelText: labels['second'],
+                    prefixIcon: const Icon(Icons.person_outline, size: 20),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 16),
+
+        // Contract-specific fields (e.g. return/divorce)
+        if (_selectedContractTypeId == 8) ...[
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _divorceContractNumberCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'رقم عقد الطلاق',
+                    prefixIcon: Icon(Icons.numbers, size: 20),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextFormField(
+                  controller: _returnDateCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'تاريخ الرجعة',
+                    prefixIcon: Icon(Icons.calendar_today, size: 20),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // Dynamic fields
+        DynamicFieldBuilder(
+          fields: state.filteredFields,
+          isLoading: state.isLoadingFields,
+          controllers: _dynamicControllers,
+          onFieldChanged: (entry) {
+            ref
+                .read(addEntryProvider.notifier)
+                .updateFormData(entry.key, entry.value);
+            if (entry.key == 'sale_price') {
+              Future.delayed(Duration.zero, _calculateFees);
+            }
+          },
+        ),
+      ],
     );
   }
 

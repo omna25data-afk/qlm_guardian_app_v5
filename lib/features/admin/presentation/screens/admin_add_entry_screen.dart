@@ -44,6 +44,7 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
   int? _selectedContractTypeId;
   String _writerType = 'guardian';
   int? _selectedGuardianId;
+  int? _selectedGuardianRecordBookId;
   int? _selectedWriterId;
   int? _selectedOtherWriterId;
   String? _selectedSubtype1;
@@ -283,6 +284,9 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
       data['guardian_entry_number'] = int.tryParse(
         _guardianEntryNumberCtrl.text,
       );
+      if (_selectedGuardianRecordBookId != null) {
+        data['guardian_record_book_id'] = _selectedGuardianRecordBookId;
+      }
       data['guardian_record_book_number'] = int.tryParse(
         _guardianRecordBookNumberCtrl.text,
       );
@@ -388,6 +392,7 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
       _selectedContractTypeId = typeId;
       _selectedSubtype1 = null;
       _selectedSubtype2 = null;
+      _selectedGuardianRecordBookId = null;
     });
     final notifier = ref.read(addEntryProvider.notifier);
     notifier.loadSubtypes(typeId);
@@ -466,7 +471,7 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
                             icon: Icons.verified_user,
                             accentColor: AppColors.success,
                             isCollapsible: true,
-                            child: _buildGuardianRecordSection(),
+                            child: _buildGuardianRecordSection(state),
                           ),
                         if (_writerType == 'guardian')
                           const SizedBox(height: 16),
@@ -787,8 +792,20 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
             : null,
         itemLabelBuilder: (item) => item['name']?.toString() ?? '',
         onChanged: (item) {
-          if (item != null)
-            setState(() => _selectedGuardianId = item['id'] as int);
+          if (item != null) {
+            setState(() {
+              _selectedGuardianId = item['id'] as int;
+              _selectedGuardianRecordBookId = null;
+            });
+            if (_selectedContractTypeId != null) {
+              ref
+                  .read(addEntryProvider.notifier)
+                  .loadGuardianRecordBooks(
+                    _selectedContractTypeId!,
+                    _selectedGuardianId!,
+                  );
+            }
+          }
         },
         validator: (item) =>
             _writerType == 'guardian' && (item == null || item.isEmpty)
@@ -1042,8 +1059,7 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
                   orElse: () => state.documentationRecordBooks.first,
                 )
               : null,
-          itemLabelBuilder: (b) =>
-              'سجل رقم ${b.bookNumber} لسنة ${b.hijriYear}',
+          itemLabelBuilder: (b) => b.compositeName,
           onChanged: (book) {
             if (book != null) {
               setState(() {
@@ -1399,28 +1415,44 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
   }
 
   // ═══════ Guardian Record ═══════
-  Widget _buildGuardianRecordSection() {
-    String recordType = '';
-    switch (_selectedContractTypeId) {
-      case 1:
-        recordType = 'سجل الزواج';
-        break;
-      case 7:
-        recordType = 'سجل الطلاق';
-        break;
-      case 8:
-        recordType = 'سجل الرجعة';
-        break;
-      default:
-        recordType = 'سجل المحررات';
-    }
+  Widget _buildGuardianRecordSection(AddEntryState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _textField(
-          TextEditingController(text: recordType),
-          'نوع السجل',
-          readOnly: true,
+        SearchableDropdown<RecordBook>(
+          items: state.guardianRecordBooks,
+          label: 'سجل الأمين *',
+          hint: 'اختر دفتر الأمين...',
+          value: _selectedGuardianRecordBookId != null
+              ? state.guardianRecordBooks.firstWhere(
+                  (b) => b.id == _selectedGuardianRecordBookId,
+                  orElse: () => state.guardianRecordBooks.isNotEmpty
+                      ? state.guardianRecordBooks.first
+                      : RecordBook(
+                          id: 0,
+                          name: '',
+                          bookNumber: 0,
+                          hijriYear: 0,
+                          category: '',
+                          createdBy: 0,
+                          isActive: false,
+                          constraintsPerPage: 0,
+                          endConstraintNumber: 0,
+                          startConstraintNumber: 0,
+                          status: '',
+                          totalPages: 0,
+                        ),
+                )
+              : null,
+          itemLabelBuilder: (b) => b.id == 0 ? '' : b.compositeName,
+          onChanged: (book) {
+            if (book != null && book.id != 0) {
+              setState(() {
+                _selectedGuardianRecordBookId = book.id;
+                _guardianRecordBookNumberCtrl.text = book.bookNumber.toString();
+              });
+            }
+          },
         ),
         const SizedBox(height: 12),
         Row(
@@ -1430,6 +1462,7 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
                 _guardianRecordBookNumberCtrl,
                 'رقم السجل',
                 keyboardType: TextInputType.number,
+                readOnly: true,
                 icon: Icons.menu_book,
               ),
             ),

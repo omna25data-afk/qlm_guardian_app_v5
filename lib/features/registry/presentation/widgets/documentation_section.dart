@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:hijri_picker/hijri_picker.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/searchable_dropdown.dart';
-import '../providers/add_registry_entry_provider.dart';
 import '../../../records/data/models/record_book.dart';
 
-class DocumentationSection extends ConsumerWidget {
+class DocumentationSection extends StatelessWidget {
   final int? selectedContractTypeId;
   final int? selectedDocRecordBookId;
+  final List<RecordBook> filteredRecordBooks;
   final TextEditingController docHijriDateCtrl;
   final TextEditingController docGregorianDateCtrl;
   final TextEditingController docRecordBookNumberCtrl;
@@ -42,6 +41,7 @@ class DocumentationSection extends ConsumerWidget {
     super.key,
     required this.selectedContractTypeId,
     required this.selectedDocRecordBookId,
+    required this.filteredRecordBooks,
     required this.docHijriDateCtrl,
     required this.docGregorianDateCtrl,
     required this.docRecordBookNumberCtrl,
@@ -71,21 +71,19 @@ class DocumentationSection extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(addRegistryEntryProvider);
-
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Doc Record Book Selector
-        if (state.filteredRecordBooks.isNotEmpty) ...[
+        if (filteredRecordBooks.isNotEmpty) ...[
           SearchableDropdown<RecordBook>(
-            items: state.filteredRecordBooks,
+            items: filteredRecordBooks,
             label: 'سجل التوثيق النهائي',
             value: selectedDocRecordBookId != null
-                ? state.filteredRecordBooks.firstWhere(
+                ? filteredRecordBooks.firstWhere(
                     (b) => b.id == selectedDocRecordBookId,
-                    orElse: () => state.filteredRecordBooks.first,
+                    orElse: () => filteredRecordBooks.first,
                   )
                 : null,
             itemLabelBuilder: (b) =>

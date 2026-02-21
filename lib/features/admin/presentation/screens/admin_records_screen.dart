@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 
 import 'tabs/all_entries_tab.dart'; // New tab
+import 'tabs/inspection_tab.dart'; // Inspection tab
 import 'tabs/record_books_tab.dart'; // Renamed existing
 
 class AdminRecordsScreen extends StatefulWidget {
@@ -18,7 +19,7 @@ class _AdminRecordsScreenState extends State<AdminRecordsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -71,6 +72,7 @@ class _AdminRecordsScreenState extends State<AdminRecordsScreen>
                     tabs: const [
                       Tab(text: 'السجلات (الدفاتر)'),
                       Tab(text: 'القيود (المحررات)'),
+                      Tab(text: 'فحص وتفتيش'),
                     ],
                   ),
                 ],
@@ -80,7 +82,11 @@ class _AdminRecordsScreenState extends State<AdminRecordsScreen>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: const [RecordBooksTab(), AllEntriesTab()],
+              children: const [
+                RecordBooksTab(),
+                AllEntriesTab(),
+                InspectionTab(),
+              ],
             ),
           ),
         ],

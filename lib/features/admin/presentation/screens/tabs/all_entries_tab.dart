@@ -11,6 +11,7 @@ import '../../../../../core/di/injection.dart';
 import '../../../../admin/presentation/widgets/registry_entry_correction_dialog.dart';
 import '../../../../registry/presentation/screens/compact_registry_entry_screen.dart';
 import '../admin_add_entry_screen.dart';
+import '../../../../admin/presentation/providers/admin_dashboard_provider.dart';
 
 // Create a provider for All Entries specifically
 final allEntriesProvider =
@@ -66,10 +67,288 @@ class AllEntriesNotifier
     if (writerType != null) this.writerType = writerType;
     fetchEntries();
   }
+
+  void setWriterType(String? type) {
+    writerType = type;
+    fetchEntries();
+  }
+
+  void setStatus(String? newStatus) {
+    status = newStatus;
+    fetchEntries();
+  }
+
+  void clearFilters() {
+    searchQuery = null;
+    status = null;
+    year = null;
+    contractTypeId = null;
+    writerType = null;
+    fetchEntries();
+  }
 }
 
 class AllEntriesTab extends ConsumerWidget {
   const AllEntriesTab({super.key});
+
+  Widget _buildFilterChip({
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return FilterChip(
+      label: Text(
+        label,
+        style: TextStyle(
+          fontFamily: 'Tajawal',
+          fontSize: 13,
+          color: isActive ? Colors.white : Colors.grey.shade700,
+        ),
+      ),
+      selected: isActive,
+      onSelected: (_) => onTap(),
+      selectedColor: AppColors.primary,
+      backgroundColor: Colors.grey.shade100,
+      checkmarkColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isActive ? AppColors.primary : Colors.grey.shade300,
+        ),
+      ),
+    );
+  }
+
+  void _showAdvancedFilters(
+    BuildContext context,
+    WidgetRef ref,
+    AllEntriesNotifier notifier,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) {
+          return FutureBuilder<List<dynamic>>(
+            future: Future.wait<dynamic>([
+              ref.read(adminRepositoryProvider).getAdminRecordBookTypes(),
+            ]),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+
+              final types =
+                  snapshot.data?[0] as List<Map<String, dynamic>>? ?? [];
+
+              // Current filter values
+              int? selectedYear = notifier.year;
+              int? selectedContractType = notifier.contractTypeId;
+
+              return StatefulBuilder(
+                builder: (context, setModalState) {
+                  return Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'تصفية متقدمة',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Year Dropdown
+                        const Text(
+                          'سنة الإصدار',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<int>(
+                              value: selectedYear,
+                              isExpanded: true,
+                              hint: const Text(
+                                'الكل',
+                                style: TextStyle(fontFamily: 'Tajawal'),
+                              ),
+                              items: [
+                                const DropdownMenuItem<int>(
+                                  value: null,
+                                  child: Text(
+                                    'الكل',
+                                    style: TextStyle(fontFamily: 'Tajawal'),
+                                  ),
+                                ),
+                                ...List.generate(30, (index) {
+                                  final year = DateTime.now().year - index;
+                                  return DropdownMenuItem<int>(
+                                    value: year,
+                                    child: Text(
+                                      year.toString(),
+                                      style: const TextStyle(
+                                        fontFamily: 'Tajawal',
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ],
+                              onChanged: (val) {
+                                setModalState(() => selectedYear = val);
+                              },
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Contract Type Dropdown
+                        const Text(
+                          'نوع العقد/القيد',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<int>(
+                              value: selectedContractType,
+                              isExpanded: true,
+                              hint: const Text(
+                                'الكل',
+                                style: TextStyle(fontFamily: 'Tajawal'),
+                              ),
+                              items: [
+                                const DropdownMenuItem<int>(
+                                  value: null,
+                                  child: Text(
+                                    'الكل',
+                                    style: TextStyle(fontFamily: 'Tajawal'),
+                                  ),
+                                ),
+                                ...types.map(
+                                  (t) => DropdownMenuItem<int>(
+                                    value: t['id'] as int,
+                                    child: Text(
+                                      t['name']?.toString() ?? '',
+                                      style: const TextStyle(
+                                        fontFamily: 'Tajawal',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (val) {
+                                setModalState(() => selectedContractType = val);
+                              },
+                            ),
+                          ),
+                        ),
+
+                        const Spacer(),
+
+                        // Apply Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: () {
+                              notifier.updateFilters(
+                                year: selectedYear,
+                                contractTypeId: selectedContractType,
+                              );
+                              Navigator.pop(ctx);
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              'تطبيق الفلتر',
+                              style: TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Clear Filters
+                        Center(
+                          child: TextButton(
+                            onPressed: () {
+                              notifier.clearFilters();
+                              Navigator.pop(ctx);
+                            },
+                            child: const Text(
+                              'مسح الفلاتر',
+                              style: TextStyle(
+                                fontFamily: 'Tajawal',
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -129,31 +408,102 @@ class AllEntriesTab extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          // Filter Bar (Search + Chips)
+          // Writer Type Sub-tabs (SegmentedButton)
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<String>(
+                style: SegmentedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  selectedForegroundColor: Colors.white,
+                  selectedBackgroundColor: AppColors.primary,
+                  textStyle: const TextStyle(
+                    fontFamily: 'Tajawal',
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  side: BorderSide(color: Colors.grey.shade300),
+                ),
+                segments: const [
+                  ButtonSegment<String>(
+                    value: 'all',
+                    label: Text('الكل', overflow: TextOverflow.ellipsis),
+                  ),
+                  ButtonSegment<String>(
+                    value: 'documentation',
+                    label: Text('توثيق', overflow: TextOverflow.ellipsis),
+                  ),
+                  ButtonSegment<String>(
+                    value: 'guardian',
+                    label: Text('أمناء', overflow: TextOverflow.ellipsis),
+                  ),
+                  ButtonSegment<String>(
+                    value: 'external',
+                    label: Text('أخرى', overflow: TextOverflow.ellipsis),
+                  ),
+                ],
+                selected: {notifier.writerType ?? 'all'},
+                onSelectionChanged: (Set<String> newSelection) {
+                  final val = newSelection.first;
+                  notifier.setWriterType(val == 'all' ? null : val);
+                },
+                showSelectedIcon: false,
+              ),
+            ),
+          ),
+          // Filter Bar (Search + Status Chips)
           Container(
             color: Colors.white,
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'بحث في المحررات (رقم القيد، الأطراف...)',
-                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'بحث في المحررات (رقم القيد، الأطراف...)',
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: Colors.grey,
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 0,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        onChanged: (val) {
+                          notifier.updateFilters(search: val);
+                        },
+                      ),
                     ),
-                  ),
-                  onChanged: (val) {
-                    // Debounce in a real app
-                    notifier.updateFilters(search: val);
-                  },
+                    const SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.tune, color: AppColors.primary),
+                        onPressed: () {
+                          _showAdvancedFilters(context, ref, notifier);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
-                // Horizontal Filter Chips
+                // Status Filter Chips
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -161,26 +511,25 @@ class AllEntriesTab extends ConsumerWidget {
                       _buildFilterChip(
                         label: 'الكل',
                         isActive: notifier.status == null,
-                        onTap: () => notifier.updateFilters(status: null),
+                        onTap: () => notifier.setStatus(null),
                       ),
                       const SizedBox(width: 8),
                       _buildFilterChip(
                         label: 'موثق',
                         isActive: notifier.status == 'documented',
-                        onTap: () =>
-                            notifier.updateFilters(status: 'documented'),
+                        onTap: () => notifier.setStatus('documented'),
                       ),
                       const SizedBox(width: 8),
                       _buildFilterChip(
-                        label: 'قيد التدقيق', // Pending
+                        label: 'قيد التدقيق',
                         isActive: notifier.status == 'pending',
-                        onTap: () => notifier.updateFilters(status: 'pending'),
+                        onTap: () => notifier.setStatus('pending'),
                       ),
                       const SizedBox(width: 8),
                       _buildFilterChip(
-                        label: 'مسودة', // Draft
+                        label: 'مسودة',
                         isActive: notifier.status == 'draft',
-                        onTap: () => notifier.updateFilters(status: 'draft'),
+                        onTap: () => notifier.setStatus('draft'),
                       ),
                     ],
                   ),
@@ -231,6 +580,18 @@ class AllEntriesTab extends ConsumerWidget {
                               RegistryEntryCorrectionDialog(entry: entry),
                         );
                       },
+                      onEdit: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                CompactRegistryEntryScreen(initialData: entry),
+                          ),
+                        ).then((_) {
+                          // Refresh entries after returning from edit screen
+                          ref.read(allEntriesProvider.notifier).fetchEntries();
+                        });
+                      },
                     );
                   },
                 );
@@ -245,36 +606,6 @@ class AllEntriesTab extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChip({
-    required String label,
-    required bool isActive,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: isActive ? null : onTap, // Prevent reload if already active
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : Colors.grey[100],
-          borderRadius: BorderRadius.circular(20),
-          border: isActive
-              ? null
-              : Border.all(color: Colors.grey[300]!, width: 1),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isActive ? Colors.white : Colors.grey[700],
-            fontSize: 13,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-            fontFamily: 'Tajawal',
-          ),
-        ),
       ),
     );
   }

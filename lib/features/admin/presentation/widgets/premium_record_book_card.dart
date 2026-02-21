@@ -152,6 +152,48 @@ class PremiumRecordBookCard extends StatelessWidget {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          if (book.formNumber != null)
+                            Expanded(
+                              child: _buildIconText(
+                                Icons.description_outlined,
+                                'نموذج: ${book.formNumber}',
+                              ),
+                            ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _buildIconText(
+                              Icons.format_list_numbered,
+                              'القيود: ${book.startConstraintNumber} - ${book.endConstraintNumber}',
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (book.openingProcedureDateHijri != null ||
+                          book.closingProcedureDateHijri != null) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            if (book.openingProcedureDateHijri != null)
+                              Expanded(
+                                child: _buildIconText(
+                                  Icons.lock_open,
+                                  'الافتتاح: ${book.openingProcedureDateHijri}',
+                                ),
+                              ),
+                            const SizedBox(width: 8),
+                            if (book.closingProcedureDateHijri != null)
+                              Expanded(
+                                child: _buildIconText(
+                                  Icons.lock_outline,
+                                  'الإغلاق: ${book.closingProcedureDateHijri}',
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),

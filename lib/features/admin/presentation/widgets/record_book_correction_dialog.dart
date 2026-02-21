@@ -194,9 +194,9 @@ class _RecordBookCorrectionDialogState
                         ),
                         items: const [
                           DropdownMenuItem(
-                            value: 'open',
+                            value: 'active',
                             child: Text(
-                              'مفتوح',
+                              'مفتوح / نشط',
                               style: TextStyle(fontFamily: 'Tajawal'),
                             ),
                           ),
@@ -204,6 +204,27 @@ class _RecordBookCorrectionDialogState
                             value: 'closed',
                             child: Text(
                               'مغلق',
+                              style: TextStyle(fontFamily: 'Tajawal'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'archived',
+                            child: Text(
+                              'مؤرشف',
+                              style: TextStyle(fontFamily: 'Tajawal'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'full',
+                            child: Text(
+                              'ممتلئ',
+                              style: TextStyle(fontFamily: 'Tajawal'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'pending_opening',
+                            child: Text(
+                              'بانتظار الافتتاح',
                               style: TextStyle(fontFamily: 'Tajawal'),
                             ),
                           ),

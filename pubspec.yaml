@@ -73,6 +73,10 @@ dev_dependencies:
   mockito: ^5.4.4
   flutter_test:
     sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
   flutter_lints: ^6.0.0
   
   # Code Generation
@@ -81,6 +85,7 @@ dev_dependencies:
   injectable_generator: ^2.6.3
   json_serializable: ^6.9.4
   drift_dev: ^2.27.0
+  test: ^1.26.3
 
 flutter:
   uses-material-design: true

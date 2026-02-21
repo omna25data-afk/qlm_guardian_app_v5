@@ -718,6 +718,93 @@ class AdminRepository {
         [];
   }
 
+  // ─── Record Book Inspections (فحوصات السجلات) ─────────────
+
+  /// Fetch record book inspections list
+  Future<Map<String, dynamic>> getRecordBookInspections({
+    int page = 1,
+    String? search,
+    String? status,
+    int? hijriYear,
+    int? quarter,
+    int? guardianId,
+  }) async {
+    final params = <String, dynamic>{'page': page};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (status != null) params['status'] = status;
+    if (hijriYear != null) params['hijri_year'] = hijriYear;
+    if (quarter != null) params['quarter'] = quarter;
+    if (guardianId != null) params['guardian_id'] = guardianId;
+
+    final response = await _apiClient.get(
+      ApiEndpoints.adminRecordBookInspections,
+      queryParameters: params,
+    );
+    return response.data;
+  }
+
+  /// Fetch record book inspection detail
+  Future<Map<String, dynamic>> getRecordBookInspectionDetail(int id) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.adminRecordBookInspectionDetail(id),
+    );
+    return response.data['data'] ?? response.data;
+  }
+
+  /// Receive a record book for inspection
+  Future<Map<String, dynamic>> receiveInspection(int id) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.adminReceiveInspection(id),
+    );
+    return response.data;
+  }
+
+  /// Return a record book after inspection
+  Future<Map<String, dynamic>> returnInspection(int id) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.adminReturnInspection(id),
+    );
+    return response.data;
+  }
+
+  /// Complete an inspection
+  Future<Map<String, dynamic>> completeInspection(
+    int id, {
+    String? generalNotes,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.adminCompleteInspection(id),
+      data: generalNotes != null ? {'general_notes': generalNotes} : null,
+    );
+    return response.data;
+  }
+
+  // ─── Record Book Procedures (إجراءات السجلات) ─────────────
+
+  /// Fetch all inspection procedures (صرف/افتتاح/إغلاق/أرشفة)
+  Future<List<Map<String, dynamic>>> getInspectionProcedures({
+    int page = 1,
+    String? search,
+    String? procedureType,
+    int? hijriYear,
+    int? recordBookId,
+  }) async {
+    final params = <String, dynamic>{'page': page};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (procedureType != null) params['procedure_type'] = procedureType;
+    if (hijriYear != null) params['hijri_year'] = hijriYear;
+    if (recordBookId != null) params['record_book_id'] = recordBookId;
+
+    final response = await _apiClient.get(
+      ApiEndpoints.adminInspectionProcedures,
+      queryParameters: params,
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
   /// Delete a guardian
   Future<void> deleteGuardian(int id) async {
     await _apiClient.delete('${ApiEndpoints.adminGuardians}/$id');

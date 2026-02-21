@@ -86,18 +86,52 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                // Category Filters (Chips)
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildFilterChip('الكل', 'all'),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('سجلات الأمناء', 'guardian_recording'),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('سجلات التوثيق', 'documentation_final'),
+                // Category Filters (SegmentedButton)
+                SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<String>(
+                    style: SegmentedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      selectedForegroundColor: Colors.white,
+                      selectedBackgroundColor: AppColors.primary,
+                      textStyle: const TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      side: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    segments: const [
+                      ButtonSegment<String>(
+                        value: 'all',
+                        label: Text('الكل'),
+                        icon: Icon(Icons.all_inclusive, size: 16),
+                      ),
+                      ButtonSegment<String>(
+                        value: 'guardian_recording',
+                        label: Text('سجلات الأمناء'),
+                        icon: Icon(Icons.edit_document, size: 16),
+                      ),
+                      ButtonSegment<String>(
+                        value: 'documentation',
+                        label: Text('سجلات التوثيق'),
+                        icon: Icon(Icons.verified_user, size: 16),
+                      ),
                     ],
+                    selected: {
+                      ref.watch(adminRecordBooksProvider).categoryFilter ??
+                          'all',
+                    },
+                    onSelectionChanged: (Set<String> newSelection) {
+                      final val = newSelection.first;
+                      ref
+                          .read(adminRecordBooksProvider.notifier)
+                          .setCategoryFilter(val == 'all' ? null : val);
+                    },
+                    showSelectedIcon: false,
                   ),
                 ),
               ],
@@ -171,40 +205,6 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildFilterChip(String label, String? value) {
-    final currentCategory = ref.watch(adminRecordBooksProvider).categoryFilter;
-
-    // If value is 'all', it is selected if current is null or 'all'
-    final isSelected = (value == 'all')
-        ? (currentCategory == null || currentCategory == 'all')
-        : (currentCategory == value);
-
-    return FilterChip(
-      label: Text(
-        label,
-        style: TextStyle(
-          color: isSelected ? Colors.white : AppColors.textPrimary,
-          fontFamily: 'Tajawal',
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-      selected: isSelected,
-      onSelected: (_) {
-        ref.read(adminRecordBooksProvider.notifier).setCategoryFilter(value);
-      },
-      backgroundColor: Colors.white,
-      selectedColor: AppColors.primary,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: isSelected ? AppColors.primary : Colors.grey[300]!,
-        ),
-      ),
-      showCheckmark: false,
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
     );
   }
 

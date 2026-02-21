@@ -104,6 +104,22 @@ class ApiEndpoints {
   static String get adminInspectionEntryNotes =>
       '$baseUrl/admin/inspection/entry-notes';
 
+  // Admin: Record Book Inspections (فحوصات السجلات)
+  static String get adminRecordBookInspections =>
+      '$baseUrl/admin/inspection/record-book-inspections';
+  static String adminRecordBookInspectionDetail(int id) =>
+      '$baseUrl/admin/inspection/record-book-inspections/$id';
+  static String adminReceiveInspection(int id) =>
+      '$baseUrl/admin/inspection/record-book-inspections/$id/receive';
+  static String adminReturnInspection(int id) =>
+      '$baseUrl/admin/inspection/record-book-inspections/$id/return';
+  static String adminCompleteInspection(int id) =>
+      '$baseUrl/admin/inspection/record-book-inspections/$id/complete';
+
+  // Admin: Record Book Procedures (إجراءات السجلات)
+  static String get adminInspectionProcedures =>
+      '$baseUrl/admin/inspection/record-book-procedures';
+
   // Reports
   static String get reportsExport => '$baseUrl/reports/export';
   static String get reportsYears => '$baseUrl/reports/years';

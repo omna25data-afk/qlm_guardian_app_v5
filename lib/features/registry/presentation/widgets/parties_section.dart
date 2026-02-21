@@ -7,7 +7,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/searchable_dropdown.dart';
 import '../../../admin/presentation/providers/add_entry_provider.dart';
 import 'contract_type_selector.dart';
-import 'dynamic_field_builder.dart';
 
 /// Contract type party labels
 const Map<int, Map<String, String>> contractPartyLabels = {
@@ -114,15 +113,33 @@ class _PartiesSectionState extends ConsumerState<PartiesSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Contract Type
+        // ── الجزء الأول: نوع العقد والأنواع الفرعية ──
         ContractTypeSelector(
           contractTypes: widget.contractTypes,
           selectedId: widget.selectedContractTypeId,
           onSelected: widget.onContractTypeSelected,
         ),
-        const SizedBox(height: 24),
 
-        // Document Date
+        // Subtypes (appear after contract type selection)
+        if (widget.selectedContractTypeId != null) ...[
+          const SizedBox(height: 16),
+          ..._buildSubtypes(state),
+        ],
+
+        const SizedBox(height: 24),
+        const Divider(),
+        const SizedBox(height: 16),
+
+        // ── الجزء الثاني: بيانات الكاتب ──
+        _buildWriterTypeSelector(),
+        const SizedBox(height: 16),
+        _buildWriterSelector(state),
+
+        const SizedBox(height: 24),
+        const Divider(),
+        const SizedBox(height: 16),
+
+        // ── الجزء الثالث: تاريخ المحرر ──
         Row(
           children: [
             Expanded(
@@ -153,35 +170,6 @@ class _PartiesSectionState extends ConsumerState<PartiesSection> {
             ),
           ],
         ),
-        const SizedBox(height: 24),
-
-        // Writer Type
-        _buildWriterTypeSelector(),
-        const SizedBox(height: 16),
-
-        // Writer Selector based on type
-        _buildWriterSelector(state),
-        const SizedBox(height: 16),
-
-        // Dynamic subtypes + parties
-        if (widget.selectedContractTypeId != null) ...[
-          ..._buildSubtypes(state),
-          ..._buildPartyFields(),
-          ..._buildContractSpecificFields(),
-          DynamicFieldBuilder(
-            fields: state.filteredFields,
-            isLoading: state.isLoadingFields,
-            controllers: widget.dynamicControllers,
-            onFieldChanged: (entry) {
-              ref
-                  .read(addEntryProvider.notifier)
-                  .updateFormData(entry.key, entry.value);
-              if (entry.key == 'sale_price') {
-                Future.delayed(Duration.zero, widget.onFeesRecalculate);
-              }
-            },
-          ),
-        ],
       ],
     );
   }

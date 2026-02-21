@@ -222,4 +222,13 @@ class RecordBook {
   List<String> get years => [hijriYear.toString()];
   int get currentPageNumber =>
       (usedPages < totalPages) ? usedPages + 1 : totalPages;
+
+  /// Dynamic composite name for UI display
+  String get compositeName {
+    final baseName = '$contractType (رقم $bookNumber - $hijriYear)';
+    if (writerName.isNotEmpty) {
+      return '$baseName - $writerName';
+    }
+    return baseName;
+  }
 }

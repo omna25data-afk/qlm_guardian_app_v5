@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/add_registry_entry_provider.dart';
 import '../../../records/data/models/record_book.dart';
 import '../../../../core/widgets/searchable_dropdown.dart';
 
-class GuardianSection extends ConsumerWidget {
+class GuardianSection extends StatelessWidget {
   final int? guardianRecordBookId;
+  final List<RecordBook> guardianRecordBooks;
   final TextEditingController recordBookNumberCtrl;
   final TextEditingController pageNumberCtrl;
   final TextEditingController entryNumberCtrl;
@@ -16,6 +15,7 @@ class GuardianSection extends ConsumerWidget {
   const GuardianSection({
     super.key,
     required this.guardianRecordBookId,
+    required this.guardianRecordBooks,
     required this.recordBookNumberCtrl,
     required this.pageNumberCtrl,
     required this.entryNumberCtrl,
@@ -25,9 +25,7 @@ class GuardianSection extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(addRegistryEntryProvider);
-
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -41,21 +39,21 @@ class GuardianSection extends ConsumerWidget {
                   child: SearchableDropdown<RecordBook>(
                     label: 'سجل قيد محررات الأمين',
                     hint: 'اختر السجل',
-                    items: state.guardianRecordBooks,
-                    itemLabelBuilder: (b) =>
-                        '${b.name} - رقم ${b.bookNumber} لسنة ${b.hijriYear}هـ (${b.writerName})',
-                    value: state.guardianRecordBooks
-                        .cast<RecordBook?>()
-                        .firstWhere(
-                          (b) => b?.id.toString() == recordBookNumberCtrl.text,
-                          orElse: () => null,
-                        ),
+                    items: guardianRecordBooks,
+                    itemLabelBuilder: (b) => b.compositeName,
+                    value: guardianRecordBookId != null
+                        ? guardianRecordBooks.cast<RecordBook?>().firstWhere(
+                            (b) => b?.id == guardianRecordBookId,
+                            orElse: () => null,
+                          )
+                        : null,
                     onChanged: (book) {
                       if (book != null) {
-                        recordBookNumberCtrl.text = book.id.toString();
-                        // Update the page and entry number if needed, or leave it to manual if they can edit
+                        recordBookNumberCtrl.text = book.bookNumber.toString();
+                        onRecordBookIdChanged(book.id);
                       } else {
                         recordBookNumberCtrl.clear();
+                        onRecordBookIdChanged(null);
                       }
                     },
                   ),
