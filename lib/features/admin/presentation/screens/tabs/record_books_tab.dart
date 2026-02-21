@@ -37,56 +37,8 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
             padding: const EdgeInsets.all(16),
             color: Colors.white,
             child: Column(
+              // Category Filters (SegmentedButton) Top Placement
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'بحث في السجلات...',
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            color: Colors.grey,
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 0,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        onChanged: (val) {
-                          ref
-                              .read(adminRecordBooksProvider.notifier)
-                              .setSearchQuery(val);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Advanced Filter Button
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.tune, color: AppColors.primary),
-                        onPressed: () {
-                          // TODO: Show Advanced Filters Dialog (Type, Guardian)
-                          _showAdvancedFilters();
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                // Category Filters (SegmentedButton)
                 SizedBox(
                   width: double.infinity,
                   child: SegmentedButton<String>(
@@ -126,13 +78,71 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
                           'all',
                     },
                     onSelectionChanged: (Set<String> newSelection) {
+                      if (newSelection.isEmpty) return;
                       final val = newSelection.first;
                       ref
                           .read(adminRecordBooksProvider.notifier)
                           .setCategoryFilter(val == 'all' ? null : val);
                     },
                     showSelectedIcon: false,
+                    emptySelectionAllowed: false, // Prevent deselection freeze
                   ),
+                ),
+                const SizedBox(height: 16),
+                // Search Bar & Advanced Filter
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText:
+                              'بحث باسم السجل، اسم الأمين، أو رقم السجل...',
+                          hintStyle: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 13,
+                            color: Colors.grey.shade400,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: AppColors.primary,
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 0,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        onChanged: (val) {
+                          ref
+                              .read(adminRecordBooksProvider.notifier)
+                              .setSearchQuery(val);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Advanced Filter Button
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.tune, color: AppColors.primary),
+                        onPressed: () {
+                          // TODO: Show Advanced Filters Dialog (Type, Guardian)
+                          _showAdvancedFilters();
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

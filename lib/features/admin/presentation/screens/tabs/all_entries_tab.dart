@@ -449,10 +449,12 @@ class AllEntriesTab extends ConsumerWidget {
                 ],
                 selected: {notifier.writerType ?? 'all'},
                 onSelectionChanged: (Set<String> newSelection) {
+                  if (newSelection.isEmpty) return;
                   final val = newSelection.first;
                   notifier.setWriterType(val == 'all' ? null : val);
                 },
                 showSelectedIcon: false,
+                emptySelectionAllowed: false,
               ),
             ),
           ),
