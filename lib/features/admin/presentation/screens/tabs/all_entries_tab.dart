@@ -435,12 +435,15 @@ class AllEntriesTab extends ConsumerWidget {
                     label: Text('الكل', overflow: TextOverflow.ellipsis),
                   ),
                   ButtonSegment<String>(
-                    value: 'documentation',
-                    label: Text('توثيق', overflow: TextOverflow.ellipsis),
+                    value: 'guardian',
+                    label: Text(
+                      'أمناء شرعيين',
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   ButtonSegment<String>(
-                    value: 'guardian',
-                    label: Text('أمناء', overflow: TextOverflow.ellipsis),
+                    value: 'documentation',
+                    label: Text('قلم التوثيق', overflow: TextOverflow.ellipsis),
                   ),
                   ButtonSegment<String>(
                     value: 'external',

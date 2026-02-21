@@ -57,20 +57,18 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
                       side: BorderSide(color: Colors.grey.shade300),
                     ),
                     segments: const [
-                      ButtonSegment<String>(
-                        value: 'all',
-                        label: Text('الكل'),
-                        icon: Icon(Icons.all_inclusive, size: 16),
-                      ),
+                      ButtonSegment<String>(value: 'all', label: Text('الكل')),
                       ButtonSegment<String>(
                         value: 'guardian_recording',
                         label: Text('سجلات الأمناء'),
-                        icon: Icon(Icons.edit_document, size: 16),
                       ),
                       ButtonSegment<String>(
-                        value: 'documentation',
-                        label: Text('سجلات التوثيق'),
-                        icon: Icon(Icons.verified_user, size: 16),
+                        value: 'documentation_recording',
+                        label: Text('تحرير التوثيق'),
+                      ),
+                      ButtonSegment<String>(
+                        value: 'documentation_final',
+                        label: Text('التوثيق النهائي'),
                       ),
                     ],
                     selected: {
@@ -85,7 +83,7 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
                           .setCategoryFilter(val == 'all' ? null : val);
                     },
                     showSelectedIcon: false,
-                    emptySelectionAllowed: false, // Prevent deselection freeze
+                    emptySelectionAllowed: false,
                   ),
                 ),
                 const SizedBox(height: 16),
