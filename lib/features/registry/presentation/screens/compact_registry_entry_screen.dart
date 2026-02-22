@@ -152,6 +152,23 @@ class _CompactRegistryEntryScreenState
               _selectedGuardianId!,
             );
           }
+
+          if (data.formData != null) {
+            notifier.setFormData(data.formData!);
+            setState(() {
+              data.formData!.forEach((key, value) {
+                _dynamicControllers[key] = TextEditingController(
+                  text: value?.toString() ?? '',
+                );
+              });
+              if (data.formData!['subtype_1'] != null) {
+                _selectedSubtype1 = data.formData!['subtype_1'];
+              }
+              if (data.formData!['subtype_2'] != null) {
+                _selectedSubtype2 = data.formData!['subtype_2'];
+              }
+            });
+          }
         }
       });
     } else {
@@ -330,7 +347,11 @@ class _CompactRegistryEntryScreenState
 
     data.removeWhere((key, value) => value == null || value == '');
 
-    final success = await ref.read(addEntryProvider.notifier).submitEntry(data);
+    final success = widget.initialData != null
+        ? await ref
+              .read(addEntryProvider.notifier)
+              .updateEntry(widget.initialData!.id, data)
+        : await ref.read(addEntryProvider.notifier).submitEntry(data);
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -341,7 +362,9 @@ class _CompactRegistryEntryScreenState
               const SizedBox(width: 8),
               Text(
                 _isOnline
-                    ? 'تم الحفظ بنجاح'
+                    ? (widget.initialData != null
+                          ? 'تم التعديل بنجاح'
+                          : 'تم الحفظ بنجاح')
                     : 'تم الحفظ محلياً - سيُرفع عند الاتصال',
                 style: const TextStyle(fontFamily: 'Tajawal'),
               ),

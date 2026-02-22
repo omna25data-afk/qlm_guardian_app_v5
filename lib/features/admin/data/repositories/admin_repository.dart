@@ -273,6 +273,8 @@ class AdminRepository {
     String? type,
     String? guardianId,
     String? sortBy,
+    String? dateFrom,
+    String? dateTo,
   }) async {
     final params = <String, dynamic>{'page': page};
     if (searchQuery != null && searchQuery.isNotEmpty) {
@@ -286,6 +288,10 @@ class AdminRepository {
       params['guardian_id'] = guardianId;
     }
     if (sortBy != null) params['sort_by'] = sortBy;
+    if (dateFrom != null && dateFrom.isNotEmpty) {
+      params['date_from'] = dateFrom;
+    }
+    if (dateTo != null && dateTo.isNotEmpty) params['date_to'] = dateTo;
 
     final response = await _systemRepository.getAdminRecordBooks(params);
 

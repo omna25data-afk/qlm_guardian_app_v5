@@ -13,44 +13,132 @@ import '../../../../registry/presentation/screens/compact_registry_entry_screen.
 import '../admin_add_entry_screen.dart';
 import '../../../../admin/presentation/providers/admin_dashboard_provider.dart';
 
+class AllEntriesState {
+  final List<RegistryEntrySections> entries;
+  final bool isLoading;
+  final bool isFetchingMore;
+  final bool hasMore;
+  final int page;
+  final String? error;
+
+  // Filters
+  final String? searchQuery;
+  final String? status;
+  final int? year;
+  final int? contractTypeId;
+  final String? writerType;
+  final String? dateFrom;
+  final String? dateTo;
+
+  const AllEntriesState({
+    this.entries = const [],
+    this.isLoading = false,
+    this.isFetchingMore = false,
+    this.hasMore = true,
+    this.page = 1,
+    this.error,
+    this.searchQuery,
+    this.status,
+    this.year,
+    this.contractTypeId,
+    this.writerType,
+    this.dateFrom,
+    this.dateTo,
+  });
+
+  AllEntriesState copyWith({
+    List<RegistryEntrySections>? entries,
+    bool? isLoading,
+    bool? isFetchingMore,
+    bool? hasMore,
+    int? page,
+    String? error,
+    String? searchQuery,
+    String? status,
+    int? year,
+    int? contractTypeId,
+    String? writerType,
+    String? dateFrom,
+    String? dateTo,
+  }) {
+    return AllEntriesState(
+      entries: entries ?? this.entries,
+      isLoading: isLoading ?? this.isLoading,
+      isFetchingMore: isFetchingMore ?? this.isFetchingMore,
+      hasMore: hasMore ?? this.hasMore,
+      page: page ?? this.page,
+      error: error,
+      searchQuery: searchQuery ?? this.searchQuery,
+      status: status ?? this.status,
+      year: year ?? this.year,
+      contractTypeId: contractTypeId ?? this.contractTypeId,
+      writerType: writerType ?? this.writerType,
+      dateFrom: dateFrom ?? this.dateFrom,
+      dateTo: dateTo ?? this.dateTo,
+    );
+  }
+}
+
 // Create a provider for All Entries specifically
 final allEntriesProvider =
-    StateNotifierProvider.autoDispose<
-      AllEntriesNotifier,
-      AsyncValue<List<RegistryEntrySections>>
-    >((ref) {
+    StateNotifierProvider.autoDispose<AllEntriesNotifier, AllEntriesState>((
+      ref,
+    ) {
       return AllEntriesNotifier(getIt<AdminRepository>());
     });
 
-class AllEntriesNotifier
-    extends StateNotifier<AsyncValue<List<RegistryEntrySections>>> {
+class AllEntriesNotifier extends StateNotifier<AllEntriesState> {
   final AdminRepository _repository;
 
-  // Filters
-  String? searchQuery;
-  String? status;
-  int? year;
-  int? contractTypeId;
-  String? writerType;
-
-  AllEntriesNotifier(this._repository) : super(const AsyncValue.loading()) {
+  AllEntriesNotifier(this._repository) : super(const AllEntriesState()) {
     fetchEntries();
   }
 
-  Future<void> fetchEntries() async {
-    state = const AsyncValue.loading();
-    try {
-      final entries = await _repository.getRegistryEntries(
-        searchQuery: searchQuery,
-        status: status,
-        year: year,
-        contractTypeId: contractTypeId,
-        writerType: writerType,
+  Future<void> fetchEntries({bool refresh = false}) async {
+    if (state.isLoading || (state.isFetchingMore && !refresh)) return;
+
+    if (refresh) {
+      state = state.copyWith(
+        isLoading: true,
+        page: 1,
+        hasMore: true,
+        error: null,
       );
-      state = AsyncValue.data(entries);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+    } else {
+      if (!state.hasMore) return;
+      state = state.copyWith(isFetchingMore: true, error: null);
     }
+
+    try {
+      final newEntries = await _repository.getRegistryEntries(
+        page: state.page,
+        searchQuery: state.searchQuery,
+        status: state.status,
+        year: state.year,
+        contractTypeId: state.contractTypeId,
+        writerType: state.writerType,
+        dateFrom: state.dateFrom,
+        dateTo: state.dateTo,
+      );
+
+      state = state.copyWith(
+        entries: refresh ? newEntries : [...state.entries, ...newEntries],
+        isLoading: false,
+        isFetchingMore: false,
+        hasMore: newEntries.length >= 10, // Assuming 10 is the per_page limit
+        page: state.page + 1,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        isFetchingMore: false,
+        error: e.toString(),
+      );
+    }
+  }
+
+  void loadMore() {
+    fetchEntries();
   }
 
   void updateFilters({
@@ -59,32 +147,41 @@ class AllEntriesNotifier
     int? year,
     int? contractTypeId,
     String? writerType,
+    String? dateFrom,
+    String? dateTo,
   }) {
-    if (search != null) searchQuery = search;
-    if (status != null) this.status = status;
-    if (year != null) this.year = year;
-    if (contractTypeId != null) this.contractTypeId = contractTypeId;
-    if (writerType != null) this.writerType = writerType;
-    fetchEntries();
+    state = state.copyWith(
+      searchQuery: search ?? state.searchQuery,
+      status: status ?? state.status,
+      year: year ?? state.year,
+      contractTypeId: contractTypeId ?? state.contractTypeId,
+      writerType: writerType ?? state.writerType,
+      dateFrom: dateFrom ?? state.dateFrom,
+      dateTo: dateTo ?? state.dateTo,
+    );
+    fetchEntries(refresh: true);
   }
 
   void setWriterType(String? type) {
-    writerType = type;
-    fetchEntries();
+    state = state.copyWith(writerType: type);
+    fetchEntries(refresh: true);
   }
 
   void setStatus(String? newStatus) {
-    status = newStatus;
-    fetchEntries();
+    state = state.copyWith(status: newStatus);
+    fetchEntries(refresh: true);
+  }
+
+  void setDates(String? from, String? to) {
+    state = state.copyWith(dateFrom: from, dateTo: to);
+    fetchEntries(refresh: true);
   }
 
   void clearFilters() {
-    searchQuery = null;
-    status = null;
-    year = null;
-    contractTypeId = null;
-    writerType = null;
-    fetchEntries();
+    state =
+        const AllEntriesState(); // Resets everything to default but we want to fetch right after
+    state = state.copyWith(isLoading: true);
+    fetchEntries(refresh: true);
   }
 }
 
@@ -123,6 +220,7 @@ class AllEntriesTab extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     AllEntriesNotifier notifier,
+    AllEntriesState entriesState,
   ) {
     showModalBottomSheet(
       context: context,
@@ -153,8 +251,8 @@ class AllEntriesTab extends ConsumerWidget {
                   snapshot.data?[0] as List<Map<String, dynamic>>? ?? [];
 
               // Current filter values
-              int? selectedYear = notifier.year;
-              int? selectedContractType = notifier.contractTypeId;
+              int? selectedYear = entriesState.year;
+              int? selectedContractType = entriesState.contractTypeId;
 
               return StatefulBuilder(
                 builder: (context, setModalState) {
@@ -287,6 +385,60 @@ class AllEntriesTab extends ConsumerWidget {
                               onChanged: (val) {
                                 setModalState(() => selectedContractType = val);
                               },
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Date of Editing filter
+                        const Text(
+                          'تاريخ التحرير',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            final picked = await showDateRangePicker(
+                              context: context,
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime.now().add(
+                                const Duration(days: 365),
+                              ),
+                              locale: const Locale('ar'),
+                            );
+                            if (picked != null) {
+                              final from =
+                                  '${picked.start.year}-${picked.start.month.toString().padLeft(2, '0')}-${picked.start.day.toString().padLeft(2, '0')}';
+                              final to =
+                                  '${picked.end.year}-${picked.end.month.toString().padLeft(2, '0')}-${picked.end.day.toString().padLeft(2, '0')}';
+                              setModalState(() {
+                                notifier.setDates(from, to);
+                              });
+                            }
+                          },
+                          icon: const Icon(Icons.date_range, size: 18),
+                          label: Text(
+                            entriesState.dateFrom != null
+                                ? '${entriesState.dateFrom} → ${entriesState.dateTo ?? '...'} '
+                                : 'اختر فترة التحرير',
+                            style: const TextStyle(
+                              fontFamily: 'Tajawal',
+                              fontSize: 13,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                         ),
@@ -450,7 +602,7 @@ class AllEntriesTab extends ConsumerWidget {
                     label: Text('أخرى', overflow: TextOverflow.ellipsis),
                   ),
                 ],
-                selected: {notifier.writerType ?? 'all'},
+                selected: {entriesState.writerType ?? 'all'},
                 onSelectionChanged: (Set<String> newSelection) {
                   if (newSelection.isEmpty) return;
                   final val = newSelection.first;
@@ -501,7 +653,12 @@ class AllEntriesTab extends ConsumerWidget {
                       child: IconButton(
                         icon: const Icon(Icons.tune, color: AppColors.primary),
                         onPressed: () {
-                          _showAdvancedFilters(context, ref, notifier);
+                          _showAdvancedFilters(
+                            context,
+                            ref,
+                            notifier,
+                            entriesState,
+                          );
                         },
                       ),
                     ),
@@ -515,26 +672,38 @@ class AllEntriesTab extends ConsumerWidget {
                     children: [
                       _buildFilterChip(
                         label: 'الكل',
-                        isActive: notifier.status == null,
+                        isActive: entriesState.status == null,
                         onTap: () => notifier.setStatus(null),
                       ),
                       const SizedBox(width: 8),
                       _buildFilterChip(
                         label: 'موثق',
-                        isActive: notifier.status == 'documented',
+                        isActive: entriesState.status == 'documented',
                         onTap: () => notifier.setStatus('documented'),
                       ),
                       const SizedBox(width: 8),
                       _buildFilterChip(
+                        label: 'مقيدة',
+                        isActive: entriesState.status == 'registered',
+                        onTap: () => notifier.setStatus('registered'),
+                      ),
+                      const SizedBox(width: 8),
+                      _buildFilterChip(
                         label: 'قيد التدقيق',
-                        isActive: notifier.status == 'pending',
+                        isActive: entriesState.status == 'pending',
                         onTap: () => notifier.setStatus('pending'),
                       ),
                       const SizedBox(width: 8),
                       _buildFilterChip(
                         label: 'مسودة',
-                        isActive: notifier.status == 'draft',
+                        isActive: entriesState.status == 'draft',
                         onTap: () => notifier.setStatus('draft'),
+                      ),
+                      const SizedBox(width: 8),
+                      _buildFilterChip(
+                        label: 'مرفوض',
+                        isActive: entriesState.status == 'rejected',
+                        onTap: () => notifier.setStatus('rejected'),
                       ),
                     ],
                   ),
@@ -547,10 +716,17 @@ class AllEntriesTab extends ConsumerWidget {
 
           // Entries List
           Expanded(
-            child: entriesState.when(
-              data: (entries) {
-                if (entries.isEmpty) {
-                  return Center(
+            child: entriesState.isLoading && entriesState.entries.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : entriesState.error != null && entriesState.entries.isEmpty
+                ? Center(
+                    child: Text(
+                      'حدث خطأ: ${entriesState.error}',
+                      style: const TextStyle(fontFamily: 'Tajawal'),
+                    ),
+                  )
+                : entriesState.entries.isEmpty
+                ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -569,46 +745,58 @@ class AllEntriesTab extends ConsumerWidget {
                         ),
                       ],
                     ),
-                  );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: entries.length,
-                  itemBuilder: (context, index) {
-                    final entry = entries[index];
-                    return PremiumEntryCard(
-                      entry: entry,
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) =>
-                              RegistryEntryCorrectionDialog(entry: entry),
+                  )
+                : NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification scrollInfo) {
+                      if (!entriesState.isFetchingMore &&
+                          entriesState.hasMore &&
+                          scrollInfo.metrics.pixels >=
+                              scrollInfo.metrics.maxScrollExtent - 200) {
+                        notifier.loadMore();
+                      }
+                      return false;
+                    },
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount:
+                          entriesState.entries.length +
+                          (entriesState.isFetchingMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == entriesState.entries.length) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                        final entry = entriesState.entries[index];
+                        return PremiumEntryCard(
+                          entry: entry,
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  RegistryEntryCorrectionDialog(entry: entry),
+                            );
+                          },
+                          onEdit: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CompactRegistryEntryScreen(
+                                  initialData: entry,
+                                ),
+                              ),
+                            ).then((_) {
+                              // Refresh entries after returning from edit screen
+                              ref
+                                  .read(allEntriesProvider.notifier)
+                                  .fetchEntries(refresh: true);
+                            });
+                          },
                         );
                       },
-                      onEdit: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                CompactRegistryEntryScreen(initialData: entry),
-                          ),
-                        ).then((_) {
-                          // Refresh entries after returning from edit screen
-                          ref.read(allEntriesProvider.notifier).fetchEntries();
-                        });
-                      },
-                    );
-                  },
-                );
-              },
-              error: (err, st) => Center(
-                child: Text(
-                  'حدث خطأ: $err',
-                  style: const TextStyle(fontFamily: 'Tajawal'),
-                ),
-              ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-            ),
+                    ),
+                  ),
           ),
         ],
       ),

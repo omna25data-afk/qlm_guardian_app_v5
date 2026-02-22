@@ -293,6 +293,36 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
     }
   }
 
+  Future<bool> updateEntry(int entryId, Map<String, dynamic> data) async {
+    state = state.copyWith(isSubmitting: true, error: null);
+    try {
+      // Merge dynamic formData
+      final mergedData = Map<String, dynamic>.from(data);
+      mergedData.addAll(state.formData);
+
+      await _repo.updateRegistryEntry(entryId, mergedData);
+
+      // Clear draft on success
+      _cacheBox?.delete(_draftKey);
+
+      state = state.copyWith(
+        isSubmitting: false,
+        hasDraft: false,
+        successMessage: 'تم تعديل القيد بنجاح',
+      );
+      return true;
+    } catch (e) {
+      String errorMsg = 'حدث خطأ أثناء تعديل القيد';
+      if (e.toString().contains('422')) {
+        errorMsg = 'يرجى التحقق من البيانات المدخلة';
+      } else if (e.toString().contains('403')) {
+        errorMsg = 'لا تملك صلاحية لتعديل هذا القيد';
+      }
+      state = state.copyWith(isSubmitting: false, error: errorMsg);
+      return false;
+    }
+  }
+
   Future<void> loadFormFields(int contractTypeId) async {
     state = state.copyWith(isLoadingFields: true);
 
@@ -369,6 +399,10 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
     final newData = Map<String, dynamic>.from(state.formData);
     newData[key] = value;
     state = state.copyWith(formData: newData);
+  }
+
+  void setFormData(Map<String, dynamic> data) {
+    state = state.copyWith(formData: Map<String, dynamic>.from(data));
   }
 
   /// Save current form data as a draft

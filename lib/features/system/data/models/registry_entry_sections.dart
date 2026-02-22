@@ -42,7 +42,9 @@ class RegistryEntrySections extends Equatable {
       guardianInfo: RegistryGuardianInfo.fromJson(json),
       statusInfo: RegistryStatusInfo.fromJson(json),
       metadata: RegistryMetadata.fromJson(json),
-      formData: json['form_data'] as Map<String, dynamic>?,
+      formData:
+          (json['contract_details'] as Map<String, dynamic>?) ??
+          (json['form_data'] as Map<String, dynamic>?),
     );
   }
 

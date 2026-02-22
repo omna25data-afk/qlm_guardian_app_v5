@@ -251,34 +251,97 @@ class PremiumRecordBookCard extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                // 4. Statistics Grid (Entries) - Always show if there are entries or if it's an active book
+                // 4. Statistics Grid (Entries) - Detailed breakdown
                 if (book.totalEntries > 0 || book.isActive)
                   Container(
                     color: Colors.grey[50],
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 8,
+                    ),
+                    child: Column(
                       children: [
-                        _buildStatItem(
-                          context,
-                          'إجمالي القيود',
-                          '${book.totalEntries}',
-                          AppColors.textPrimary,
+                        // Stats row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildStatItem(
+                              context,
+                              'إجمالي',
+                              '${book.totalEntries}',
+                              AppColors.textPrimary,
+                            ),
+                            _buildVerticalDivider(),
+                            _buildStatItem(
+                              context,
+                              'موثقة',
+                              '${book.completedEntries}',
+                              AppColors.success,
+                            ),
+                            _buildVerticalDivider(),
+                            _buildStatItem(
+                              context,
+                              'مقيدة',
+                              '${book.registeredEntries}',
+                              Colors.blue,
+                            ),
+                            _buildVerticalDivider(),
+                            _buildStatItem(
+                              context,
+                              'مسودة',
+                              '${book.draftEntries + book.pendingEntries}',
+                              Colors.orange,
+                            ),
+                            if (book.rejectedEntries > 0) ...[
+                              _buildVerticalDivider(),
+                              _buildStatItem(
+                                context,
+                                'مرفوضة',
+                                '${book.rejectedEntries}',
+                                AppColors.error,
+                              ),
+                            ],
+                          ],
                         ),
-                        _buildVerticalDivider(),
-                        _buildStatItem(
-                          context,
-                          'موثقة',
-                          '${book.completedEntries}',
-                          AppColors.success,
-                        ),
-                        _buildVerticalDivider(),
-                        _buildStatItem(
-                          context,
-                          'قيد العمل',
-                          '${book.draftEntries + book.pendingEntries + book.registeredEntries}',
-                          Colors.orange,
-                        ),
+                        // Color distribution bar
+                        if (book.totalEntries > 0) ...[
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: SizedBox(
+                              height: 6,
+                              child: Row(
+                                children: [
+                                  if (book.completedEntries > 0)
+                                    Expanded(
+                                      flex: book.completedEntries,
+                                      child: Container(
+                                        color: AppColors.success,
+                                      ),
+                                    ),
+                                  if (book.registeredEntries > 0)
+                                    Expanded(
+                                      flex: book.registeredEntries,
+                                      child: Container(color: Colors.blue),
+                                    ),
+                                  if (book.draftEntries + book.pendingEntries >
+                                      0)
+                                    Expanded(
+                                      flex:
+                                          book.draftEntries +
+                                          book.pendingEntries,
+                                      child: Container(color: Colors.orange),
+                                    ),
+                                  if (book.rejectedEntries > 0)
+                                    Expanded(
+                                      flex: book.rejectedEntries,
+                                      child: Container(color: AppColors.error),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

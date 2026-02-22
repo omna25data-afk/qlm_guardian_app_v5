@@ -13,7 +13,15 @@ class AdminRecordBooksState {
   final String? categoryFilter;
   final String? typeFilter;
   final String? guardianFilter;
-  final String? groupBy; // 'type', 'guardian', or null
+  final String? groupBy; // 'type', 'guardian', 'year', 'writer_type', or null
+  final int? contractTypeId;
+  final String? periodType; // 'yearly', 'half_yearly', 'quarterly', 'custom'
+  final int? periodYear;
+  final String? dateFrom;
+  final String? dateTo;
+  final String?
+  sortField; // 'book_number', 'created_at', 'usage', 'entries_count'
+  final bool sortAscending;
 
   const AdminRecordBooksState({
     this.books = const [],
@@ -27,6 +35,13 @@ class AdminRecordBooksState {
     this.typeFilter,
     this.guardianFilter,
     this.groupBy,
+    this.contractTypeId,
+    this.periodType,
+    this.periodYear,
+    this.dateFrom,
+    this.dateTo,
+    this.sortField,
+    this.sortAscending = true,
   });
 
   AdminRecordBooksState copyWith({
@@ -41,6 +56,19 @@ class AdminRecordBooksState {
     String? typeFilter,
     String? guardianFilter,
     String? groupBy,
+    int? contractTypeId,
+    bool clearContractTypeId = false,
+    String? periodType,
+    bool clearPeriodType = false,
+    int? periodYear,
+    bool clearPeriodYear = false,
+    String? dateFrom,
+    bool clearDateFrom = false,
+    String? dateTo,
+    bool clearDateTo = false,
+    String? sortField,
+    bool clearSortField = false,
+    bool? sortAscending,
   }) {
     return AdminRecordBooksState(
       books: books ?? this.books,
@@ -54,6 +82,15 @@ class AdminRecordBooksState {
       typeFilter: typeFilter ?? this.typeFilter,
       guardianFilter: guardianFilter ?? this.guardianFilter,
       groupBy: groupBy ?? this.groupBy,
+      contractTypeId: clearContractTypeId
+          ? null
+          : (contractTypeId ?? this.contractTypeId),
+      periodType: clearPeriodType ? null : (periodType ?? this.periodType),
+      periodYear: clearPeriodYear ? null : (periodYear ?? this.periodYear),
+      dateFrom: clearDateFrom ? null : (dateFrom ?? this.dateFrom),
+      dateTo: clearDateTo ? null : (dateTo ?? this.dateTo),
+      sortField: clearSortField ? null : (sortField ?? this.sortField),
+      sortAscending: sortAscending ?? this.sortAscending,
     );
   }
 }
@@ -81,8 +118,14 @@ class AdminRecordBooksNotifier extends StateNotifier<AdminRecordBooksState> {
             categoryFilter: category ?? state.categoryFilter,
             typeFilter: type ?? state.typeFilter,
             guardianFilter: guardian ?? state.guardianFilter,
-            groupBy: state
-                .groupBy, // Persist groupBy on refresh unless explicitly changed via separate method
+            groupBy: state.groupBy,
+            contractTypeId: state.contractTypeId,
+            periodType: state.periodType,
+            periodYear: state.periodYear,
+            dateFrom: state.dateFrom,
+            dateTo: state.dateTo,
+            sortField: state.sortField,
+            sortAscending: state.sortAscending,
             isLoading: true,
           )
         : state.copyWith(isLoading: true, error: null);
@@ -98,7 +141,10 @@ class AdminRecordBooksNotifier extends StateNotifier<AdminRecordBooksState> {
         category: state.categoryFilter,
         type: state.typeFilter,
         guardianId: state.guardianFilter,
-        sortBy: state.groupBy, // Pass groupBy as sortBy
+        contractTypeId: state.contractTypeId,
+        sortBy: state.sortField ?? state.groupBy,
+        dateFrom: state.dateFrom,
+        dateTo: state.dateTo,
       );
 
       state = state.copyWith(
@@ -121,6 +167,10 @@ class AdminRecordBooksNotifier extends StateNotifier<AdminRecordBooksState> {
   }
 
   void setCategoryFilter(String? category) {
+    // When changing category, clear guardian filter if not guardian_recording
+    if (category != 'guardian_recording') {
+      state = state.copyWith(guardianFilter: null);
+    }
     fetchBooks(refresh: true, category: category);
   }
 
@@ -132,9 +182,50 @@ class AdminRecordBooksNotifier extends StateNotifier<AdminRecordBooksState> {
     fetchBooks(refresh: true, guardian: guardianId);
   }
 
+  void setContractTypeId(int? contractTypeId) {
+    if (contractTypeId == null) {
+      state = state.copyWith(clearContractTypeId: true);
+    } else {
+      state = state.copyWith(contractTypeId: contractTypeId);
+    }
+    fetchBooks(refresh: true);
+  }
+
+  void setPeriodFilter({
+    String? periodType,
+    int? periodYear,
+    String? dateFrom,
+    String? dateTo,
+  }) {
+    state = state.copyWith(
+      periodType: periodType,
+      clearPeriodType: periodType == null,
+      periodYear: periodYear,
+      clearPeriodYear: periodYear == null,
+      dateFrom: dateFrom,
+      clearDateFrom: dateFrom == null,
+      dateTo: dateTo,
+      clearDateTo: dateTo == null,
+    );
+    fetchBooks(refresh: true);
+  }
+
+  void setSortField(String? field, {bool ascending = true}) {
+    if (field == null) {
+      state = state.copyWith(clearSortField: true, sortAscending: ascending);
+    } else {
+      state = state.copyWith(sortField: field, sortAscending: ascending);
+    }
+    fetchBooks(refresh: true);
+  }
+
   void setGroupBy(String? groupBy) {
-    // When grouping changes, we must refresh to get sorted data
     state = state.copyWith(groupBy: groupBy);
+    fetchBooks(refresh: true);
+  }
+
+  void clearAllFilters() {
+    state = const AdminRecordBooksState();
     fetchBooks(refresh: true);
   }
 }
