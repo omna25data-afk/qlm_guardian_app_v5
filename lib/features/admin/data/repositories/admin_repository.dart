@@ -275,6 +275,9 @@ class AdminRepository {
     String? sortBy,
     String? dateFrom,
     String? dateTo,
+    String? periodType,
+    String? periodValue,
+    int? periodYear,
   }) async {
     final params = <String, dynamic>{'page': page};
     if (searchQuery != null && searchQuery.isNotEmpty) {
@@ -292,6 +295,9 @@ class AdminRepository {
       params['date_from'] = dateFrom;
     }
     if (dateTo != null && dateTo.isNotEmpty) params['date_to'] = dateTo;
+    if (periodType != null) params['period_type'] = periodType;
+    if (periodValue != null) params['period_value'] = periodValue;
+    if (periodYear != null) params['hijri_year'] = periodYear;
 
     final response = await _systemRepository.getAdminRecordBooks(params);
 

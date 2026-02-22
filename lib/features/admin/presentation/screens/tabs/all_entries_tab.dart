@@ -8,8 +8,8 @@ import '../../../../admin/presentation/widgets/premium_entry_card.dart';
 import '../../../../admin/data/repositories/admin_repository.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/di/injection.dart';
-import '../../../../admin/presentation/widgets/registry_entry_correction_dialog.dart';
 import '../../../../registry/presentation/screens/compact_registry_entry_screen.dart';
+import '../../../../registry/presentation/screens/entry_details_screen.dart';
 import '../admin_add_entry_screen.dart';
 import '../../../../admin/presentation/providers/admin_dashboard_provider.dart';
 
@@ -54,12 +54,18 @@ class AllEntriesState {
     int? page,
     String? error,
     String? searchQuery,
+    bool clearSearchQuery = false,
     String? status,
+    bool clearStatus = false,
     int? year,
+    bool clearYear = false,
     int? contractTypeId,
+    bool clearContractTypeId = false,
     String? writerType,
+    bool clearWriterType = false,
     String? dateFrom,
     String? dateTo,
+    bool clearDates = false,
   }) {
     return AllEntriesState(
       entries: entries ?? this.entries,
@@ -68,13 +74,15 @@ class AllEntriesState {
       hasMore: hasMore ?? this.hasMore,
       page: page ?? this.page,
       error: error,
-      searchQuery: searchQuery ?? this.searchQuery,
-      status: status ?? this.status,
-      year: year ?? this.year,
-      contractTypeId: contractTypeId ?? this.contractTypeId,
-      writerType: writerType ?? this.writerType,
-      dateFrom: dateFrom ?? this.dateFrom,
-      dateTo: dateTo ?? this.dateTo,
+      searchQuery: clearSearchQuery ? null : (searchQuery ?? this.searchQuery),
+      status: clearStatus ? null : (status ?? this.status),
+      year: clearYear ? null : (year ?? this.year),
+      contractTypeId: clearContractTypeId
+          ? null
+          : (contractTypeId ?? this.contractTypeId),
+      writerType: clearWriterType ? null : (writerType ?? this.writerType),
+      dateFrom: clearDates ? null : (dateFrom ?? this.dateFrom),
+      dateTo: clearDates ? null : (dateTo ?? this.dateTo),
     );
   }
 }
@@ -143,37 +151,61 @@ class AllEntriesNotifier extends StateNotifier<AllEntriesState> {
 
   void updateFilters({
     String? search,
+    bool clearSearch = false,
     String? status,
+    bool clearStatus = false,
     int? year,
+    bool clearYear = false,
     int? contractTypeId,
+    bool clearContractTypeId = false,
     String? writerType,
+    bool clearWriterType = false,
     String? dateFrom,
     String? dateTo,
+    bool clearDates = false,
   }) {
     state = state.copyWith(
       searchQuery: search ?? state.searchQuery,
+      clearSearchQuery: clearSearch,
       status: status ?? state.status,
+      clearStatus: clearStatus,
       year: year ?? state.year,
+      clearYear: clearYear,
       contractTypeId: contractTypeId ?? state.contractTypeId,
+      clearContractTypeId: clearContractTypeId,
       writerType: writerType ?? state.writerType,
+      clearWriterType: clearWriterType,
       dateFrom: dateFrom ?? state.dateFrom,
       dateTo: dateTo ?? state.dateTo,
+      clearDates: clearDates,
+    );
+    fetchEntries(refresh: true);
+  }
+
+  void setContractType(int? typeId) {
+    state = state.copyWith(
+      contractTypeId: typeId,
+      clearContractTypeId: typeId == null,
     );
     fetchEntries(refresh: true);
   }
 
   void setWriterType(String? type) {
-    state = state.copyWith(writerType: type);
+    state = state.copyWith(writerType: type, clearWriterType: type == null);
     fetchEntries(refresh: true);
   }
 
   void setStatus(String? newStatus) {
-    state = state.copyWith(status: newStatus);
+    state = state.copyWith(status: newStatus, clearStatus: newStatus == null);
     fetchEntries(refresh: true);
   }
 
   void setDates(String? from, String? to) {
-    state = state.copyWith(dateFrom: from, dateTo: to);
+    state = state.copyWith(
+      dateFrom: from,
+      dateTo: to,
+      clearDates: from == null && to == null,
+    );
     fetchEntries(refresh: true);
   }
 
@@ -452,7 +484,10 @@ class AllEntriesTab extends ConsumerWidget {
                             onPressed: () {
                               notifier.updateFilters(
                                 year: selectedYear,
+                                clearYear: selectedYear == null,
                                 contractTypeId: selectedContractType,
+                                clearContractTypeId:
+                                    selectedContractType == null,
                               );
                               Navigator.pop(ctx);
                             },
@@ -566,50 +601,65 @@ class AllEntriesTab extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: SizedBox(
               width: double.infinity,
-              child: SegmentedButton<String>(
-                style: SegmentedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  selectedForegroundColor: Colors.white,
-                  selectedBackgroundColor: AppColors.primary,
-                  textStyle: const TextStyle(
-                    fontFamily: 'Tajawal',
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  side: BorderSide(color: Colors.grey.shade300),
-                ),
-                segments: const [
-                  ButtonSegment<String>(
-                    value: 'all',
-                    label: Text('الكل', overflow: TextOverflow.ellipsis),
-                  ),
-                  ButtonSegment<String>(
-                    value: 'guardian',
-                    label: Text(
-                      'أمناء شرعيين',
-                      overflow: TextOverflow.ellipsis,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SegmentedButton<int?>(
+                  style: SegmentedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    selectedForegroundColor: Colors.white,
+                    selectedBackgroundColor: AppColors.primary,
+                    textStyle: const TextStyle(
+                      fontFamily: 'Tajawal',
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
                     ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    side: BorderSide(color: Colors.grey.shade300),
                   ),
-                  ButtonSegment<String>(
-                    value: 'documentation',
-                    label: Text('قلم التوثيق', overflow: TextOverflow.ellipsis),
-                  ),
-                  ButtonSegment<String>(
-                    value: 'external',
-                    label: Text('أخرى', overflow: TextOverflow.ellipsis),
-                  ),
-                ],
-                selected: {entriesState.writerType ?? 'all'},
-                onSelectionChanged: (Set<String> newSelection) {
-                  if (newSelection.isEmpty) return;
-                  final val = newSelection.first;
-                  notifier.setWriterType(val == 'all' ? null : val);
-                },
-                showSelectedIcon: false,
-                emptySelectionAllowed: false,
+                  segments: const [
+                    ButtonSegment<int?>(
+                      value: null,
+                      label: Text('الكل', overflow: TextOverflow.ellipsis),
+                    ),
+                    ButtonSegment<int?>(
+                      value: 1,
+                      label: Text('زواج', overflow: TextOverflow.ellipsis),
+                    ),
+                    ButtonSegment<int?>(
+                      value: 7,
+                      label: Text('طلاق', overflow: TextOverflow.ellipsis),
+                    ),
+                    ButtonSegment<int?>(
+                      value: 8,
+                      label: Text('رجعة', overflow: TextOverflow.ellipsis),
+                    ),
+                    ButtonSegment<int?>(
+                      value: 10,
+                      label: Text('مبيع', overflow: TextOverflow.ellipsis),
+                    ),
+                    ButtonSegment<int?>(
+                      value: 5,
+                      label: Text('تصرف', overflow: TextOverflow.ellipsis),
+                    ),
+                    ButtonSegment<int?>(
+                      value: 4,
+                      label: Text('وكالة', overflow: TextOverflow.ellipsis),
+                    ),
+                    ButtonSegment<int?>(
+                      value: 6,
+                      label: Text('قسمة', overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                  selected: {entriesState.contractTypeId},
+                  onSelectionChanged: (Set<int?> newSelection) {
+                    if (newSelection.isEmpty) return;
+                    notifier.setContractType(newSelection.first);
+                  },
+                  showSelectedIcon: false,
+                  emptySelectionAllowed: false,
+                ),
               ),
             ),
           ),
@@ -640,7 +690,10 @@ class AllEntriesTab extends ConsumerWidget {
                           ),
                         ),
                         onChanged: (val) {
-                          notifier.updateFilters(search: val);
+                          notifier.updateFilters(
+                            search: val,
+                            clearSearch: val.isEmpty,
+                          );
                         },
                       ),
                     ),
@@ -772,10 +825,12 @@ class AllEntriesTab extends ConsumerWidget {
                         return PremiumEntryCard(
                           entry: entry,
                           onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) =>
-                                  RegistryEntryCorrectionDialog(entry: entry),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    EntryDetailsScreen(entry: entry),
+                              ),
                             );
                           },
                           onEdit: () {

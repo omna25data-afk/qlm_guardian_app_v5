@@ -98,6 +98,25 @@ class _CompactRegistryEntryScreenState
       final hasConnection = results.any((r) => r != ConnectivityResult.none);
       if (mounted) setState(() => _isOnline = hasConnection);
     });
+    _documentHijriDateCtrl.addListener(_syncGuardianDateWithDocument);
+    _docHijriDateCtrl.addListener(_syncGuardianDateWithDocumentation);
+  }
+
+  void _syncGuardianDateWithDocument() {
+    // Sync only if writer is guardian
+    if (_writerType == 'guardian' && _documentHijriDateCtrl.text.isNotEmpty) {
+      _guardianHijriDateCtrl.text = _documentHijriDateCtrl.text;
+      _guardianGregorianDateCtrl.text = _documentGregorianDateCtrl.text;
+    }
+  }
+
+  void _syncGuardianDateWithDocumentation() {
+    // If documentation date changes and writer is documentation, you might want to sync,
+    // but the guardian date is mainly used for guardian. If the user wants to sync when documentation date changes:
+    if (_docHijriDateCtrl.text.isNotEmpty) {
+      _guardianHijriDateCtrl.text = _docHijriDateCtrl.text;
+      _guardianGregorianDateCtrl.text = _docGregorianDateCtrl.text;
+    }
   }
 
   void _initializeData() {
@@ -107,6 +126,8 @@ class _CompactRegistryEntryScreenState
       _firstPartyCtrl.text = data.basicInfo.firstPartyName;
       _secondPartyCtrl.text = data.basicInfo.secondPartyName;
       _documentHijriDateCtrl.text = data.documentInfo.documentHijriDate ?? '';
+      _documentGregorianDateCtrl.text =
+          data.documentInfo.documentGregorianDate ?? '';
 
       _writerType = data.writerInfo.writerType ?? 'guardian';
 
@@ -118,6 +139,12 @@ class _CompactRegistryEntryScreenState
 
       // Financial
       _feeAmountCtrl.text = data.financialInfo.feeAmount?.toString() ?? '0';
+      _penaltyAmountCtrl.text =
+          data.financialInfo.penaltyAmount?.toString() ?? '0';
+      _supportAmountCtrl.text =
+          data.financialInfo.supportAmount?.toString() ?? '0';
+      _sustainabilityAmountCtrl.text =
+          data.financialInfo.sustainabilityAmount?.toString() ?? '200';
       _totalAmountCtrl.text = data.financialInfo.totalAmount.toString();
 
       // Documentation Book
@@ -128,8 +155,11 @@ class _CompactRegistryEntryScreenState
           data.documentInfo.docPageNumber?.toString() ?? '';
       _docEntryNumberCtrl.text =
           data.documentInfo.docEntryNumber?.toString() ?? '';
+      _docHijriDateCtrl.text = data.documentInfo.docHijriDate ?? '';
+      _docGregorianDateCtrl.text = data.documentInfo.docGregorianDate ?? '';
 
       // Guardian Book
+      _guardianRecordBookId = data.guardianInfo.guardianRecordBookId;
       _guardianRecordBookNumberCtrl.text =
           data.guardianInfo.guardianRecordBookNumber?.toString() ?? '';
       _guardianPageNumberCtrl.text =
@@ -137,6 +167,8 @@ class _CompactRegistryEntryScreenState
       _guardianEntryNumberCtrl.text =
           data.guardianInfo.guardianEntryNumber?.toString() ?? '';
       _guardianHijriDateCtrl.text = data.guardianInfo.guardianHijriDate ?? '';
+      _guardianGregorianDateCtrl.text =
+          data.guardianInfo.guardianGregorianDate ?? '';
 
       // Load specific dependencies (needs notifier)
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -161,11 +193,21 @@ class _CompactRegistryEntryScreenState
                   text: value?.toString() ?? '',
                 );
               });
-              if (data.formData!['subtype_1'] != null) {
-                _selectedSubtype1 = data.formData!['subtype_1'];
+              if (data.basicInfo.subtype1 != null) {
+                _selectedSubtype1 = data.basicInfo.subtype1.toString();
               }
-              if (data.formData!['subtype_2'] != null) {
-                _selectedSubtype2 = data.formData!['subtype_2'];
+              if (data.basicInfo.subtype2 != null) {
+                _selectedSubtype2 = data.basicInfo.subtype2.toString();
+              }
+            });
+          } else {
+            // Still try to bind subtypes even if formData is null
+            setState(() {
+              if (data.basicInfo.subtype1 != null) {
+                _selectedSubtype1 = data.basicInfo.subtype1.toString();
+              }
+              if (data.basicInfo.subtype2 != null) {
+                _selectedSubtype2 = data.basicInfo.subtype2.toString();
               }
             });
           }
@@ -185,6 +227,8 @@ class _CompactRegistryEntryScreenState
 
   @override
   void dispose() {
+    _documentHijriDateCtrl.removeListener(_syncGuardianDateWithDocument);
+    _docHijriDateCtrl.removeListener(_syncGuardianDateWithDocumentation);
     _fadeController.dispose();
     _firstPartyCtrl.dispose();
     _secondPartyCtrl.dispose();
@@ -713,8 +757,13 @@ class _CompactRegistryEntryScreenState
   }
 
   PreferredSizeWidget _buildAppBar(AddEntryState state) {
+    final isEdit = widget.initialData != null;
+    final titleText = isEdit
+        ? 'تعديل القيد رقم (${widget.initialData!.id})'
+        : 'إضافة قيد جديد';
+
     return AppBar(
-      title: const Text('إضافة قيد جديد'),
+      title: Text(titleText),
       actions: [
         // Online/Offline indicator
         Container(

@@ -282,6 +282,52 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
             ),
           ],
 
+          if (state.periodType == 'half_yearly' ||
+              state.periodType == 'quarterly') ...[
+            const SizedBox(width: 8),
+            Container(
+              height: 36,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value:
+                      _getPeriodValues(
+                            state.periodType,
+                          )?.any((item) => item.value == state.periodValue) ==
+                          true
+                      ? state.periodValue
+                      : null,
+                  hint: const Text(
+                    'الفترة',
+                    style: TextStyle(fontFamily: 'Tajawal', fontSize: 11),
+                  ),
+                  isDense: true,
+                  style: const TextStyle(
+                    fontFamily: 'Tajawal',
+                    fontSize: 12,
+                    color: Colors.black,
+                  ),
+                  items: _getPeriodValues(state.periodType),
+                  onChanged: (val) {
+                    if (val != null) {
+                      ref
+                          .read(adminRecordBooksProvider.notifier)
+                          .setPeriodFilter(
+                            periodType: state.periodType,
+                            periodYear: state.periodYear,
+                            periodValue: val,
+                          );
+                    }
+                  },
+                ),
+              ),
+            ),
+          ],
+
           // Custom date range button
           if (state.periodType == 'custom') ...[
             const SizedBox(width: 8),
@@ -342,6 +388,23 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
         ),
       ),
     );
+  }
+
+  List<DropdownMenuItem<String>>? _getPeriodValues(String? type) {
+    if (type == 'half_yearly') {
+      return const [
+        DropdownMenuItem(value: '1', child: Text('النصف الأول')),
+        DropdownMenuItem(value: '2', child: Text('النصف الثاني')),
+      ];
+    } else if (type == 'quarterly') {
+      return const [
+        DropdownMenuItem(value: 'Q1', child: Text('الربع الأول')),
+        DropdownMenuItem(value: 'Q2', child: Text('الربع الثاني')),
+        DropdownMenuItem(value: 'Q3', child: Text('الربع الثالث')),
+        DropdownMenuItem(value: 'Q4', child: Text('الربع الرابع')),
+      ];
+    }
+    return null;
   }
 
   Future<void> _showDateRangePicker() async {

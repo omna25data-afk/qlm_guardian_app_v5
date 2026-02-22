@@ -184,7 +184,9 @@ class RegistryWriterInfo extends Equatable {
   factory RegistryWriterInfo.fromJson(Map<String, dynamic> json) {
     return RegistryWriterInfo(
       writerType: json['writer_type'],
-      writerId: json['writer_id'],
+      writerId: json['writer_type'] == 'guardian'
+          ? (json['guardian_id'] ?? json['writer_id'])
+          : json['writer_id'],
       otherWriterId: json['other_writer_id'],
       writerName: json['writer_name'],
     );
@@ -231,14 +233,25 @@ class RegistryDocumentInfo extends Equatable {
   });
 
   factory RegistryDocumentInfo.fromJson(Map<String, dynamic> json) {
-    final hDate = json['doc_hijri_date'] ?? json['document_hijri_date'];
-    final gDate = json['doc_gregorian_date'] ?? json['document_gregorian_date'];
+    final rawDocHDate = json['doc_hijri_date'];
+    final docHDate = rawDocHDate?.toString().split('T').first;
+
+    final rawDocGDate = json['doc_gregorian_date'];
+    final docGDate = rawDocGDate?.toString().split('T').first;
+
+    final rawDocumentHDate =
+        json['document_hijri_date'] ?? json['document_date']?['hijri'];
+    final documentHDate = rawDocumentHDate?.toString().split('T').first;
+
+    final rawDocumentGDate =
+        json['document_gregorian_date'] ?? json['document_date']?['gregorian'];
+    final documentGDate = rawDocumentGDate?.toString().split('T').first;
 
     return RegistryDocumentInfo(
-      docHijriDate: hDate,
-      docGregorianDate: gDate,
-      documentHijriDate: hDate,
-      documentGregorianDate: gDate,
+      docHijriDate: docHDate,
+      docGregorianDate: docGDate,
+      documentHijriDate: documentHDate,
+      documentGregorianDate: documentGDate,
       docRecordBookId: json['doc_record_book_id'],
       docRecordBookNumber: json['doc_record_book_number'],
       docPageNumber: json['doc_page_number'],
@@ -314,19 +327,32 @@ class RegistryFinancialInfo extends Equatable {
       return double.tryParse(val.toString()) ?? 0.0;
     }
 
+    final fees = json['fees'] as Map<String, dynamic>?;
+
     return RegistryFinancialInfo(
-      feeAmount: parseDouble(json['fee_amount']),
-      supportAmount: parseDouble(json['support_amount']),
-      sustainabilityAmount: parseDouble(json['sustainability_amount']),
-      penaltyAmount: parseDouble(json['penalty_amount']),
-      authenticationFeeAmount: parseDouble(json['authentication_fee_amount']),
-      transferFeeAmount: parseDouble(json['transfer_fee_amount']),
-      otherFeeAmount: parseDouble(json['other_fee_amount']),
+      feeAmount: parseDouble(json['fee_amount'] ?? fees?['amount']),
+      supportAmount: parseDouble(json['support_amount'] ?? fees?['support']),
+      sustainabilityAmount: parseDouble(
+        json['sustainability_amount'] ?? fees?['sustainability'],
+      ),
+      penaltyAmount: parseDouble(json['penalty_amount'] ?? fees?['penalty']),
+      authenticationFeeAmount: parseDouble(
+        json['authentication_fee_amount'] ?? fees?['authentication_fee'],
+      ),
+      transferFeeAmount: parseDouble(
+        json['transfer_fee_amount'] ?? fees?['transfer_fee'],
+      ),
+      otherFeeAmount: parseDouble(
+        json['other_fee_amount'] ?? fees?['other_fee'],
+      ),
       exemptionType: json['exemption_type'],
       exemptionReason: json['exemption_reason'],
-      receiptNumber: json['receipt_number'],
-      totalAmount: parseDouble(json['total_amount']),
-      paidAmount: parseDouble(json['paid_amount']),
+      receiptNumber: json['receipt_number'] ?? fees?['receipt_number'],
+      totalAmount: parseDouble(json['total_amount'] ?? fees?['total']),
+      paidAmount: parseDouble(
+        json['paid_amount'] ??
+            (fees != null && fees['is_paid'] == true ? fees['total'] : 0.0),
+      ),
     );
   }
 
@@ -372,6 +398,7 @@ class RegistryGuardianInfo extends Equatable {
   final int? guardianPageNumber;
   final int? guardianEntryNumber;
   final String? guardianHijriDate;
+  final String? guardianGregorianDate;
 
   const RegistryGuardianInfo({
     this.guardianId,
@@ -380,16 +407,28 @@ class RegistryGuardianInfo extends Equatable {
     this.guardianPageNumber,
     this.guardianEntryNumber,
     this.guardianHijriDate,
+    this.guardianGregorianDate,
   });
 
   factory RegistryGuardianInfo.fromJson(Map<String, dynamic> json) {
+    final book = json['record_book'] as Map<String, dynamic>?;
+
     return RegistryGuardianInfo(
       guardianId: json['guardian_id'],
-      guardianRecordBookId: json['guardian_record_book_id'],
-      guardianRecordBookNumber: json['guardian_record_book_number'],
-      guardianPageNumber: json['guardian_page_number'],
-      guardianEntryNumber: json['guardian_entry_number'],
-      guardianHijriDate: json['guardian_hijri_date'],
+      guardianRecordBookId: json['guardian_record_book_id'] ?? book?['id'],
+      guardianRecordBookNumber:
+          json['guardian_record_book_number'] ?? book?['number'],
+      guardianPageNumber: json['guardian_page_number'] ?? book?['page_number'],
+      guardianEntryNumber:
+          json['guardian_entry_number'] ?? book?['entry_number'],
+      guardianHijriDate: json['guardian_hijri_date']
+          ?.toString()
+          .split('T')
+          .first,
+      guardianGregorianDate: json['guardian_gregorian_date']
+          ?.toString()
+          .split('T')
+          .first,
     );
   }
 
@@ -401,6 +440,7 @@ class RegistryGuardianInfo extends Equatable {
       'guardian_page_number': guardianPageNumber,
       'guardian_entry_number': guardianEntryNumber,
       'guardian_hijri_date': guardianHijriDate,
+      'guardian_gregorian_date': guardianGregorianDate,
     };
   }
 
@@ -412,6 +452,7 @@ class RegistryGuardianInfo extends Equatable {
     guardianPageNumber,
     guardianEntryNumber,
     guardianHijriDate,
+    guardianGregorianDate,
   ];
 }
 

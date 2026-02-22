@@ -215,8 +215,21 @@ class RegistryEntryModel extends Equatable {
     this.extraAttributes,
   });
 
-  factory RegistryEntryModel.fromJson(Map<String, dynamic> json) =>
-      _$RegistryEntryModelFromJson(json);
+  factory RegistryEntryModel.fromJson(Map<String, dynamic> json) {
+    final data = Map<String, dynamic>.from(json);
+    void stripTime(String key) {
+      if (data[key] != null && data[key] is String) {
+        data[key] = data[key].toString().split('T').first;
+      }
+    }
+
+    stripTime('document_hijri_date');
+    stripTime('doc_hijri_date');
+    stripTime('guardian_hijri_date');
+    stripTime('hijri_date');
+
+    return _$RegistryEntryModelFromJson(data);
+  }
   Map<String, dynamic> toJson() => _$RegistryEntryModelToJson(this);
 
   @override

@@ -124,8 +124,14 @@ class RegistryEntry {
                 : int.tryParse(json['other_writer_id'].toString()) ?? null)
           : null,
       writerName: json['writer_name'] ?? '',
-      documentHijriDate: json['document_hijri_date'] ?? null,
-      documentGregorianDate: json['document_gregorian_date'] ?? null,
+      documentHijriDate: json['document_hijri_date']
+          ?.toString()
+          .split('T')
+          .first,
+      documentGregorianDate: json['document_gregorian_date']
+          ?.toString()
+          .split('T')
+          .first,
       docRecordBookId: json['doc_record_book_id'] != null
           ? (json['doc_record_book_id'] is int
                 ? json['doc_record_book_id']
@@ -157,8 +163,8 @@ class RegistryEntry {
                 ? json['doc_document_number']
                 : int.tryParse(json['doc_document_number'].toString()) ?? null)
           : null,
-      docHijriDate: json['doc_hijri_date'] ?? null,
-      docGregorianDate: json['doc_gregorian_date'] ?? null,
+      docHijriDate: json['doc_hijri_date']?.toString().split('T').first,
+      docGregorianDate: json['doc_gregorian_date']?.toString().split('T').first,
       feeAmount: json['fee_amount'] != null
           ? (json['fee_amount'] is num
                 ? json['fee_amount'].toDouble()
@@ -206,7 +212,10 @@ class RegistryEntry {
                 : int.tryParse(json['guardian_entry_number'].toString()) ??
                       null)
           : null,
-      guardianHijriDate: json['guardian_hijri_date'] ?? null,
+      guardianHijriDate: json['guardian_hijri_date']
+          ?.toString()
+          .split('T')
+          .first,
       constraintableType: json['constraintable_type'] ?? null,
       constraintableId: json['constraintable_id'] != null
           ? (json['constraintable_id'] is int
@@ -221,9 +230,9 @@ class RegistryEntry {
                 ? json['created_by']
                 : int.tryParse(json['created_by'].toString()) ?? 0)
           : 0,
-      createdAt: json['created_at'] ?? null,
-      updatedAt: json['updated_at'] ?? null,
-      deletedAt: json['deleted_at'] ?? null,
+      createdAt: json['created_at']?.toString().split('T').first,
+      updatedAt: json['updated_at']?.toString().split('T').first,
+      deletedAt: json['deleted_at']?.toString().split('T').first,
     );
   }
 

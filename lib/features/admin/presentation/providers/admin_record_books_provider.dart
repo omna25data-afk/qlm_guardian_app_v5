@@ -16,6 +16,7 @@ class AdminRecordBooksState {
   final String? groupBy; // 'type', 'guardian', 'year', 'writer_type', or null
   final int? contractTypeId;
   final String? periodType; // 'yearly', 'half_yearly', 'quarterly', 'custom'
+  final String? periodValue; // '1', '2' or 'Q1', 'Q2', etc.
   final int? periodYear;
   final String? dateFrom;
   final String? dateTo;
@@ -37,6 +38,7 @@ class AdminRecordBooksState {
     this.groupBy,
     this.contractTypeId,
     this.periodType,
+    this.periodValue,
     this.periodYear,
     this.dateFrom,
     this.dateTo,
@@ -48,18 +50,27 @@ class AdminRecordBooksState {
     List<RecordBook>? books,
     bool? isLoading,
     String? error,
+    bool clearError = false,
     bool? hasMore,
     int? page,
     String? searchQuery,
+    bool clearSearchQuery = false,
     String? statusFilter,
+    bool clearStatusFilter = false,
     String? categoryFilter,
+    bool clearCategoryFilter = false,
     String? typeFilter,
+    bool clearTypeFilter = false,
     String? guardianFilter,
+    bool clearGuardianFilter = false,
     String? groupBy,
+    bool clearGroupBy = false,
     int? contractTypeId,
     bool clearContractTypeId = false,
     String? periodType,
     bool clearPeriodType = false,
+    String? periodValue,
+    bool clearPeriodValue = false,
     int? periodYear,
     bool clearPeriodYear = false,
     String? dateFrom,
@@ -73,19 +84,26 @@ class AdminRecordBooksState {
     return AdminRecordBooksState(
       books: books ?? this.books,
       isLoading: isLoading ?? this.isLoading,
-      error: error,
+      error: clearError ? null : (error ?? this.error),
       hasMore: hasMore ?? this.hasMore,
       page: page ?? this.page,
-      searchQuery: searchQuery ?? this.searchQuery,
-      statusFilter: statusFilter ?? this.statusFilter,
-      categoryFilter: categoryFilter ?? this.categoryFilter,
-      typeFilter: typeFilter ?? this.typeFilter,
-      guardianFilter: guardianFilter ?? this.guardianFilter,
-      groupBy: groupBy ?? this.groupBy,
+      searchQuery: clearSearchQuery ? null : (searchQuery ?? this.searchQuery),
+      statusFilter: clearStatusFilter
+          ? null
+          : (statusFilter ?? this.statusFilter),
+      categoryFilter: clearCategoryFilter
+          ? null
+          : (categoryFilter ?? this.categoryFilter),
+      typeFilter: clearTypeFilter ? null : (typeFilter ?? this.typeFilter),
+      guardianFilter: clearGuardianFilter
+          ? null
+          : (guardianFilter ?? this.guardianFilter),
+      groupBy: clearGroupBy ? null : (groupBy ?? this.groupBy),
       contractTypeId: clearContractTypeId
           ? null
           : (contractTypeId ?? this.contractTypeId),
       periodType: clearPeriodType ? null : (periodType ?? this.periodType),
+      periodValue: clearPeriodValue ? null : (periodValue ?? this.periodValue),
       periodYear: clearPeriodYear ? null : (periodYear ?? this.periodYear),
       dateFrom: clearDateFrom ? null : (dateFrom ?? this.dateFrom),
       dateTo: clearDateTo ? null : (dateTo ?? this.dateTo),
@@ -101,34 +119,17 @@ class AdminRecordBooksNotifier extends StateNotifier<AdminRecordBooksState> {
   AdminRecordBooksNotifier(this._repository)
     : super(const AdminRecordBooksState());
 
-  Future<void> fetchBooks({
-    bool refresh = false,
-    String? search,
-    String? status,
-    String? category,
-    String? type,
-    String? guardian,
-  }) async {
+  Future<void> fetchBooks({bool refresh = false}) async {
     if (state.isLoading) return;
 
     final newState = refresh
-        ? AdminRecordBooksState(
-            searchQuery: search ?? state.searchQuery,
-            statusFilter: status ?? state.statusFilter,
-            categoryFilter: category ?? state.categoryFilter,
-            typeFilter: type ?? state.typeFilter,
-            guardianFilter: guardian ?? state.guardianFilter,
-            groupBy: state.groupBy,
-            contractTypeId: state.contractTypeId,
-            periodType: state.periodType,
-            periodYear: state.periodYear,
-            dateFrom: state.dateFrom,
-            dateTo: state.dateTo,
-            sortField: state.sortField,
-            sortAscending: state.sortAscending,
+        ? state.copyWith(
             isLoading: true,
+            page: 1,
+            hasMore: true,
+            clearError: true,
           )
-        : state.copyWith(isLoading: true, error: null);
+        : state.copyWith(isLoading: true, clearError: true);
     state = newState;
 
     if (!state.hasMore && !refresh) return;
@@ -145,6 +146,9 @@ class AdminRecordBooksNotifier extends StateNotifier<AdminRecordBooksState> {
         sortBy: state.sortField ?? state.groupBy,
         dateFrom: state.dateFrom,
         dateTo: state.dateTo,
+        periodType: state.periodType,
+        periodValue: state.periodValue,
+        periodYear: state.periodYear,
       );
 
       state = state.copyWith(
@@ -159,27 +163,41 @@ class AdminRecordBooksNotifier extends StateNotifier<AdminRecordBooksState> {
   }
 
   void setSearchQuery(String query) {
-    fetchBooks(refresh: true, search: query);
+    state = state.copyWith(searchQuery: query, clearSearchQuery: query.isEmpty);
+    fetchBooks(refresh: true);
   }
 
   void setStatusFilter(String? status) {
-    fetchBooks(refresh: true, status: status);
+    state = state.copyWith(
+      statusFilter: status,
+      clearStatusFilter: status == null,
+    );
+    fetchBooks(refresh: true);
   }
 
   void setCategoryFilter(String? category) {
     // When changing category, clear guardian filter if not guardian_recording
     if (category != 'guardian_recording') {
-      state = state.copyWith(guardianFilter: null);
+      state = state.copyWith(clearGuardianFilter: true);
     }
-    fetchBooks(refresh: true, category: category);
+    state = state.copyWith(
+      categoryFilter: category,
+      clearCategoryFilter: category == null,
+    );
+    fetchBooks(refresh: true);
   }
 
   void setTypeFilter(String? type) {
-    fetchBooks(refresh: true, type: type);
+    state = state.copyWith(typeFilter: type, clearTypeFilter: type == null);
+    fetchBooks(refresh: true);
   }
 
   void setGuardianFilter(String? guardianId) {
-    fetchBooks(refresh: true, guardian: guardianId);
+    state = state.copyWith(
+      guardianFilter: guardianId,
+      clearGuardianFilter: guardianId == null,
+    );
+    fetchBooks(refresh: true);
   }
 
   void setContractTypeId(int? contractTypeId) {
@@ -193,6 +211,7 @@ class AdminRecordBooksNotifier extends StateNotifier<AdminRecordBooksState> {
 
   void setPeriodFilter({
     String? periodType,
+    String? periodValue,
     int? periodYear,
     String? dateFrom,
     String? dateTo,
@@ -200,6 +219,11 @@ class AdminRecordBooksNotifier extends StateNotifier<AdminRecordBooksState> {
     state = state.copyWith(
       periodType: periodType,
       clearPeriodType: periodType == null,
+      periodValue: periodValue,
+      clearPeriodValue:
+          periodValue == null &&
+          periodType != 'half_yearly' &&
+          periodType != 'quarterly',
       periodYear: periodYear,
       clearPeriodYear: periodYear == null,
       dateFrom: dateFrom,
@@ -220,7 +244,7 @@ class AdminRecordBooksNotifier extends StateNotifier<AdminRecordBooksState> {
   }
 
   void setGroupBy(String? groupBy) {
-    state = state.copyWith(groupBy: groupBy);
+    state = state.copyWith(groupBy: groupBy, clearGroupBy: groupBy == null);
     fetchBooks(refresh: true);
   }
 
