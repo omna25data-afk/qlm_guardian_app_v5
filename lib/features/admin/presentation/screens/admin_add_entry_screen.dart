@@ -223,7 +223,8 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
     );
     if (picked != null) {
       setState(() {
-        hijriCtrl.text = picked.toString();
+        hijriCtrl.text =
+            '${picked.hYear}-${picked.hMonth.toString().padLeft(2, '0')}-${picked.hDay.toString().padLeft(2, '0')}';
         gregCtrl.text = picked
             .hijriToGregorian(picked.hYear, picked.hMonth, picked.hDay)
             .toString()
@@ -265,6 +266,69 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
       return;
     }
 
+    // ── Client-side pre-validation with clear messages ──
+    if (_writerType == 'guardian' && _selectedGuardianId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('يرجى اختيار الأمين الشرعي'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (_writerType == 'documentation' && _selectedWriterId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('يرجى اختيار الموثق من قلم التوثيق'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (_writerType == 'external' && _selectedOtherWriterId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('يرجى اختيار الكاتب'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (_documentGregorianDateCtrl.text.isEmpty &&
+        _documentHijriDateCtrl.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('يرجى تحديد تاريخ المحرر (هجري أو ميلادي)'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (_firstPartyCtrl.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('يرجى إدخال اسم الطرف الأول'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (_secondPartyCtrl.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('يرجى إدخال اسم الطرف الثاني'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     final data = <String, dynamic>{
       'contract_type_id': _selectedContractTypeId,
       'first_party_name': _firstPartyCtrl.text,
@@ -272,7 +336,9 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
       'writer_type': _writerType,
       'document_hijri_date': _documentHijriDateCtrl.text,
       'document_gregorian_date': _documentGregorianDateCtrl.text,
-      'transaction_date': _documentGregorianDateCtrl.text,
+      'transaction_date': _documentGregorianDateCtrl.text.isNotEmpty
+          ? _documentGregorianDateCtrl.text
+          : null,
       'notes': _notesCtrl.text,
       'status': 'draft',
     };
@@ -361,29 +427,16 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
     final success = await ref.read(addEntryProvider.notifier).submitEntry(data);
 
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                _isOnline ? 'تم الحفظ بنجاح' : 'تم الحفظ محلياً',
-                style: const TextStyle(fontFamily: 'Tajawal'),
-              ),
-            ],
-          ),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
       ref
           .read(adminPendingEntriesProvider.notifier)
           .fetchEntries(refresh: true);
       Navigator.pop(context);
+    } else if (!success && mounted) {
+      // Error is already shown via ref.listen, but scroll to top to show inline error too
+      final currentError = ref.read(addEntryProvider).error;
+      if (currentError != null) {
+        // SnackBar is shown by ref.listen, just ensure form stays visible
+      }
     }
   }
 
@@ -404,6 +457,61 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(addEntryProvider);
+
+    // Listen for error/success state changes
+    ref.listen<AddEntryState>(addEntryProvider, (previous, next) {
+      // Show error SnackBar
+      if (next.error != null && next.error != previous?.error) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    next.error!,
+                    style: const TextStyle(fontFamily: 'Tajawal'),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 6),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+      // Show success SnackBar
+      if (next.successMessage != null &&
+          next.successMessage != previous?.successMessage) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  next.successMessage!,
+                  style: const TextStyle(fontFamily: 'Tajawal'),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    });
 
     return Directionality(
       textDirection: TextDirection.rtl,
