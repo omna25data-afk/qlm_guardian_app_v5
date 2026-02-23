@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hijri/hijri_calendar.dart';
+import 'package:hijri_picker/hijri_picker.dart';
 import '../../../records/data/models/record_book.dart';
 import '../../../../core/widgets/searchable_dropdown.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -31,6 +33,32 @@ class GuardianSection extends StatefulWidget {
 
 class _GuardianSectionState extends State<GuardianSection> {
   bool _useDifferentDate = false;
+
+  Future<void> _selectHijriDate(BuildContext context) async {
+    final picked = await showHijriDatePicker(
+      context: context,
+      initialDate: HijriCalendar.now(),
+      firstDate: HijriCalendar()
+        ..hYear = 1440
+        ..hMonth = 1
+        ..hDay = 1,
+      lastDate: HijriCalendar()
+        ..hYear = 1460
+        ..hMonth = 12
+        ..hDay = 29,
+    );
+    if (picked != null) {
+      widget.hijriDateCtrl.text =
+          '${picked.hYear}-${picked.hMonth.toString().padLeft(2, '0')}-${picked.hDay.toString().padLeft(2, '0')}';
+      final greg = picked.hijriToGregorian(
+        picked.hYear,
+        picked.hMonth,
+        picked.hDay,
+      );
+      widget.gregorianDateCtrl.text =
+          '${greg.year}-${greg.month.toString().padLeft(2, '0')}-${greg.day.toString().padLeft(2, '0')}';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,11 +113,12 @@ class _GuardianSectionState extends State<GuardianSection> {
                   textInputAction: TextInputAction.next,
                   decoration: const InputDecoration(
                     labelText: 'التاريخ الهجري',
-                    hintText: 'هـ',
+                    hintText: 'اختر التاريخ',
                     hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                     prefixIcon: Icon(Icons.calendar_month, size: 20),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
+                  onTap: () => _selectHijriDate(context),
                 ),
               ),
               const SizedBox(width: 12),
@@ -100,7 +129,7 @@ class _GuardianSectionState extends State<GuardianSection> {
                   textInputAction: TextInputAction.next,
                   decoration: const InputDecoration(
                     labelText: 'التاريخ الميلادي',
-                    hintText: 'م',
+                    hintText: 'يتحدث تلقائياً',
                     hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                     prefixIcon: Icon(Icons.date_range, size: 20),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
