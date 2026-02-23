@@ -1,0 +1,70 @@
+[
+    {
+        "type": "header",
+        "version": "5.2.2",
+        "comment": "Export to JSON plugin for PHPMyAdmin"
+    },
+    {
+        "type": "database",
+        "name": "u438006377_qlm_47"
+    },
+    {
+        "type": "table",
+        "name": "registry_entries",
+        "database": "u438006377_qlm_47",
+        "data": [
+            {
+                "id": "7688",
+                "serial_number": "557",
+                "hijri_year": "1447",
+                "constraint_type_id": "6",
+                "contract_type_id": "1",
+                "first_party_name": "اسم الزوج تجريبي اسماعيل",
+                "second_party_name": "اسم الزوجة تجريبي اسماعيل",
+                "writer_type": "guardian",
+                "writer_id": null,
+                "other_writer_id": null,
+                "writer_name": "اسماعيل احمد عبده سفيان",
+                "document_hijri_date": "1447-07-02 00:00:00",
+                "document_gregorian_date": "2025-12-22",
+                "doc_record_book_id": null,
+                "doc_record_book_number": null,
+                "doc_page_number": null,
+                "doc_entry_number": null,
+                "doc_box_number": null,
+                "doc_document_number": null,
+                "doc_hijri_date": null,
+                "doc_gregorian_date": null,
+                "fee_amount": "0.00",
+                "has_authentication_fee": "0",
+                "authentication_fee_amount": null,
+                "has_transfer_fee": "0",
+                "transfer_fee_amount": null,
+                "has_other_fee": "0",
+                "other_fee_amount": null,
+                "penalty_amount": "0.00",
+                "support_amount": "0.00",
+                "receipt_number": null,
+                "sustainability_amount": "0.00",
+                "exemption_type": null,
+                "exemption_reason": null,
+                "guardian_id": "4",
+                "guardian_record_book_id": "25",
+                "guardian_record_book_number": "1",
+                "guardian_page_number": "50",
+                "guardian_entry_number": "20",
+                "guardian_hijri_date": null,
+                "constraintable_type": "App\\Models\\MarriageContract",
+                "constraintable_id": "3281",
+                "status": "registered_guardian",
+                "delivery_status": "kept",
+                "notes": null,
+                "created_by": "26",
+                "created_at": "2026-02-23 04:21:11",
+                "updated_at": "2026-02-23 04:21:11",
+                "deleted_at": null,
+                "uuid": "6b8ba735-cbf6-48c4-9178-cc18e98bb0ef"
+            }
+        ]
+    }
+]

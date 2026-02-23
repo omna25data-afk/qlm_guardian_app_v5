@@ -11,7 +11,8 @@ import '../../../../../core/di/injection.dart';
 import '../../../../registry/presentation/screens/compact_registry_entry_screen.dart';
 import '../../../../registry/presentation/screens/entry_details_screen.dart';
 import '../admin_add_entry_screen.dart';
-import '../../../../admin/presentation/providers/admin_dashboard_provider.dart';
+
+import '../../../../admin/presentation/widgets/advanced_all_entries_filter_sheet.dart';
 
 class AllEntriesState {
   final List<RegistryEntrySections> entries;
@@ -27,8 +28,14 @@ class AllEntriesState {
   final int? year;
   final int? contractTypeId;
   final String? writerType;
+  final int? filteredWriterId;
+  final String? dateFilterType;
   final String? dateFrom;
   final String? dateTo;
+  final String? hijriDateFrom;
+  final String? hijriDateTo;
+  final String? recordBookCategory;
+  final int? recordBookTypeId;
 
   const AllEntriesState({
     this.entries = const [],
@@ -42,8 +49,14 @@ class AllEntriesState {
     this.year,
     this.contractTypeId,
     this.writerType,
+    this.filteredWriterId,
+    this.dateFilterType,
     this.dateFrom,
     this.dateTo,
+    this.hijriDateFrom,
+    this.hijriDateTo,
+    this.recordBookCategory,
+    this.recordBookTypeId,
   });
 
   AllEntriesState copyWith({
@@ -63,9 +76,19 @@ class AllEntriesState {
     bool clearContractTypeId = false,
     String? writerType,
     bool clearWriterType = false,
+    int? filteredWriterId,
+    bool clearFilteredWriterId = false,
+    String? dateFilterType,
+    bool clearDateFilterType = false,
     String? dateFrom,
     String? dateTo,
+    String? hijriDateFrom,
+    String? hijriDateTo,
     bool clearDates = false,
+    String? recordBookCategory,
+    bool clearRecordBookCategory = false,
+    int? recordBookTypeId,
+    bool clearRecordBookTypeId = false,
   }) {
     return AllEntriesState(
       entries: entries ?? this.entries,
@@ -81,8 +104,22 @@ class AllEntriesState {
           ? null
           : (contractTypeId ?? this.contractTypeId),
       writerType: clearWriterType ? null : (writerType ?? this.writerType),
+      filteredWriterId: clearFilteredWriterId
+          ? null
+          : (filteredWriterId ?? this.filteredWriterId),
+      dateFilterType: clearDateFilterType
+          ? null
+          : (dateFilterType ?? this.dateFilterType),
       dateFrom: clearDates ? null : (dateFrom ?? this.dateFrom),
       dateTo: clearDates ? null : (dateTo ?? this.dateTo),
+      hijriDateFrom: clearDates ? null : (hijriDateFrom ?? this.hijriDateFrom),
+      hijriDateTo: clearDates ? null : (hijriDateTo ?? this.hijriDateTo),
+      recordBookCategory: clearRecordBookCategory
+          ? null
+          : (recordBookCategory ?? this.recordBookCategory),
+      recordBookTypeId: clearRecordBookTypeId
+          ? null
+          : (recordBookTypeId ?? this.recordBookTypeId),
     );
   }
 }
@@ -125,8 +162,14 @@ class AllEntriesNotifier extends StateNotifier<AllEntriesState> {
         year: state.year,
         contractTypeId: state.contractTypeId,
         writerType: state.writerType,
+        filteredWriterId: state.filteredWriterId,
+        dateFilterType: state.dateFilterType,
         dateFrom: state.dateFrom,
         dateTo: state.dateTo,
+        hijriDateFrom: state.hijriDateFrom,
+        hijriDateTo: state.hijriDateTo,
+        recordBookCategory: state.recordBookCategory,
+        recordBookTypeId: state.recordBookTypeId,
       );
 
       state = state.copyWith(
@@ -160,9 +203,19 @@ class AllEntriesNotifier extends StateNotifier<AllEntriesState> {
     bool clearContractTypeId = false,
     String? writerType,
     bool clearWriterType = false,
+    int? filteredWriterId,
+    bool clearFilteredWriterId = false,
+    String? dateFilterType,
+    bool clearDateFilterType = false,
     String? dateFrom,
     String? dateTo,
+    String? hijriDateFrom,
+    String? hijriDateTo,
     bool clearDates = false,
+    String? recordBookCategory,
+    bool clearRecordBookCategory = false,
+    int? recordBookTypeId,
+    bool clearRecordBookTypeId = false,
   }) {
     state = state.copyWith(
       searchQuery: search ?? state.searchQuery,
@@ -175,9 +228,19 @@ class AllEntriesNotifier extends StateNotifier<AllEntriesState> {
       clearContractTypeId: clearContractTypeId,
       writerType: writerType ?? state.writerType,
       clearWriterType: clearWriterType,
+      filteredWriterId: filteredWriterId ?? state.filteredWriterId,
+      clearFilteredWriterId: clearFilteredWriterId,
+      dateFilterType: dateFilterType ?? state.dateFilterType,
+      clearDateFilterType: clearDateFilterType,
       dateFrom: dateFrom ?? state.dateFrom,
       dateTo: dateTo ?? state.dateTo,
+      hijriDateFrom: hijriDateFrom ?? state.hijriDateFrom,
+      hijriDateTo: hijriDateTo ?? state.hijriDateTo,
       clearDates: clearDates,
+      recordBookCategory: recordBookCategory ?? state.recordBookCategory,
+      clearRecordBookCategory: clearRecordBookCategory,
+      recordBookTypeId: recordBookTypeId ?? state.recordBookTypeId,
+      clearRecordBookTypeId: clearRecordBookTypeId,
     );
     fetchEntries(refresh: true);
   }
@@ -209,6 +272,15 @@ class AllEntriesNotifier extends StateNotifier<AllEntriesState> {
     fetchEntries(refresh: true);
   }
 
+  void setHijriDates(String? from, String? to) {
+    state = state.copyWith(
+      hijriDateFrom: from,
+      hijriDateTo: to,
+      clearDates: from == null && to == null,
+    );
+    fetchEntries(refresh: true);
+  }
+
   void clearFilters() {
     state =
         const AllEntriesState(); // Resets everything to default but we want to fetch right after
@@ -220,319 +292,177 @@ class AllEntriesNotifier extends StateNotifier<AllEntriesState> {
 class AllEntriesTab extends ConsumerWidget {
   const AllEntriesTab({super.key});
 
-  Widget _buildFilterChip({
-    required String label,
-    required bool isActive,
-    required VoidCallback onTap,
-  }) {
-    return FilterChip(
-      label: Text(
-        label,
-        style: TextStyle(
-          fontFamily: 'Tajawal',
-          fontSize: 13,
-          color: isActive ? Colors.white : Colors.grey.shade700,
-        ),
-      ),
-      selected: isActive,
-      onSelected: (_) => onTap(),
-      selectedColor: AppColors.primary,
-      backgroundColor: Colors.grey.shade100,
-      checkmarkColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: isActive ? AppColors.primary : Colors.grey.shade300,
-        ),
-      ),
-    );
-  }
-
-  void _showAdvancedFilters(
+  Widget _buildSearchBarAndFilterIcon(
     BuildContext context,
     WidgetRef ref,
     AllEntriesNotifier notifier,
     AllEntriesState entriesState,
   ) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'بحث في المحررات (رقم القيد، الأطراف...)',
+                hintStyle: TextStyle(
+                  fontFamily: 'Tajawal',
+                  fontSize: 13,
+                  color: Colors.grey.shade400,
+                ),
+                prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+                filled: true,
+                fillColor: Colors.grey[100],
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (val) {
+                notifier.updateFilters(search: val, clearSearch: val.isEmpty);
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.tune, color: AppColors.primary),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (ctx) => const AdvancedAllEntriesFilterSheet(),
+                );
+              },
+            ),
+          ),
+        ],
       ),
-      builder: (ctx) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.4,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (context, scrollController) {
-          return FutureBuilder<List<dynamic>>(
-            future: Future.wait<dynamic>([
-              ref.read(adminRepositoryProvider).getAdminRecordBookTypes(),
-            ]),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
+    );
+  }
 
-              if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              }
+  Widget _buildActiveFiltersRow(
+    AllEntriesState state,
+    AllEntriesNotifier notifier,
+  ) {
+    final activeFilters = <Widget>[];
 
-              final types =
-                  snapshot.data?[0] as List<Map<String, dynamic>>? ?? [];
+    if (state.contractTypeId != null) {
+      activeFilters.add(
+        _buildActiveFilterChip(
+          'نوع العقد مخصص',
+          () => notifier.updateFilters(clearContractTypeId: true),
+        ),
+      );
+    }
 
-              // Current filter values
-              int? selectedYear = entriesState.year;
-              int? selectedContractType = entriesState.contractTypeId;
+    if (state.status != null) {
+      final statuses = {
+        'documented': 'موثق',
+        'registered': 'مقيدة',
+        'pending': 'قيد التدقيق',
+        'draft': 'مسودة',
+        'rejected': 'مرفوض',
+      };
+      activeFilters.add(
+        _buildActiveFilterChip(
+          statuses[state.status] ?? state.status!,
+          () => notifier.setStatus(null),
+        ),
+      );
+    }
 
-              return StatefulBuilder(
-                builder: (context, setModalState) {
-                  return Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        const Text(
-                          'تصفية متقدمة',
-                          style: TextStyle(
-                            fontFamily: 'Tajawal',
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
+    if (state.writerType != null) {
+      activeFilters.add(
+        _buildActiveFilterChip(
+          state.writerType!,
+          () => notifier.updateFilters(clearWriterType: true),
+        ),
+      );
+    }
 
-                        // Year Dropdown
-                        const Text(
-                          'سنة الإصدار',
-                          style: TextStyle(
-                            fontFamily: 'Tajawal',
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey[300]!),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<int>(
-                              value: selectedYear,
-                              isExpanded: true,
-                              hint: const Text(
-                                'الكل',
-                                style: TextStyle(fontFamily: 'Tajawal'),
-                              ),
-                              items: [
-                                const DropdownMenuItem<int>(
-                                  value: null,
-                                  child: Text(
-                                    'الكل',
-                                    style: TextStyle(fontFamily: 'Tajawal'),
-                                  ),
-                                ),
-                                ...List.generate(30, (index) {
-                                  final year = DateTime.now().year - index;
-                                  return DropdownMenuItem<int>(
-                                    value: year,
-                                    child: Text(
-                                      year.toString(),
-                                      style: const TextStyle(
-                                        fontFamily: 'Tajawal',
-                                      ),
-                                    ),
-                                  );
-                                }),
-                              ],
-                              onChanged: (val) {
-                                setModalState(() => selectedYear = val);
-                              },
-                            ),
-                          ),
-                        ),
+    if (state.year != null) {
+      activeFilters.add(
+        _buildActiveFilterChip(
+          'سنة ${state.year}',
+          () => notifier.updateFilters(clearYear: true),
+        ),
+      );
+    }
 
-                        const SizedBox(height: 16),
+    if (state.dateFrom != null || state.dateTo != null) {
+      activeFilters.add(
+        _buildActiveFilterChip(
+          '${state.dateFrom ?? '...'} - ${state.dateTo ?? '...'}',
+          () => notifier.updateFilters(clearDates: true),
+        ),
+      );
+    }
 
-                        // Contract Type Dropdown
-                        const Text(
-                          'نوع العقد/القيد',
-                          style: TextStyle(
-                            fontFamily: 'Tajawal',
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey[300]!),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<int>(
-                              value: selectedContractType,
-                              isExpanded: true,
-                              hint: const Text(
-                                'الكل',
-                                style: TextStyle(fontFamily: 'Tajawal'),
-                              ),
-                              items: [
-                                const DropdownMenuItem<int>(
-                                  value: null,
-                                  child: Text(
-                                    'الكل',
-                                    style: TextStyle(fontFamily: 'Tajawal'),
-                                  ),
-                                ),
-                                ...types.map(
-                                  (t) => DropdownMenuItem<int>(
-                                    value: t['id'] as int,
-                                    child: Text(
-                                      t['name']?.toString() ?? '',
-                                      style: const TextStyle(
-                                        fontFamily: 'Tajawal',
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                              onChanged: (val) {
-                                setModalState(() => selectedContractType = val);
-                              },
-                            ),
-                          ),
-                        ),
+    if (activeFilters.isEmpty) return const SizedBox.shrink();
 
-                        const SizedBox(height: 16),
+    return Container(
+      width: double.infinity,
+      color: Colors.white,
+      padding: const EdgeInsets.only(bottom: 8, right: 16, left: 16),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            const Text(
+              'فلاتر نشطة:',
+              style: TextStyle(
+                fontFamily: 'Tajawal',
+                fontSize: 11,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(width: 8),
+            ...activeFilters.expand((chip) => [chip, const SizedBox(width: 8)]),
+          ],
+        ),
+      ),
+    );
+  }
 
-                        // Date of Editing filter
-                        const Text(
-                          'تاريخ التحرير',
-                          style: TextStyle(
-                            fontFamily: 'Tajawal',
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        OutlinedButton.icon(
-                          onPressed: () async {
-                            final picked = await showDateRangePicker(
-                              context: context,
-                              firstDate: DateTime(2020),
-                              lastDate: DateTime.now().add(
-                                const Duration(days: 365),
-                              ),
-                              locale: const Locale('ar'),
-                            );
-                            if (picked != null) {
-                              final from =
-                                  '${picked.start.year}-${picked.start.month.toString().padLeft(2, '0')}-${picked.start.day.toString().padLeft(2, '0')}';
-                              final to =
-                                  '${picked.end.year}-${picked.end.month.toString().padLeft(2, '0')}-${picked.end.day.toString().padLeft(2, '0')}';
-                              setModalState(() {
-                                notifier.setDates(from, to);
-                              });
-                            }
-                          },
-                          icon: const Icon(Icons.date_range, size: 18),
-                          label: Text(
-                            entriesState.dateFrom != null
-                                ? '${entriesState.dateFrom} → ${entriesState.dateTo ?? '...'} '
-                                : 'اختر فترة التحرير',
-                            style: const TextStyle(
-                              fontFamily: 'Tajawal',
-                              fontSize: 13,
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-
-                        const Spacer(),
-
-                        // Apply Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton(
-                            onPressed: () {
-                              notifier.updateFilters(
-                                year: selectedYear,
-                                clearYear: selectedYear == null,
-                                contractTypeId: selectedContractType,
-                                clearContractTypeId:
-                                    selectedContractType == null,
-                              );
-                              Navigator.pop(ctx);
-                            },
-                            style: FilledButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              'تطبيق الفلتر',
-                              style: TextStyle(
-                                fontFamily: 'Tajawal',
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        // Clear Filters
-                        Center(
-                          child: TextButton(
-                            onPressed: () {
-                              notifier.clearFilters();
-                              Navigator.pop(ctx);
-                            },
-                            child: const Text(
-                              'مسح الفلاتر',
-                              style: TextStyle(
-                                fontFamily: 'Tajawal',
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            },
-          );
-        },
+  Widget _buildActiveFilterChip(String label, VoidCallback onRemove) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Tajawal',
+              fontSize: 11,
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: onRemove,
+            child: const Icon(Icons.close, size: 14, color: AppColors.primary),
+          ),
+        ],
       ),
     );
   }
@@ -595,178 +525,8 @@ class AllEntriesTab extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          // Writer Type Sub-tabs (SegmentedButton)
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: SizedBox(
-              width: double.infinity,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SegmentedButton<int?>(
-                  style: SegmentedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    selectedForegroundColor: Colors.white,
-                    selectedBackgroundColor: AppColors.primary,
-                    textStyle: const TextStyle(
-                      fontFamily: 'Tajawal',
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    side: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  segments: const [
-                    ButtonSegment<int?>(
-                      value: null,
-                      label: Text('الكل', overflow: TextOverflow.ellipsis),
-                    ),
-                    ButtonSegment<int?>(
-                      value: 1,
-                      label: Text('زواج', overflow: TextOverflow.ellipsis),
-                    ),
-                    ButtonSegment<int?>(
-                      value: 7,
-                      label: Text('طلاق', overflow: TextOverflow.ellipsis),
-                    ),
-                    ButtonSegment<int?>(
-                      value: 8,
-                      label: Text('رجعة', overflow: TextOverflow.ellipsis),
-                    ),
-                    ButtonSegment<int?>(
-                      value: 10,
-                      label: Text('مبيع', overflow: TextOverflow.ellipsis),
-                    ),
-                    ButtonSegment<int?>(
-                      value: 5,
-                      label: Text('تصرف', overflow: TextOverflow.ellipsis),
-                    ),
-                    ButtonSegment<int?>(
-                      value: 4,
-                      label: Text('وكالة', overflow: TextOverflow.ellipsis),
-                    ),
-                    ButtonSegment<int?>(
-                      value: 6,
-                      label: Text('قسمة', overflow: TextOverflow.ellipsis),
-                    ),
-                  ],
-                  selected: {entriesState.contractTypeId},
-                  onSelectionChanged: (Set<int?> newSelection) {
-                    if (newSelection.isEmpty) return;
-                    notifier.setContractType(newSelection.first);
-                  },
-                  showSelectedIcon: false,
-                  emptySelectionAllowed: false,
-                ),
-              ),
-            ),
-          ),
-          // Filter Bar (Search + Status Chips)
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'بحث في المحررات (رقم القيد، الأطراف...)',
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            color: Colors.grey,
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[50],
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 0,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        onChanged: (val) {
-                          notifier.updateFilters(
-                            search: val,
-                            clearSearch: val.isEmpty,
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.tune, color: AppColors.primary),
-                        onPressed: () {
-                          _showAdvancedFilters(
-                            context,
-                            ref,
-                            notifier,
-                            entriesState,
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Status Filter Chips
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildFilterChip(
-                        label: 'الكل',
-                        isActive: entriesState.status == null,
-                        onTap: () => notifier.setStatus(null),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildFilterChip(
-                        label: 'موثق',
-                        isActive: entriesState.status == 'documented',
-                        onTap: () => notifier.setStatus('documented'),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildFilterChip(
-                        label: 'مقيدة',
-                        isActive: entriesState.status == 'registered',
-                        onTap: () => notifier.setStatus('registered'),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildFilterChip(
-                        label: 'قيد التدقيق',
-                        isActive: entriesState.status == 'pending',
-                        onTap: () => notifier.setStatus('pending'),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildFilterChip(
-                        label: 'مسودة',
-                        isActive: entriesState.status == 'draft',
-                        onTap: () => notifier.setStatus('draft'),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildFilterChip(
-                        label: 'مرفوض',
-                        isActive: entriesState.status == 'rejected',
-                        onTap: () => notifier.setStatus('rejected'),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const Divider(height: 1),
-
+          _buildSearchBarAndFilterIcon(context, ref, notifier, entriesState),
+          _buildActiveFiltersRow(entriesState, notifier),
           // Entries List
           Expanded(
             child: entriesState.isLoading && entriesState.entries.isEmpty

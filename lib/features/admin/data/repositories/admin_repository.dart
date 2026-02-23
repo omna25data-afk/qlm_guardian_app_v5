@@ -333,8 +333,14 @@ class AdminRepository {
     int? year,
     int? contractTypeId,
     String? writerType,
+    int? filteredWriterId,
+    String? dateFilterType,
     String? dateFrom,
     String? dateTo,
+    String? hijriDateFrom,
+    String? hijriDateTo,
+    String? recordBookCategory,
+    int? recordBookTypeId,
   }) async {
     final params = <String, dynamic>{'page': page};
     if (searchQuery != null && searchQuery.isNotEmpty) {
@@ -344,9 +350,24 @@ class AdminRepository {
     if (recordBookId != null) params['guardian_record_book_id'] = recordBookId;
     if (year != null) params['year'] = year;
     if (contractTypeId != null) params['contract_type_id'] = contractTypeId;
+
+    // Writer info
     if (writerType != null) params['writer_type'] = writerType;
+    if (filteredWriterId != null)
+      params['filtered_writer_id'] = filteredWriterId;
+
+    // Date info
+    if (dateFilterType != null) params['date_filter_type'] = dateFilterType;
     if (dateFrom != null) params['date_from'] = dateFrom;
     if (dateTo != null) params['date_to'] = dateTo;
+    if (hijriDateFrom != null) params['hijri_date_from'] = hijriDateFrom;
+    if (hijriDateTo != null) params['hijri_date_to'] = hijriDateTo;
+
+    // Record properties
+    if (recordBookCategory != null)
+      params['record_book_category'] = recordBookCategory;
+    if (recordBookTypeId != null)
+      params['record_book_type_id'] = recordBookTypeId;
 
     final response = await _systemRepository.getRegistryEntries(params);
 

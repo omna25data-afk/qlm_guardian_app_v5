@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:hijri/hijri_calendar.dart';
@@ -93,6 +94,8 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
   final _guardianRecordBookNumberCtrl = TextEditingController();
   final _guardianPageNumberCtrl = TextEditingController();
   final _guardianEntryNumberCtrl = TextEditingController();
+  final _guardianHijriDateCtrl = TextEditingController();
+  final _guardianGregorianDateCtrl = TextEditingController();
   final Map<String, TextEditingController> _dynamicControllers = {};
 
   @override
@@ -151,6 +154,8 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
       _guardianRecordBookNumberCtrl,
       _guardianPageNumberCtrl,
       _guardianEntryNumberCtrl,
+      _guardianHijriDateCtrl,
+      _guardianGregorianDateCtrl,
     ]) {
       c.dispose();
     }
@@ -229,6 +234,11 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
             .hijriToGregorian(picked.hYear, picked.hMonth, picked.hDay)
             .toString()
             .split(' ')[0];
+        // Auto-fill guardian date from document date
+        if (hijriCtrl == _documentHijriDateCtrl) {
+          _guardianHijriDateCtrl.text = hijriCtrl.text;
+          _guardianGregorianDateCtrl.text = gregCtrl.text;
+        }
       });
     }
   }
@@ -248,7 +258,14 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
       setState(() {
         gregCtrl.text =
             '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-        hijriCtrl.text = HijriCalendar.fromDate(picked).toString();
+        final hijri = HijriCalendar.fromDate(picked);
+        hijriCtrl.text =
+            '${hijri.hYear}-${hijri.hMonth.toString().padLeft(2, '0')}-${hijri.hDay.toString().padLeft(2, '0')}';
+        // Auto-fill guardian date from document date
+        if (gregCtrl == _documentGregorianDateCtrl) {
+          _guardianGregorianDateCtrl.text = gregCtrl.text;
+          _guardianHijriDateCtrl.text = hijriCtrl.text;
+        }
       });
     }
   }
@@ -356,6 +373,7 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
       data['guardian_record_book_number'] = int.tryParse(
         _guardianRecordBookNumberCtrl.text,
       );
+      data['guardian_hijri_date'] = _guardianHijriDateCtrl.text;
     } else if (_writerType == 'documentation' && _selectedWriterId != null) {
       data['writer_id'] = _selectedWriterId;
     } else if (_writerType == 'external' && _selectedOtherWriterId != null) {
@@ -413,11 +431,16 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
     data['has_other_fee'] = _hasOtherFee;
 
     // Tax & Zakat
-    if (_selectedContractTypeId == 10 || _selectedContractTypeId == 5) {
+    if (_selectedContractTypeId == 10 ||
+        _selectedContractTypeId == 5 ||
+        _selectedContractTypeId == 2 ||
+        _selectedContractTypeId == 3) {
       data['tax_amount'] = double.tryParse(_taxAmountCtrl.text) ?? 0;
       data['tax_receipt_number'] = _taxReceiptNumberCtrl.text;
     }
-    if (_selectedContractTypeId == 10) {
+    if (_selectedContractTypeId == 10 ||
+        _selectedContractTypeId == 2 ||
+        _selectedContractTypeId == 3) {
       data['zakat_amount'] = double.tryParse(_zakatAmountCtrl.text) ?? 0;
       data['zakat_receipt_number'] = _zakatReceiptNumberCtrl.text;
     }
@@ -1303,8 +1326,11 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
         const Divider(height: 24),
         _buildExemptionSection(),
 
-        // Tax & Zakat
-        if (_selectedContractTypeId == 10 || _selectedContractTypeId == 5) ...[
+        // Tax & Zakat - only for financial contracts (sales/disposition)
+        if (_selectedContractTypeId == 10 ||
+            _selectedContractTypeId == 5 ||
+            _selectedContractTypeId == 2 ||
+            _selectedContractTypeId == 3) ...[
           const Divider(height: 32),
           _sectionLabel('ضريبة التصرفات العقارية'),
           const SizedBox(height: 8),
@@ -1322,14 +1348,16 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
               Expanded(
                 child: _textField(
                   _taxReceiptNumberCtrl,
-                  'رقم سند السداد',
+                  'رقم السند',
                   icon: Icons.numbers,
                 ),
               ),
             ],
           ),
         ],
-        if (_selectedContractTypeId == 10) ...[
+        if (_selectedContractTypeId == 10 ||
+            _selectedContractTypeId == 2 ||
+            _selectedContractTypeId == 3) ...[
           const SizedBox(height: 12),
           _sectionLabel('الزكاة'),
           const SizedBox(height: 8),
@@ -1347,7 +1375,7 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
               Expanded(
                 child: _textField(
                   _zakatReceiptNumberCtrl,
-                  'رقم سند السداد',
+                  'رقم السند',
                   icon: Icons.numbers,
                 ),
               ),
@@ -1527,6 +1555,42 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Guardian date (auto-filled from document date)
+        _sectionLabel('تاريخ القيد في سجل الأمين'),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _dateField(
+                _guardianHijriDateCtrl,
+                'التاريخ الهجري',
+                Icons.calendar_month,
+                () => _selectHijriDate(
+                  context,
+                  _guardianHijriDateCtrl,
+                  _guardianGregorianDateCtrl,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _dateField(
+                _guardianGregorianDateCtrl,
+                'التاريخ الميلادي',
+                Icons.event,
+                () => _selectGregorianDate(
+                  context,
+                  _guardianGregorianDateCtrl,
+                  _guardianHijriDateCtrl,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const Divider(height: 24),
+        // Book selector
+        _sectionLabel('بيانات السجل'),
+        const SizedBox(height: 8),
         SearchableDropdown<RecordBook>(
           items: state.guardianRecordBooks,
           label: 'سجل الأمين *',
@@ -1563,15 +1627,15 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
           },
         ),
         const SizedBox(height: 12),
+        // Entry, Page, Book Number in one row
         Row(
           children: [
             Expanded(
               child: _textField(
-                _guardianRecordBookNumberCtrl,
-                'رقم السجل',
+                _guardianEntryNumberCtrl,
+                'رقم القيد',
                 keyboardType: TextInputType.number,
-                readOnly: true,
-                icon: Icons.menu_book,
+                icon: Icons.tag,
               ),
             ),
             const SizedBox(width: 8),
@@ -1586,10 +1650,11 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
             const SizedBox(width: 8),
             Expanded(
               child: _textField(
-                _guardianEntryNumberCtrl,
-                'رقم القيد',
+                _guardianRecordBookNumberCtrl,
+                'رقم السجل',
                 keyboardType: TextInputType.number,
-                icon: Icons.tag,
+                readOnly: true,
+                icon: Icons.menu_book,
               ),
             ),
           ],
@@ -1670,8 +1735,16 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
       maxLines: maxLines,
       onChanged: onChanged,
       style: const TextStyle(fontFamily: 'Tajawal'),
+      inputFormatters: keyboardType == TextInputType.number
+          ? [_ArabicToWesternFormatter()]
+          : null,
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: const TextStyle(
+          fontFamily: 'Tajawal',
+          fontSize: 12,
+          overflow: TextOverflow.ellipsis,
+        ),
         prefixIcon: icon != null ? Icon(icon, size: 20) : null,
       ),
       validator: required
@@ -1696,5 +1769,22 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
         prefixIcon: Icon(icon, size: 20),
       ),
     );
+  }
+}
+
+/// Converts Arabic/Hindi numerals (٠١٢٣٤٥٦٧٨٩) to Western (0123456789)
+class _ArabicToWesternFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    const eastern = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    const western = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    var text = newValue.text;
+    for (var i = 0; i < eastern.length; i++) {
+      text = text.replaceAll(eastern[i], western[i]);
+    }
+    return newValue.copyWith(text: text, selection: newValue.selection);
   }
 }

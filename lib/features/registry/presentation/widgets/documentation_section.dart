@@ -161,66 +161,71 @@ class DocumentationSection extends StatelessWidget {
         ),
         const SizedBox(height: 24),
 
-        // Tax and Zakat Section
-        const Text(
-          'البيانات المالية (الضريبة والزكاة)',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: taxAmountCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'مبلغ الضريبة',
-                  prefixIcon: Icon(Icons.attach_money, size: 20),
+        // Tax and Zakat Section - only for financial contracts
+        if (selectedContractTypeId != null &&
+            [2, 3, 5, 10].contains(selectedContractTypeId)) ...[
+          const Text(
+            'البيانات المالية (الضريبة والزكاة)',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: taxAmountCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'مبلغ الضريبة',
+                    prefixIcon: Icon(Icons.attach_money, size: 20),
+                  ),
+                  keyboardType: TextInputType.number,
                 ),
-                keyboardType: TextInputType.number,
               ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextFormField(
-                controller: taxReceiptNumberCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'رقم السند (الضريبة)',
-                  prefixIcon: Icon(Icons.receipt_long, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextFormField(
+                  controller: taxReceiptNumberCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'رقم السند (الضريبة)',
+                    prefixIcon: Icon(Icons.receipt_long, size: 20),
+                  ),
+                  keyboardType: TextInputType.number,
                 ),
-                keyboardType: TextInputType.number,
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if ([2, 3, 10].contains(selectedContractTypeId)) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: zakatAmountCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'مبلغ الزكاة',
+                      prefixIcon: Icon(Icons.attach_money, size: 20),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextFormField(
+                    controller: zakatReceiptNumberCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'رقم السند (الزكاة)',
+                      prefixIcon: Icon(Icons.receipt_long, size: 20),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+              ],
             ),
           ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: zakatAmountCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'مبلغ الزكاة',
-                  prefixIcon: Icon(Icons.attach_money, size: 20),
-                ),
-                keyboardType: TextInputType.number,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextFormField(
-                controller: zakatReceiptNumberCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'رقم السند (الزكاة)',
-                  prefixIcon: Icon(Icons.receipt_long, size: 20),
-                ),
-                keyboardType: TextInputType.number,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 32),
-        const Divider(),
-        const SizedBox(height: 16),
+          const SizedBox(height: 32),
+          const Divider(),
+          const SizedBox(height: 16),
+        ],
 
         const Text(
           'الرسوم وتوزيعاتها',
@@ -469,14 +474,14 @@ class DocumentationSection extends StatelessWidget {
     return Row(
       children: [
         _buildFeeChip(
-          'توثيق',
+          'مصادقة',
           hasAuthenticationFee,
           Icons.verified,
           (v) => onAuthFeeChanged(v),
         ),
         const SizedBox(width: 8),
         _buildFeeChip(
-          'نقل ملكية',
+          'انتقال',
           hasTransferFee,
           Icons.swap_horiz,
           (v) => onTransferFeeChanged(v),
@@ -562,7 +567,8 @@ class DocumentationSection extends StatelessWidget {
         ..hDay = 29,
     );
     if (picked != null) {
-      docHijriDateCtrl.text = picked.toString();
+      docHijriDateCtrl.text =
+          '${picked.hYear}-${picked.hMonth.toString().padLeft(2, '0')}-${picked.hDay.toString().padLeft(2, '0')}';
       final greg = picked.hijriToGregorian(
         picked.hYear,
         picked.hMonth,

@@ -216,12 +216,15 @@ class _CompactRegistryEntryScreenState
     } else {
       // Set default dates
       final todayHijri = HijriCalendar.now();
-      _documentHijriDateCtrl.text = todayHijri.toString();
-      _documentGregorianDateCtrl.text = DateTime.now().toString().split(' ')[0];
-      _docHijriDateCtrl.text = todayHijri.toString();
-      _docGregorianDateCtrl.text = DateTime.now().toString().split(' ')[0];
-      _guardianHijriDateCtrl.text = todayHijri.toString();
-      _guardianGregorianDateCtrl.text = DateTime.now().toString().split(' ')[0];
+      final hijriFormatted =
+          '${todayHijri.hYear}-${todayHijri.hMonth.toString().padLeft(2, '0')}-${todayHijri.hDay.toString().padLeft(2, '0')}';
+      final gregFormatted = DateTime.now().toString().split(' ')[0];
+      _documentHijriDateCtrl.text = hijriFormatted;
+      _documentGregorianDateCtrl.text = gregFormatted;
+      _docHijriDateCtrl.text = hijriFormatted;
+      _docGregorianDateCtrl.text = gregFormatted;
+      _guardianHijriDateCtrl.text = hijriFormatted;
+      _guardianGregorianDateCtrl.text = gregFormatted;
     }
   }
 
@@ -397,20 +400,17 @@ class _CompactRegistryEntryScreenState
               .updateEntry(widget.initialData!.id, data)
         : await ref.read(addEntryProvider.notifier).submitEntry(data);
 
-    if (success && mounted) {
+    if (success && mounted && !_isOnline) {
+      // Only show offline local save message here since it doesn't come from API state
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
+            children: const [
+              Icon(Icons.check_circle, color: Colors.white, size: 20),
+              SizedBox(width: 8),
               Text(
-                _isOnline
-                    ? (widget.initialData != null
-                          ? 'تم التعديل بنجاح'
-                          : 'تم الحفظ بنجاح')
-                    : 'تم الحفظ محلياً - سيُرفع عند الاتصال',
-                style: const TextStyle(fontFamily: 'Tajawal'),
+                'تم الحفظ محلياً - سيُرفع عند الاتصال',
+                style: TextStyle(fontFamily: 'Tajawal'),
               ),
             ],
           ),
@@ -428,6 +428,49 @@ class _CompactRegistryEntryScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(addEntryProvider);
+
+    ref.listen(addEntryProvider, (previous, next) {
+      if (next.error != null && next.error != previous?.error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              next.error!,
+              style: const TextStyle(fontFamily: 'Tajawal'),
+            ),
+            backgroundColor: AppColors.warning,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+      if (next.successMessage != null &&
+          next.successMessage != previous?.successMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    next.successMessage!,
+                    style: const TextStyle(fontFamily: 'Tajawal'),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+        Navigator.pop(context); // Go back on success
+      }
+    });
 
     return Directionality(
       textDirection: TextDirection.rtl,

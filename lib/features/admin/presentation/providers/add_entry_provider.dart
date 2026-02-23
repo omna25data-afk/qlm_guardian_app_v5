@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 
 import '../../data/repositories/admin_repository.dart';
 import '../providers/admin_dashboard_provider.dart'
@@ -264,7 +265,11 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
   }
 
   Future<bool> submitEntry(Map<String, dynamic> data) async {
-    state = state.copyWith(isSubmitting: true, error: null);
+    state = state.copyWith(
+      isSubmitting: true,
+      error: null,
+      successMessage: null,
+    );
     try {
       // Merge dynamic formData
       final mergedData = Map<String, dynamic>.from(data);
@@ -279,22 +284,80 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
         isSubmitting: false,
         hasDraft: false,
         successMessage: 'تم حفظ القيد بنجاح',
+        error: null,
       );
       return true;
-    } catch (e) {
+    } on DioException catch (e) {
       String errorMsg = 'حدث خطأ أثناء حفظ القيد';
-      if (e.toString().contains('422')) {
-        errorMsg = 'يرجى التحقق من البيانات المدخلة';
-      } else if (e.toString().contains('403')) {
+      final statusCode = e.response?.statusCode;
+      final responseData = e.response?.data;
+
+      if (statusCode == 422) {
+        if (responseData is Map<String, dynamic>) {
+          if (responseData['errors'] != null) {
+            final errors = responseData['errors'] as Map<String, dynamic>;
+            final List<String> errorMessages = [];
+            errors.forEach((key, value) {
+              if (value is List) {
+                errorMessages.addAll(value.map((e) => e.toString()));
+              } else {
+                errorMessages.add(value.toString());
+              }
+            });
+            if (errorMessages.isNotEmpty) {
+              errorMsg = errorMessages.join('\n');
+            }
+          } else if (responseData['message'] != null) {
+            errorMsg = responseData['message'].toString();
+          } else {
+            errorMsg = 'يرجى التحقق من البيانات المدخلة';
+          }
+        } else {
+          errorMsg = 'يرجى التحقق من البيانات المدخلة';
+        }
+      } else if (statusCode == 403) {
         errorMsg = 'لا تملك صلاحية لإضافة قيد';
+      } else if (statusCode == 409) {
+        // Duplicate entry
+        if (responseData is Map<String, dynamic>) {
+          errorMsg = responseData['message']?.toString() ?? 'القيد مسجل مسبقاً';
+          if (responseData['error'] != null) {
+            errorMsg += '\n${responseData['error']}';
+          }
+        } else {
+          errorMsg = 'القيد مسجل مسبقاً';
+        }
+      } else if (statusCode == 404) {
+        errorMsg = 'السجل المطلوب غير موجود';
+      } else if (statusCode == 500) {
+        if (responseData is Map<String, dynamic>) {
+          errorMsg = responseData['message']?.toString() ?? 'خطأ في الخادم';
+        } else {
+          errorMsg = 'خطأ في الخادم';
+        }
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMsg = 'انتهت مهلة الاتصال، يرجى المحاولة مرة أخرى';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMsg = 'لا يوجد اتصال بالإنترنت';
       }
       state = state.copyWith(isSubmitting: false, error: errorMsg);
+      return false;
+    } catch (e) {
+      state = state.copyWith(
+        isSubmitting: false,
+        error: 'حدث خطأ غير متوقع: ${e.toString()}',
+      );
       return false;
     }
   }
 
   Future<bool> updateEntry(int entryId, Map<String, dynamic> data) async {
-    state = state.copyWith(isSubmitting: true, error: null);
+    state = state.copyWith(
+      isSubmitting: true,
+      error: null,
+      successMessage: null,
+    );
     try {
       // Merge dynamic formData
       final mergedData = Map<String, dynamic>.from(data);
@@ -309,16 +372,66 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
         isSubmitting: false,
         hasDraft: false,
         successMessage: 'تم تعديل القيد بنجاح',
+        error: null,
       );
       return true;
-    } catch (e) {
+    } on DioException catch (e) {
       String errorMsg = 'حدث خطأ أثناء تعديل القيد';
-      if (e.toString().contains('422')) {
-        errorMsg = 'يرجى التحقق من البيانات المدخلة';
-      } else if (e.toString().contains('403')) {
+      final statusCode = e.response?.statusCode;
+      final responseData = e.response?.data;
+
+      if (statusCode == 422) {
+        if (responseData is Map<String, dynamic>) {
+          if (responseData['errors'] != null) {
+            final errors = responseData['errors'] as Map<String, dynamic>;
+            final List<String> errorMessages = [];
+            errors.forEach((key, value) {
+              if (value is List) {
+                errorMessages.addAll(value.map((e) => e.toString()));
+              } else {
+                errorMessages.add(value.toString());
+              }
+            });
+            if (errorMessages.isNotEmpty) {
+              errorMsg = errorMessages.join('\n');
+            }
+          } else if (responseData['message'] != null) {
+            errorMsg = responseData['message'].toString();
+          } else {
+            errorMsg = 'يرجى التحقق من البيانات المدخلة';
+          }
+        } else {
+          errorMsg = 'يرجى التحقق من البيانات المدخلة';
+        }
+      } else if (statusCode == 403) {
         errorMsg = 'لا تملك صلاحية لتعديل هذا القيد';
+      } else if (statusCode == 409) {
+        if (responseData is Map<String, dynamic>) {
+          errorMsg = responseData['message']?.toString() ?? 'القيد مسجل مسبقاً';
+        } else {
+          errorMsg = 'القيد مسجل مسبقاً';
+        }
+      } else if (statusCode == 404) {
+        errorMsg = 'القيد المطلوب غير موجود';
+      } else if (statusCode == 500) {
+        if (responseData is Map<String, dynamic>) {
+          errorMsg = responseData['message']?.toString() ?? 'خطأ في الخادم';
+        } else {
+          errorMsg = 'خطأ في الخادم';
+        }
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMsg = 'انتهت مهلة الاتصال، يرجى المحاولة مرة أخرى';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMsg = 'لا يوجد اتصال بالإنترنت';
       }
       state = state.copyWith(isSubmitting: false, error: errorMsg);
+      return false;
+    } catch (e) {
+      state = state.copyWith(
+        isSubmitting: false,
+        error: 'حدث خطأ غير متوقع: ${e.toString()}',
+      );
       return false;
     }
   }

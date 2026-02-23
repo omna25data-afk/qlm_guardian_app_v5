@@ -94,7 +94,8 @@ class _PartiesSectionState extends ConsumerState<PartiesSection> {
         ..hDay = 29,
     );
     if (picked != null) {
-      hijriCtrl.text = picked.toString();
+      hijriCtrl.text =
+          '${picked.hYear}-${picked.hMonth.toString().padLeft(2, '0')}-${picked.hDay.toString().padLeft(2, '0')}';
       final greg = picked.hijriToGregorian(
         picked.hYear,
         picked.hMonth,
