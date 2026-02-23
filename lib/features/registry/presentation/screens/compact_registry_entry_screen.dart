@@ -272,11 +272,11 @@ class _CompactRegistryEntryScreenState
 
     if (_isExempted) {
       setState(() {
-        _feeAmountCtrl.text = '0.00';
-        _penaltyAmountCtrl.text = '0.00';
-        _supportAmountCtrl.text = '0.00';
-        _sustainabilityAmountCtrl.text = '0.00';
-        _totalAmountCtrl.text = '0.00';
+        _feeAmountCtrl.text = '0';
+        _penaltyAmountCtrl.text = '0';
+        _supportAmountCtrl.text = '0';
+        _sustainabilityAmountCtrl.text = '0';
+        _totalAmountCtrl.text = '0';
       });
       return;
     }
@@ -311,11 +311,11 @@ class _CompactRegistryEntryScreenState
         double.tryParse(_sustainabilityAmountCtrl.text) ?? 200;
 
     setState(() {
-      _feeAmountCtrl.text = (baseFee + extra).toStringAsFixed(2);
-      _penaltyAmountCtrl.text = '0.00';
-      _supportAmountCtrl.text = support.toStringAsFixed(2);
+      _feeAmountCtrl.text = (baseFee + extra).toStringAsFixed(0);
+      _penaltyAmountCtrl.text = '0';
+      _supportAmountCtrl.text = support.toStringAsFixed(0);
       _totalAmountCtrl.text = (totalFee + support + sustainability)
-          .toStringAsFixed(2);
+          .toStringAsFixed(0);
     });
   }
 

@@ -45,10 +45,18 @@ class ContractTypeSelector extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: contractTypes.map((ct) {
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 1.1,
+          ),
+          itemCount: contractTypes.length,
+          itemBuilder: (context, index) {
+            final ct = contractTypes[index];
             final id = ct['id'] as int;
             final name = ct['name']?.toString() ?? '';
             final isSelected = id == selectedId;
@@ -67,8 +75,8 @@ class ContractTypeSelector extends StatelessWidget {
                     duration: const Duration(milliseconds: 250),
                     curve: Curves.easeInOut,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
+                      horizontal: 4,
+                      vertical: 8,
                     ),
                     decoration: BoxDecoration(
                       color: isSelected
@@ -89,25 +97,28 @@ class ContractTypeSelector extends StatelessWidget {
                             ]
                           : null,
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           icon,
-                          size: 18,
+                          size: 24,
                           color: isSelected ? color : AppColors.textSecondary,
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(height: 4),
                         Text(
                           name,
                           style: TextStyle(
                             fontFamily: 'Tajawal',
-                            fontSize: 13,
+                            fontSize: 11,
                             fontWeight: isSelected
                                 ? FontWeight.bold
                                 : FontWeight.w500,
                             color: isSelected ? color : AppColors.textPrimary,
                           ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -115,7 +126,7 @@ class ContractTypeSelector extends StatelessWidget {
                 ),
               ),
             );
-          }).toList(),
+          },
         ),
       ],
     );

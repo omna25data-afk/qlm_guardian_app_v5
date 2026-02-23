@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../records/data/models/record_book.dart';
 import '../../../../core/widgets/searchable_dropdown.dart';
+import '../../../../core/theme/app_colors.dart';
 
-class GuardianSection extends StatelessWidget {
+class GuardianSection extends StatefulWidget {
   final int? guardianRecordBookId;
   final List<RecordBook> guardianRecordBooks;
   final TextEditingController recordBookNumberCtrl;
@@ -25,45 +26,90 @@ class GuardianSection extends StatelessWidget {
   });
 
   @override
+  State<GuardianSection> createState() => _GuardianSectionState();
+}
+
+class _GuardianSectionState extends State<GuardianSection> {
+  bool _useDifferentDate = false;
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // تاريخ القيد في سجل الأمين
-        const Text(
-          'تاريخ القيد في سجل الأمين',
-          style: TextStyle(
-            fontFamily: 'Tajawal',
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
+        // Toggle for different guardian date
+        Container(
+          decoration: BoxDecoration(
+            color: _useDifferentDate
+                ? AppColors.warning.withValues(alpha: 0.08)
+                : AppColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: _useDifferentDate ? AppColors.warning : AppColors.border,
+            ),
+          ),
+          child: SwitchListTile(
+            title: const Text(
+              'تاريخ قيد مختلف عن تاريخ المحرر',
+              style: TextStyle(
+                fontFamily: 'Tajawal',
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+            secondary: Icon(
+              Icons.date_range,
+              size: 20,
+              color: _useDifferentDate
+                  ? AppColors.warning
+                  : AppColors.textSecondary,
+            ),
+            value: _useDifferentDate,
+            onChanged: (v) => setState(() => _useDifferentDate = v),
+            dense: true,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: hijriDateCtrl,
-                readOnly: true,
-                decoration: const InputDecoration(
-                  labelText: 'التاريخ الهجري',
-                  prefixIcon: Icon(Icons.calendar_month, size: 20),
+
+        // Guardian date fields (only shown when toggle is on)
+        if (_useDifferentDate) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: widget.hijriDateCtrl,
+                  readOnly: true,
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(
+                    labelText: 'التاريخ الهجري',
+                    hintText: 'هـ',
+                    hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
+                    prefixIcon: Icon(Icons.calendar_month, size: 20),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextFormField(
-                controller: gregorianDateCtrl,
-                readOnly: true,
-                decoration: const InputDecoration(
-                  labelText: 'التاريخ الميلادي',
-                  prefixIcon: Icon(Icons.date_range, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextFormField(
+                  controller: widget.gregorianDateCtrl,
+                  readOnly: true,
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(
+                    labelText: 'التاريخ الميلادي',
+                    hintText: 'م',
+                    hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
+                    prefixIcon: Icon(Icons.date_range, size: 20),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
         const SizedBox(height: 16),
         const Divider(),
         const SizedBox(height: 12),
@@ -77,38 +123,42 @@ class GuardianSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        // Book selector in its own row
+        // Book selector
         SearchableDropdown<RecordBook>(
           label: 'سجل قيد محررات الأمين',
           hint: 'اختر السجل',
-          items: guardianRecordBooks,
+          items: widget.guardianRecordBooks,
           itemLabelBuilder: (b) => b.compositeName,
-          value: guardianRecordBookId != null
-              ? guardianRecordBooks.cast<RecordBook?>().firstWhere(
-                  (b) => b?.id == guardianRecordBookId,
+          value: widget.guardianRecordBookId != null
+              ? widget.guardianRecordBooks.cast<RecordBook?>().firstWhere(
+                  (b) => b?.id == widget.guardianRecordBookId,
                   orElse: () => null,
                 )
               : null,
           onChanged: (book) {
             if (book != null) {
-              recordBookNumberCtrl.text = book.bookNumber.toString();
-              onRecordBookIdChanged(book.id);
+              widget.recordBookNumberCtrl.text = book.bookNumber.toString();
+              widget.onRecordBookIdChanged(book.id);
             } else {
-              recordBookNumberCtrl.clear();
-              onRecordBookIdChanged(null);
+              widget.recordBookNumberCtrl.clear();
+              widget.onRecordBookIdChanged(null);
             }
           },
         ),
         const SizedBox(height: 12),
-        // Entry, Page, Book Number in one row
+        // Entry, Page, Book Number
         Row(
           children: [
             Expanded(
               child: TextFormField(
-                controller: entryNumberCtrl,
+                controller: widget.entryNumberCtrl,
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   labelText: 'رقم القيد',
+                  hintText: 'القيد',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                   prefixIcon: Icon(Icons.tag, size: 20),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -116,10 +166,14 @@ class GuardianSection extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: TextFormField(
-                controller: pageNumberCtrl,
+                controller: widget.pageNumberCtrl,
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   labelText: 'رقم الصفحة',
+                  hintText: 'الصفحة',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                   prefixIcon: Icon(Icons.description, size: 20),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -127,11 +181,14 @@ class GuardianSection extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: TextFormField(
-                controller: recordBookNumberCtrl,
+                controller: widget.recordBookNumberCtrl,
                 readOnly: true,
                 decoration: const InputDecoration(
                   labelText: 'رقم السجل',
+                  hintText: 'السجل',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                   prefixIcon: Icon(Icons.menu_book, size: 20),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
                 keyboardType: TextInputType.number,
               ),

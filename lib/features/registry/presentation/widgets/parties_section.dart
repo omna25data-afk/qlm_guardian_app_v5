@@ -147,9 +147,13 @@ class _PartiesSectionState extends ConsumerState<PartiesSection> {
               child: TextFormField(
                 controller: widget.documentHijriDateController,
                 readOnly: true,
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   labelText: 'تاريخ المحرر (هـ)',
+                  hintText: 'هـ',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                   prefixIcon: Icon(Icons.calendar_month, size: 20),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
                 onTap: () => _selectHijriDate(
                   context,
@@ -163,9 +167,13 @@ class _PartiesSectionState extends ConsumerState<PartiesSection> {
               child: TextFormField(
                 controller: widget.documentGregorianDateController,
                 readOnly: true,
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   labelText: 'تاريخ المحرر (م)',
+                  hintText: 'م',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                   prefixIcon: Icon(Icons.date_range, size: 20),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
               ),
             ),

@@ -130,7 +130,7 @@ class EntryDetailsScreen extends StatelessWidget {
             _buildSectionTitle('بيانات القيد في قلم التوثيق'),
             _buildInfoGrid([
               _buildGridItem(
-                'رقم القيد',
+                'قيد',
                 entry.documentInfo.docEntryNumber?.toString() ?? '-',
                 Icons.numbers_outlined,
               ),

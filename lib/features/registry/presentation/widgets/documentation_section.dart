@@ -100,9 +100,13 @@ class DocumentationSection extends StatelessWidget {
               child: TextFormField(
                 controller: docHijriDateCtrl,
                 readOnly: true,
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   labelText: 'تاريخ التوثيق (هـ)',
+                  hintText: 'هـ',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                   prefixIcon: Icon(Icons.calendar_month, size: 20),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
                 onTap: () => _selectHijriDate(context),
               ),
@@ -112,9 +116,13 @@ class DocumentationSection extends StatelessWidget {
               child: TextFormField(
                 controller: docGregorianDateCtrl,
                 readOnly: true,
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   labelText: 'تاريخ التوثيق (م)',
+                  hintText: 'م',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                   prefixIcon: Icon(Icons.date_range, size: 20),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
               ),
             ),
@@ -128,9 +136,13 @@ class DocumentationSection extends StatelessWidget {
             Expanded(
               child: TextFormField(
                 controller: docRecordBookNumberCtrl,
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   labelText: 'رقم السجل',
+                  hintText: 'السجل',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                   prefixIcon: Icon(Icons.book, size: 20),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -139,9 +151,13 @@ class DocumentationSection extends StatelessWidget {
             Expanded(
               child: TextFormField(
                 controller: docPageNumberCtrl,
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   labelText: 'رقم الصفحة',
+                  hintText: 'الصفحة',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                   prefixIcon: Icon(Icons.description, size: 20),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -150,9 +166,13 @@ class DocumentationSection extends StatelessWidget {
             Expanded(
               child: TextFormField(
                 controller: docEntryNumberCtrl,
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   labelText: 'رقم القيد',
+                  hintText: 'القيد',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                   prefixIcon: Icon(Icons.tag, size: 20),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -294,9 +314,13 @@ class DocumentationSection extends StatelessWidget {
               Expanded(
                 child: TextFormField(
                   controller: feeAmountCtrl,
+                  textInputAction: TextInputAction.next,
                   decoration: const InputDecoration(
                     labelText: 'رسوم التوثيق',
+                    hintText: '0',
+                    hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                     prefixIcon: Icon(Icons.attach_money, size: 20),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (_) => onFeesRecalculate(),
@@ -306,9 +330,13 @@ class DocumentationSection extends StatelessWidget {
               Expanded(
                 child: TextFormField(
                   controller: penaltyAmountCtrl,
+                  textInputAction: TextInputAction.next,
                   decoration: const InputDecoration(
-                    labelText: 'الغرامة (مع التأخير)',
+                    labelText: 'الغرامة',
+                    hintText: '0',
+                    hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                     prefixIcon: Icon(Icons.warning_amber, size: 20),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (_) => onFeesRecalculate(),
@@ -322,9 +350,13 @@ class DocumentationSection extends StatelessWidget {
               Expanded(
                 child: TextFormField(
                   controller: supportAmountCtrl,
+                  textInputAction: TextInputAction.next,
                   decoration: const InputDecoration(
                     labelText: 'الدعم',
+                    hintText: '0',
+                    hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                     prefixIcon: Icon(Icons.volunteer_activism, size: 20),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (_) => onFeesRecalculate(),
@@ -334,9 +366,13 @@ class DocumentationSection extends StatelessWidget {
               Expanded(
                 child: TextFormField(
                   controller: sustainabilityAmountCtrl,
+                  textInputAction: TextInputAction.next,
                   decoration: const InputDecoration(
                     labelText: 'الاستدامة',
+                    hintText: '200',
+                    hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                     prefixIcon: Icon(Icons.eco, size: 20),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (_) => onFeesRecalculate(),
