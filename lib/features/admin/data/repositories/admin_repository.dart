@@ -53,17 +53,16 @@ class AdminRepository {
     Map<String, dynamic> data, {
     String? imagePath,
   }) async {
-    dynamic body = data;
+    final Map<String, dynamic> formDataMap = {...data};
 
     if (imagePath != null) {
-      body = FormData.fromMap({
-        ...data,
-        'photo': await MultipartFile.fromFile(
-          imagePath,
-          filename: imagePath.split('/').last,
-        ),
-      });
+      formDataMap['photo'] = await MultipartFile.fromFile(
+        imagePath,
+        filename: imagePath.split('/').last,
+      );
     }
+
+    final body = FormData.fromMap(formDataMap, ListFormat.multiCompatible);
 
     await _apiClient.post(ApiEndpoints.adminGuardians, data: body);
   }
@@ -74,25 +73,17 @@ class AdminRepository {
     Map<String, dynamic> data, {
     String? imagePath,
   }) async {
-    dynamic body = data;
+    final Map<String, dynamic> formDataMap = {...data, '_method': 'PUT'};
 
     if (imagePath != null) {
-      body = FormData.fromMap({
-        ...data,
-        'photo': await MultipartFile.fromFile(
-          imagePath,
-          filename: imagePath.split('/').last,
-        ),
-      });
+      formDataMap['photo'] = await MultipartFile.fromFile(
+        imagePath,
+        filename: imagePath.split('/').last,
+      );
     }
 
-    // Using POST with _method=PUT to support multipart with PUT in Laravel
-    if (imagePath != null) {
-      (body as FormData).fields.add(const MapEntry('_method', 'PUT'));
-      await _apiClient.post('${ApiEndpoints.adminGuardians}/$id', data: body);
-    } else {
-      await _apiClient.put('${ApiEndpoints.adminGuardians}/$id', data: body);
-    }
+    final body = FormData.fromMap(formDataMap, ListFormat.multiCompatible);
+    await _apiClient.post('${ApiEndpoints.adminGuardians}/$id', data: body);
   }
 
   // ─── Dashboard ───────────────────────────────────────────
