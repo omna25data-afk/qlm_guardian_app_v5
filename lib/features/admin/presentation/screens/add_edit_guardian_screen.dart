@@ -197,6 +197,7 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
     return "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
   }
 
+  void _openAreaSelection(String type, bool multi) {
     String? parentId;
     List<String>? parentIds;
     if (type == 'قرية') {
