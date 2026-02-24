@@ -342,13 +342,41 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
       }
     } catch (e) {
       if (mounted) {
+        String errorMessage = 'حدث خطأ غير متوقع: $e';
+
+        // التحقق مما إذا كان الخطأ من Dio
+        if (e.runtimeType.toString() == 'DioException') {
+          final dioError = e as dynamic;
+          if (dioError.response != null && dioError.response?.data != null) {
+            final data = dioError.response?.data;
+            if (data is Map &&
+                data.containsKey('message') &&
+                data['message'] != null) {
+              errorMessage = data['message'];
+            }
+            if (data is Map &&
+                data.containsKey('errors') &&
+                data['errors'] is Map) {
+              final errorsMap = data['errors'] as Map;
+              if (errorsMap.isNotEmpty) {
+                final firstErrorKey = errorsMap.keys.first;
+                final firstErrorList = errorsMap[firstErrorKey] as List;
+                if (firstErrorList.isNotEmpty) {
+                  errorMessage = '$errorMessage\n- ${firstErrorList.first}';
+                }
+              }
+            }
+          }
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'خطأ: $e',
+              errorMessage,
               style: const TextStyle(fontFamily: 'Tajawal'),
             ),
             backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
