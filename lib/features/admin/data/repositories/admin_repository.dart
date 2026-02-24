@@ -127,6 +127,7 @@ class AdminRepository {
     String? searchQuery,
     String? type,
     String? parentId,
+    List<String>? parentIds,
   }) async {
     final params = <String, dynamic>{'page': page};
     if (searchQuery != null && searchQuery.isNotEmpty) {
@@ -134,6 +135,9 @@ class AdminRepository {
     }
     if (type != null) params['type'] = type;
     if (parentId != null) params['parent_id'] = parentId;
+    if (parentIds != null && parentIds.isNotEmpty) {
+      params['parent_ids'] = parentIds;
+    }
 
     final response = await _apiClient.get(
       ApiEndpoints.adminAreas,
@@ -154,7 +158,13 @@ class AdminRepository {
   Future<List<AdminAreaModel>> getLocalities({
     String? query,
     String? parentId,
-  }) => getAreas(searchQuery: query, type: 'محل', parentId: parentId);
+    List<String>? parentIds,
+  }) => getAreas(
+    searchQuery: query,
+    type: 'محل',
+    parentId: parentId,
+    parentIds: parentIds,
+  );
 
   /// Create a new area
   Future<void> createArea(Map<String, dynamic> data) async {

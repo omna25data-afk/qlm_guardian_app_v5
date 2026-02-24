@@ -197,8 +197,8 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
     return "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
   }
 
-  void _openAreaSelection(String type, bool multi) {
     String? parentId;
+    List<String>? parentIds;
     if (type == 'قرية') {
       if (_selectedMainDistrict == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -224,7 +224,7 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
         );
         return;
       }
-      parentId = _selectedVillages.first.id.toString();
+      parentIds = _selectedVillages.map((e) => e.id.toString()).toList();
     }
 
     showModalBottomSheet(
@@ -238,6 +238,7 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
             ? (_selectedMainDistrict != null ? [_selectedMainDistrict!] : [])
             : (type == 'قرية' ? _selectedVillages : _selectedLocalities),
         parentId: parentId,
+        parentIds: parentIds,
         onSelected: (List<AdminAreaModel> items) {
           setState(() {
             if (type == 'عزلة') {
@@ -1143,6 +1144,7 @@ class _AreaSelectionSheet extends ConsumerStatefulWidget {
   final List<AdminAreaModel> currentSelection;
   final Function(List<AdminAreaModel>) onSelected;
   final String? parentId;
+  final List<String>? parentIds;
 
   const _AreaSelectionSheet({
     required this.type,
@@ -1150,6 +1152,7 @@ class _AreaSelectionSheet extends ConsumerStatefulWidget {
     required this.currentSelection,
     required this.onSelected,
     this.parentId,
+    this.parentIds,
   });
 
   @override
@@ -1179,6 +1182,7 @@ class _AreaSelectionSheetState extends ConsumerState<_AreaSelectionSheet> {
         type: widget.type,
         searchQuery: query,
         parentId: widget.parentId,
+        parentIds: widget.parentIds,
       );
       if (mounted) setState(() => _items = items);
     } catch (e) {
