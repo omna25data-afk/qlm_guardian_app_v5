@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../providers/admin_areas_provider.dart';
 import '../../data/models/admin_area_model.dart';
 import '../providers/admin_dashboard_provider.dart';
+import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/add_edit_area_screen.dart';
 
 class AreasListTab extends ConsumerStatefulWidget {
   const AreasListTab({super.key});
@@ -25,75 +26,88 @@ class _AreasListTabState extends ConsumerState<AreasListTab> {
   Widget build(BuildContext context) {
     final state = ref.watch(adminAreasProvider);
 
-    return Column(
-      children: [
-        // Search Bar (Optional, can add later if needed as per V4)
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Column(
+        children: [
+          // Search Bar (Optional, can add later if needed as per V4)
 
-        // List
-        Expanded(
-          child: state.isLoading && state.areas.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : state.error != null && state.areas.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: AppColors.error,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(state.error!),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => ref
-                            .read(adminAreasProvider.notifier)
-                            .fetchAreas(refresh: true),
-                        child: const Text('إعادة المحاولة'),
-                      ),
-                    ],
-                  ),
-                )
-              : state.areas.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.map_outlined,
-                        size: 60,
-                        color: AppColors.textHint,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'لا توجد مناطق',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 16,
-                          fontFamily: 'Tajawal',
+          // List
+          Expanded(
+            child: state.isLoading && state.areas.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : state.error != null && state.areas.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: AppColors.error,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        Text(state.error!),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => ref
+                              .read(adminAreasProvider.notifier)
+                              .fetchAreas(refresh: true),
+                          child: const Text('إعادة المحاولة'),
+                        ),
+                      ],
+                    ),
+                  )
+                : state.areas.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.map_outlined,
+                          size: 60,
+                          color: AppColors.textHint,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'لا توجد مناطق',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 16,
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () => ref
+                        .read(adminAreasProvider.notifier)
+                        .fetchAreas(refresh: true),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: state.areas.length,
+                      itemBuilder: (context, index) {
+                        return _AreaExpansionTile(
+                          area: state.areas[index],
+                          level: 1, // Start with Level 1 (Districts/Azla)
+                        );
+                      },
+                    ),
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: () => ref
-                      .read(adminAreasProvider.notifier)
-                      .fetchAreas(refresh: true),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: state.areas.length,
-                    itemBuilder: (context, index) {
-                      return _AreaExpansionTile(
-                        area: state.areas[index],
-                        level: 1, // Start with Level 1 (Districts/Azla)
-                      );
-                    },
-                  ),
-                ),
-        ),
-      ],
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddEditAreaScreen()),
+          );
+        },
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 }

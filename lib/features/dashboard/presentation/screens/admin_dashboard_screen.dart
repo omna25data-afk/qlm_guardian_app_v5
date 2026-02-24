@@ -5,6 +5,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../admin/presentation/screens/admin_entries_screen.dart';
 import '../../../reports/presentation/screens/main_dashboard_screen.dart';
+import '../../../admin/presentation/screens/guardians/admin_guardians_screen.dart';
 import '../providers/dashboard_provider.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -243,7 +244,12 @@ class AdminDashboardScreen extends ConsumerWidget {
                   title: 'إدارة الأمناء',
                   subtitle: 'عرض وتعديل بيانات الأمناء الشرعيين',
                   onTap: () {
-                    // TODO: Navigate to guardians management
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AdminGuardiansScreen(),
+                      ),
+                    );
                   },
                 ),
                 _ManagementTile(

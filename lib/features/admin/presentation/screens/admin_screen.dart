@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/geographic_areas_screen.dart';
+import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/admin_guardians_screen.dart';
 
 /// Admin panel home screen — accessible only by رئيس القلم
 class AdminScreen extends StatelessWidget {
@@ -34,7 +35,12 @@ class AdminScreen extends StatelessWidget {
                     title: 'إدارة الأمناء',
                     subtitle: 'عرض وتعديل بيانات الأمناء',
                     onTap: () {
-                      // TODO: Navigate to guardians management
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AdminGuardiansScreen(),
+                        ),
+                      );
                     },
                   ),
                   _buildAdminCard(

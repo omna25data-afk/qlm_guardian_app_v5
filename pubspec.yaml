@@ -68,6 +68,7 @@ dependencies:
   local_auth: ^3.0.0
   hijri_picker:
     path: ./packages/hijri_picker
+  flutter_slidable: ^4.0.3
 
 dev_dependencies:
   mockito: ^5.4.4

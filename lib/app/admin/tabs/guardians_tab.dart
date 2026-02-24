@@ -1,3 +1,6 @@
+// ⚠️ [DEPRECATED] هذه الشاشة قديمة وغير مستخدمة حالياً.
+// تم استبدالها بالشاشات الجديدة الموجودة في مسار:
+// lib/features/admin/presentation/screens/guardians/...
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

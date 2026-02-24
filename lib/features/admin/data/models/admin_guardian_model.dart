@@ -12,7 +12,7 @@ class AdminGuardianModel {
   @JsonKey(name: 'serial_number')
   final String? serialNumber;
   final String? phone;
-  @JsonKey(name: 'photo_url')
+  @JsonKey(name: 'personal_photo')
   final String? photoUrl;
 
   // Statuses

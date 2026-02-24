@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../providers/admin_licenses_provider.dart';
 import '../../data/models/admin_renewal_model.dart';
+import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/add_edit_license_screen.dart';
 
 class LicensesListTab extends ConsumerStatefulWidget {
   const LicensesListTab({super.key});
@@ -24,93 +25,108 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
   Widget build(BuildContext context) {
     final state = ref.watch(adminLicensesProvider);
 
-    return Column(
-      children: [
-        // List
-        Expanded(
-          child: state.isLoading && state.licenses.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : state.error != null && state.licenses.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: AppColors.error,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(state.error!),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => ref
-                            .read(adminLicensesProvider.notifier)
-                            .fetchLicenses(refresh: true),
-                        child: const Text('إعادة المحاولة'),
-                      ),
-                    ],
-                  ),
-                )
-              : state.licenses.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.assignment_outlined,
-                        size: 60,
-                        color: AppColors.textHint,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'لا توجد رخص',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 16,
-                          fontFamily: 'Tajawal',
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Column(
+        children: [
+          // List
+          Expanded(
+            child: state.isLoading && state.licenses.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : state.error != null && state.licenses.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: AppColors.error,
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              : NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification scrollInfo) {
-                    if (!state.isLoading &&
-                        state.hasMore &&
-                        scrollInfo.metrics.pixels ==
-                            scrollInfo.metrics.maxScrollExtent) {
-                      ref.read(adminLicensesProvider.notifier).fetchLicenses();
-                    }
-                    return false;
-                  },
-                  child: RefreshIndicator(
-                    onRefresh: () => ref
-                        .read(adminLicensesProvider.notifier)
-                        .fetchLicenses(refresh: true),
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      itemCount:
-                          state.licenses.length + (state.hasMore ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == state.licenses.length) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
+                        const SizedBox(height: 16),
+                        Text(state.error!),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => ref
+                              .read(adminLicensesProvider.notifier)
+                              .fetchLicenses(refresh: true),
+                          child: const Text('إعادة المحاولة'),
+                        ),
+                      ],
+                    ),
+                  )
+                : state.licenses.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.assignment_outlined,
+                          size: 60,
+                          color: AppColors.textHint,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'لا توجد رخص',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 16,
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification scrollInfo) {
+                      if (!state.isLoading &&
+                          state.hasMore &&
+                          scrollInfo.metrics.pixels ==
+                              scrollInfo.metrics.maxScrollExtent) {
+                        ref
+                            .read(adminLicensesProvider.notifier)
+                            .fetchLicenses();
+                      }
+                      return false;
+                    },
+                    child: RefreshIndicator(
+                      onRefresh: () => ref
+                          .read(adminLicensesProvider.notifier)
+                          .fetchLicenses(refresh: true),
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        itemCount:
+                            state.licenses.length + (state.hasMore ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == state.licenses.length) {
+                            return const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
 
-                        final license = state.licenses[index];
-                        return _buildLicenseCard(context, license);
-                      },
+                          final license = state.licenses[index];
+                          return _buildLicenseCard(context, license);
+                        },
+                      ),
                     ),
                   ),
-                ),
-        ),
-      ],
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddEditLicenseScreen()),
+          );
+        },
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 

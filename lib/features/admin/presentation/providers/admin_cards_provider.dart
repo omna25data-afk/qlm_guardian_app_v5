@@ -63,6 +63,19 @@ class AdminCardsNotifier extends StateNotifier<AdminCardsState> {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
+
+  Future<bool> renewCard(int guardianId, Map<String, dynamic> data) async {
+    try {
+      final repository = _ref.read(adminRepositoryProvider);
+      await repository.submitCardRenewal(guardianId, data);
+      // Refresh list after successful renewal
+      fetchCards(refresh: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
+  }
 }
 
 final adminCardsProvider =

@@ -3,21 +3,21 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i5;
+import 'dart:async' as _i6;
 
-import 'package:dio/dio.dart' as _i3;
+import 'package:dio/dio.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:qlm_guardian_app_v5/core/network/api_client.dart' as _i8;
+import 'package:qlm_guardian_app_v5/core/network/api_client.dart' as _i9;
 import 'package:qlm_guardian_app_v5/core/network/interceptors/auth_interceptor.dart'
-    as _i2;
+    as _i3;
 import 'package:qlm_guardian_app_v5/features/registry/data/models/contract_type_model.dart'
-    as _i6;
-import 'package:qlm_guardian_app_v5/features/registry/data/models/form_field_model.dart'
     as _i7;
+import 'package:qlm_guardian_app_v5/features/registry/data/models/form_field_model.dart'
+    as _i8;
 import 'package:qlm_guardian_app_v5/features/registry/data/repositories/registry_repository.dart'
-    as _i4;
+    as _i5;
 import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart'
-    as _i9;
+    as _i2;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -33,25 +33,25 @@ import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_s
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-class _FakeAuthInterceptor_0 extends _i1.SmartFake
-    implements _i2.AuthInterceptor {
-  _FakeAuthInterceptor_0(Object parent, Invocation parentInvocation)
+class _FakeRegistryEntrySections_0 extends _i1.SmartFake
+    implements _i2.RegistryEntrySections {
+  _FakeRegistryEntrySections_0(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeDio_1 extends _i1.SmartFake implements _i3.Dio {
-  _FakeDio_1(Object parent, Invocation parentInvocation)
+class _FakeAuthInterceptor_1 extends _i1.SmartFake
+    implements _i3.AuthInterceptor {
+  _FakeAuthInterceptor_1(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeResponse_2<T1> extends _i1.SmartFake implements _i3.Response<T1> {
-  _FakeResponse_2(Object parent, Invocation parentInvocation)
+class _FakeDio_2 extends _i1.SmartFake implements _i4.Dio {
+  _FakeDio_2(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeRegistryEntrySections_3 extends _i1.SmartFake
-    implements _i9.RegistryEntrySections {
-  _FakeRegistryEntrySections_3(Object parent, Invocation parentInvocation)
+class _FakeResponse_3<T1> extends _i1.SmartFake implements _i4.Response<T1> {
+  _FakeResponse_3(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -59,44 +59,44 @@ class _FakeRegistryEntrySections_3 extends _i1.SmartFake
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockRegistryRepository extends _i1.Mock
-    implements _i4.RegistryRepository {
+    implements _i5.RegistryRepository {
   MockRegistryRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i5.Future<List<_i9.RegistryEntrySections>> getEntries() =>
+  _i6.Future<List<_i2.RegistryEntrySections>> getEntries() =>
       (super.noSuchMethod(
             Invocation.method(#getEntries, []),
-            returnValue: _i5.Future<List<_i9.RegistryEntrySections>>.value(
-              <_i9.RegistryEntrySections>[],
+            returnValue: _i6.Future<List<_i2.RegistryEntrySections>>.value(
+              <_i2.RegistryEntrySections>[],
             ),
           )
-          as _i5.Future<List<_i9.RegistryEntrySections>>);
+          as _i6.Future<List<_i2.RegistryEntrySections>>);
 
   @override
-  _i5.Future<List<_i6.ContractTypeModel>> getContractTypes() =>
+  _i6.Future<List<_i7.ContractTypeModel>> getContractTypes() =>
       (super.noSuchMethod(
             Invocation.method(#getContractTypes, []),
-            returnValue: _i5.Future<List<_i6.ContractTypeModel>>.value(
-              <_i6.ContractTypeModel>[],
+            returnValue: _i6.Future<List<_i7.ContractTypeModel>>.value(
+              <_i7.ContractTypeModel>[],
             ),
           )
-          as _i5.Future<List<_i6.ContractTypeModel>>);
+          as _i6.Future<List<_i7.ContractTypeModel>>);
 
   @override
-  _i5.Future<List<_i7.FormFieldModel>> getFormFields(int? typeId) =>
+  _i6.Future<List<_i8.FormFieldModel>> getFormFields(int? typeId) =>
       (super.noSuchMethod(
             Invocation.method(#getFormFields, [typeId]),
-            returnValue: _i5.Future<List<_i7.FormFieldModel>>.value(
-              <_i7.FormFieldModel>[],
+            returnValue: _i6.Future<List<_i8.FormFieldModel>>.value(
+              <_i8.FormFieldModel>[],
             ),
           )
-          as _i5.Future<List<_i7.FormFieldModel>>);
+          as _i6.Future<List<_i8.FormFieldModel>>);
 
   @override
-  _i5.Future<_i9.RegistryEntrySections> createEntry(
-    _i9.RegistryEntrySections? entry, {
+  _i6.Future<_i2.RegistryEntrySections> createEntry(
+    _i2.RegistryEntrySections? entry, {
     String? attachmentPath,
   }) =>
       (super.noSuchMethod(
@@ -105,8 +105,8 @@ class MockRegistryRepository extends _i1.Mock
               [entry],
               {#attachmentPath: attachmentPath},
             ),
-            returnValue: _i5.Future<_i9.RegistryEntrySections>.value(
-              _FakeRegistryEntrySections_3(
+            returnValue: _i6.Future<_i2.RegistryEntrySections>.value(
+              _FakeRegistryEntrySections_0(
                 this,
                 Invocation.method(
                   #createEntry,
@@ -116,41 +116,41 @@ class MockRegistryRepository extends _i1.Mock
               ),
             ),
           )
-          as _i5.Future<_i9.RegistryEntrySections>);
+          as _i6.Future<_i2.RegistryEntrySections>);
 }
 
 /// A class which mocks [ApiClient].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockApiClient extends _i1.Mock implements _i8.ApiClient {
+class MockApiClient extends _i1.Mock implements _i9.ApiClient {
   MockApiClient() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i2.AuthInterceptor get authInterceptor =>
+  _i3.AuthInterceptor get authInterceptor =>
       (super.noSuchMethod(
             Invocation.getter(#authInterceptor),
-            returnValue: _FakeAuthInterceptor_0(
+            returnValue: _FakeAuthInterceptor_1(
               this,
               Invocation.getter(#authInterceptor),
             ),
           )
-          as _i2.AuthInterceptor);
+          as _i3.AuthInterceptor);
 
   @override
-  _i3.Dio get dio =>
+  _i4.Dio get dio =>
       (super.noSuchMethod(
             Invocation.getter(#dio),
-            returnValue: _FakeDio_1(this, Invocation.getter(#dio)),
+            returnValue: _FakeDio_2(this, Invocation.getter(#dio)),
           )
-          as _i3.Dio);
+          as _i4.Dio);
 
   @override
-  _i5.Future<_i3.Response<T>> get<T>(
+  _i6.Future<_i4.Response<T>> get<T>(
     String? path, {
     Map<String, dynamic>? queryParameters,
-    _i3.Options? options,
+    _i4.Options? options,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -158,8 +158,8 @@ class MockApiClient extends _i1.Mock implements _i8.ApiClient {
               [path],
               {#queryParameters: queryParameters, #options: options},
             ),
-            returnValue: _i5.Future<_i3.Response<T>>.value(
-              _FakeResponse_2<T>(
+            returnValue: _i6.Future<_i4.Response<T>>.value(
+              _FakeResponse_3<T>(
                 this,
                 Invocation.method(
                   #get,
@@ -169,14 +169,14 @@ class MockApiClient extends _i1.Mock implements _i8.ApiClient {
               ),
             ),
           )
-          as _i5.Future<_i3.Response<T>>);
+          as _i6.Future<_i4.Response<T>>);
 
   @override
-  _i5.Future<_i3.Response<T>> post<T>(
+  _i6.Future<_i4.Response<T>> post<T>(
     String? path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
-    _i3.Options? options,
+    _i4.Options? options,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -188,8 +188,8 @@ class MockApiClient extends _i1.Mock implements _i8.ApiClient {
                 #options: options,
               },
             ),
-            returnValue: _i5.Future<_i3.Response<T>>.value(
-              _FakeResponse_2<T>(
+            returnValue: _i6.Future<_i4.Response<T>>.value(
+              _FakeResponse_3<T>(
                 this,
                 Invocation.method(
                   #post,
@@ -203,14 +203,14 @@ class MockApiClient extends _i1.Mock implements _i8.ApiClient {
               ),
             ),
           )
-          as _i5.Future<_i3.Response<T>>);
+          as _i6.Future<_i4.Response<T>>);
 
   @override
-  _i5.Future<_i3.Response<T>> put<T>(
+  _i6.Future<_i4.Response<T>> put<T>(
     String? path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
-    _i3.Options? options,
+    _i4.Options? options,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -222,8 +222,8 @@ class MockApiClient extends _i1.Mock implements _i8.ApiClient {
                 #options: options,
               },
             ),
-            returnValue: _i5.Future<_i3.Response<T>>.value(
-              _FakeResponse_2<T>(
+            returnValue: _i6.Future<_i4.Response<T>>.value(
+              _FakeResponse_3<T>(
                 this,
                 Invocation.method(
                   #put,
@@ -237,14 +237,14 @@ class MockApiClient extends _i1.Mock implements _i8.ApiClient {
               ),
             ),
           )
-          as _i5.Future<_i3.Response<T>>);
+          as _i6.Future<_i4.Response<T>>);
 
   @override
-  _i5.Future<_i3.Response<T>> delete<T>(
+  _i6.Future<_i4.Response<T>> delete<T>(
     String? path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
-    _i3.Options? options,
+    _i4.Options? options,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -256,8 +256,8 @@ class MockApiClient extends _i1.Mock implements _i8.ApiClient {
                 #options: options,
               },
             ),
-            returnValue: _i5.Future<_i3.Response<T>>.value(
-              _FakeResponse_2<T>(
+            returnValue: _i6.Future<_i4.Response<T>>.value(
+              _FakeResponse_3<T>(
                 this,
                 Invocation.method(
                   #delete,
@@ -271,5 +271,5 @@ class MockApiClient extends _i1.Mock implements _i8.ApiClient {
               ),
             ),
           )
-          as _i5.Future<_i3.Response<T>>);
+          as _i6.Future<_i4.Response<T>>);
 }

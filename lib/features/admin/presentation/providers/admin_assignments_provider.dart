@@ -86,6 +86,19 @@ class AdminAssignmentsNotifier extends StateNotifier<AdminAssignmentsState> {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
+
+  Future<bool> createAssignment(Map<String, dynamic> data) async {
+    try {
+      final repository = _ref.read(adminRepositoryProvider);
+      await repository.createAssignment(data);
+      // Refresh list after successful creation
+      fetchAssignments(refresh: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
+  }
 }
 
 final adminAssignmentsProvider =

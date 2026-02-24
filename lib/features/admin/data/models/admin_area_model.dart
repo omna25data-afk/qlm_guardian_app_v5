@@ -10,6 +10,8 @@ class AdminAreaModel {
   final String type;
   @JsonKey(name: 'parent_name')
   final String? parentName;
+  @JsonKey(name: 'parent_id')
+  final int? parentId;
   @JsonKey(name: 'children_count', defaultValue: 0)
   final int childrenCount;
   @JsonKey(name: 'guardians_count', defaultValue: 0)
@@ -24,12 +26,14 @@ class AdminAreaModel {
   final List<AdminAreaModel> children;
   @JsonKey(defaultValue: 0)
   final int level;
+  final String? description;
 
   AdminAreaModel({
     required this.id,
     required this.name,
     required this.type,
     this.parentName,
+    this.parentId,
     required this.childrenCount,
     required this.guardiansCount,
     required this.color,
@@ -37,6 +41,7 @@ class AdminAreaModel {
     required this.isActive,
     this.children = const [],
     this.level = 0,
+    this.description,
   });
 
   factory AdminAreaModel.fromJson(Map<String, dynamic> json) =>

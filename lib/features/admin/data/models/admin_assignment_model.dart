@@ -9,6 +9,15 @@ class AdminAssignmentModel {
   final String guardianName;
   @JsonKey(name: 'area_name', defaultValue: 'غيـر محدد')
   final String areaName;
+
+  // Base Fields
+  @JsonKey(name: 'original_guardian_id')
+  final int? originalGuardianId;
+  @JsonKey(name: 'assigned_guardian_id')
+  final int? assignedGuardianId;
+  @JsonKey(name: 'assignment_type')
+  final String? assignmentType;
+
   final String type;
   @JsonKey(name: 'type_text')
   final String typeText;
@@ -19,18 +28,27 @@ class AdminAssignmentModel {
   final String status;
   @JsonKey(name: 'status_color')
   final String statusColor;
+
+  final String? reason;
+  @JsonKey(name: 'is_active')
+  final bool? isActive;
   final String? notes;
 
   AdminAssignmentModel({
     required this.id,
     required this.guardianName,
     required this.areaName,
+    this.originalGuardianId,
+    this.assignedGuardianId,
+    this.assignmentType,
     required this.type,
     required this.typeText,
     this.startDate,
     this.endDate,
     required this.status,
     required this.statusColor,
+    this.reason,
+    this.isActive,
     this.notes,
   });
 

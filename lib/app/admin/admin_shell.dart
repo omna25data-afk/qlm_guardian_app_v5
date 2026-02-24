@@ -7,7 +7,7 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 
 // Placeholder tabs — will be replaced with real implementations
 import 'tabs/admin_dashboard_tab.dart';
-import 'tabs/guardians_tab.dart';
+import '../../features/admin/presentation/screens/guardians/admin_guardians_screen.dart';
 import 'tabs/records_tab.dart';
 import '../../features/reports/presentation/screens/main_dashboard_screen.dart';
 import 'tabs/admin_settings_tab.dart';
@@ -26,7 +26,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
 
   final List<Widget> _pages = const [
     AdminDashboardTab(),
-    GuardiansTab(),
+    AdminGuardiansScreen(),
     RecordsTab(),
     MainDashboardScreen(),
     AdminSettingsTab(),

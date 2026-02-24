@@ -72,6 +72,19 @@ class AdminAreasNotifier extends StateNotifier<AdminAreasState> {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
+
+  Future<bool> createArea(Map<String, dynamic> data) async {
+    try {
+      final repository = _ref.read(adminRepositoryProvider);
+      await repository.createArea(data);
+      // Refresh list after successful creation
+      fetchAreas(refresh: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
+  }
 }
 
 final adminAreasProvider =

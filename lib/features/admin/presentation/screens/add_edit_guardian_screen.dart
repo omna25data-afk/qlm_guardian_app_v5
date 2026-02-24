@@ -272,7 +272,7 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
         'family_name': _familyNameController.text,
         'great_grandfather_name': _greatGrandfatherNameController.text,
         'birth_place': _birthPlaceController.text,
-        'phone': _phoneController.text, // Changed from phone_number to phone
+        'phone_number': _phoneController.text,
         'home_phone': _homePhoneController.text,
         'proof_type': _proofType,
         'proof_number': _proofNumberController.text,
@@ -508,8 +508,9 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
   }
 
   List<Step> get _steps => [
+    // --- الخطوة 1: المعلومات الأساسية والاتصال ---
     Step(
-      title: const Text('المعلومات الشخصية'),
+      title: const Text('المعلومات الأساسية'),
       isActive: _currentStep >= 0,
       state: _currentStep > 0 ? StepState.complete : StepState.indexed,
       content: Column(
@@ -557,7 +558,6 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
             Icons.tag,
             required: true,
           ),
-
           _buildSectionTitle('الاسم الكامل', Icons.badge),
           Row(
             children: [
@@ -606,7 +606,6 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
             'الجد الكبير',
             Icons.person_outline,
           ),
-
           const SizedBox(height: 10),
           _buildSectionTitle('بيانات الميلاد والاتصال', Icons.contact_mail),
           Row(
@@ -654,12 +653,16 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
         ],
       ),
     ),
+
+    // --- الخطوة 2: الإثباتات والخبرة ---
     Step(
-      title: const Text('الهوية'),
+      title: const Text('الإثباتات والخبرة'),
       isActive: _currentStep >= 1,
       state: _currentStep > 1 ? StepState.complete : StepState.indexed,
       content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildSectionTitle('بيانات الهوية', Icons.assignment_ind),
           DropdownButtonFormField<String>(
             initialValue: _proofType,
             decoration: InputDecoration(
@@ -721,15 +724,8 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
               ),
             ],
           ),
-        ],
-      ),
-    ),
-    Step(
-      title: const Text('المهنة'),
-      isActive: _currentStep >= 2,
-      state: _currentStep > 2 ? StepState.complete : StepState.indexed,
-      content: Column(
-        children: [
+          const Divider(height: 32),
+          _buildSectionTitle('البيانات المهنية', Icons.work),
           _buildTextField(
             _qualificationController,
             'المؤهل العلمي',
@@ -763,10 +759,12 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
         ],
       ),
     ),
+
+    // --- الخطوة 3: التراخيص والمناطق ---
     Step(
-      title: const Text('الرخصة'),
-      isActive: _currentStep >= 3,
-      state: _currentStep > 3 ? StepState.complete : StepState.indexed,
+      title: const Text('التراخيص والمناطق'),
+      isActive: _currentStep >= 2,
+      state: _currentStep > 2 ? StepState.complete : StepState.indexed,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -838,15 +836,8 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
               ),
             ],
           ),
-        ],
-      ),
-    ),
-    Step(
-      title: const Text('المناطق'),
-      isActive: _currentStep >= 4,
-      state: _currentStep > 4 ? StepState.complete : StepState.indexed,
-      content: Column(
-        children: [
+          const Divider(height: 32),
+          _buildSectionTitle('مناطق الاختصاص', Icons.map),
           _buildAreaCard(
             'عزلة الاختصاص الرئيسية',
             _selectedMainDistrict?.name ?? 'اضغط للاختيار',
@@ -877,19 +868,12 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
             () => _openAreaSelection('محل', true),
             isSelected: _selectedLocalities.isNotEmpty,
           ),
-        ],
-      ),
-    ),
-    Step(
-      title: const Text('الحالة'),
-      isActive: _currentStep >= 5,
-      state: _currentStep > 5 ? StepState.complete : StepState.indexed,
-      content: Column(
-        children: [
+          const Divider(height: 32),
+          _buildSectionTitle('الحالة الوظيفية', Icons.assignment_turned_in),
           DropdownButtonFormField<String>(
             initialValue: _employmentStatus,
             decoration: InputDecoration(
-              labelText: 'الحالة الوظيفية',
+              labelText: 'الحالة',
               prefixIcon: Icon(
                 Icons.info_outline,
                 color: _employmentStatus == 'على رأس العمل'

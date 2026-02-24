@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../providers/admin_assignments_provider.dart';
 import '../../data/models/admin_assignment_model.dart';
+import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/add_edit_assignment_screen.dart';
 
 class AssignmentsListTab extends ConsumerStatefulWidget {
   const AssignmentsListTab({super.key});
@@ -26,95 +27,108 @@ class _AssignmentsListTabState extends ConsumerState<AssignmentsListTab> {
   Widget build(BuildContext context) {
     final state = ref.watch(adminAssignmentsProvider);
 
-    return Column(
-      children: [
-        // List
-        Expanded(
-          child: state.isLoading && state.assignments.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : state.error != null && state.assignments.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: AppColors.error,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(state.error!),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => ref
-                            .read(adminAssignmentsProvider.notifier)
-                            .fetchAssignments(refresh: true),
-                        child: const Text('إعادة المحاولة'),
-                      ),
-                    ],
-                  ),
-                )
-              : state.assignments.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.assignment_turned_in_outlined,
-                        size: 60,
-                        color: AppColors.textHint,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'لا توجد تكليفات',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 16,
-                          fontFamily: 'Tajawal',
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Column(
+        children: [
+          // List
+          Expanded(
+            child: state.isLoading && state.assignments.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : state.error != null && state.assignments.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: AppColors.error,
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              : NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification scrollInfo) {
-                    if (!state.isLoading &&
-                        state.hasMore &&
-                        scrollInfo.metrics.pixels ==
-                            scrollInfo.metrics.maxScrollExtent) {
-                      ref
+                        const SizedBox(height: 16),
+                        Text(state.error!),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => ref
+                              .read(adminAssignmentsProvider.notifier)
+                              .fetchAssignments(refresh: true),
+                          child: const Text('إعادة المحاولة'),
+                        ),
+                      ],
+                    ),
+                  )
+                : state.assignments.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.assignment_turned_in_outlined,
+                          size: 60,
+                          color: AppColors.textHint,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'لا توجد تكليفات',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 16,
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification scrollInfo) {
+                      if (!state.isLoading &&
+                          state.hasMore &&
+                          scrollInfo.metrics.pixels ==
+                              scrollInfo.metrics.maxScrollExtent) {
+                        ref
+                            .read(adminAssignmentsProvider.notifier)
+                            .fetchAssignments();
+                      }
+                      return false;
+                    },
+                    child: RefreshIndicator(
+                      onRefresh: () => ref
                           .read(adminAssignmentsProvider.notifier)
-                          .fetchAssignments();
-                    }
-                    return false;
-                  },
-                  child: RefreshIndicator(
-                    onRefresh: () => ref
-                        .read(adminAssignmentsProvider.notifier)
-                        .fetchAssignments(refresh: true),
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      itemCount:
-                          state.assignments.length + (state.hasMore ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == state.assignments.length) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
+                          .fetchAssignments(refresh: true),
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        itemCount:
+                            state.assignments.length + (state.hasMore ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == state.assignments.length) {
+                            return const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
 
-                        final assignment = state.assignments[index];
-                        return _buildAssignmentCard(context, assignment);
-                      },
+                          final assignment = state.assignments[index];
+                          return _buildAssignmentCard(context, assignment);
+                        },
+                      ),
                     ),
                   ),
-                ),
-        ),
-      ],
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddEditAssignmentScreen()),
+          );
+        },
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 
