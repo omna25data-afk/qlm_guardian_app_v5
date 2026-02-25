@@ -20,10 +20,15 @@ class RetryInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    // Don't retry if not a network error or non-retryable status
-    if (err.type != DioExceptionType.badResponse &&
-        err.type != DioExceptionType.connectionTimeout &&
-        err.type != DioExceptionType.receiveTimeout) {
+    // Retry on network errors, timeouts, and server errors
+    final isRetryableType =
+        err.type == DioExceptionType.badResponse ||
+        err.type == DioExceptionType.connectionTimeout ||
+        err.type == DioExceptionType.receiveTimeout ||
+        err.type == DioExceptionType.sendTimeout ||
+        err.type == DioExceptionType.connectionError;
+
+    if (!isRetryableType) {
       handler.next(err);
       return;
     }

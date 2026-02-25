@@ -19,6 +19,7 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
   int? _selectedGuardianId;
   String? _selectedGuardianName;
 
+  late TextEditingController _renewalNumberController;
   late TextEditingController _renewalDateController;
   late TextEditingController _expiryDateController;
   late TextEditingController _receiptNumberController;
@@ -26,15 +27,26 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
   late TextEditingController _receiptDateController;
   late TextEditingController _notesController;
 
+  Map<String, dynamic>? _lastRenewalInfo;
+
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _renewalNumberController = TextEditingController(text: '1');
     _renewalDateController = TextEditingController(
       text: DateFormat('yyyy-MM-dd').format(DateTime.now()),
     );
-    _expiryDateController = TextEditingController();
+    _expiryDateController = TextEditingController(
+      text: DateFormat('yyyy-MM-dd').format(
+        DateTime(
+          DateTime.now().year + 1,
+          DateTime.now().month,
+          DateTime.now().day,
+        ),
+      ),
+    );
     _receiptNumberController = TextEditingController();
     _receiptAmountController = TextEditingController();
     _receiptDateController = TextEditingController();
@@ -43,6 +55,7 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
 
   @override
   void dispose() {
+    _renewalNumberController.dispose();
     _renewalDateController.dispose();
     _expiryDateController.dispose();
     _receiptNumberController.dispose();
@@ -60,10 +73,16 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
       lastDate: DateTime(2075),
     );
     if (picked != null) {
-      if (mounted)
-        setState(
-          () => controller.text = DateFormat('yyyy-MM-dd').format(picked),
-        );
+      if (mounted) {
+        setState(() {
+          controller.text = DateFormat('yyyy-MM-dd').format(picked);
+          if (controller == _renewalDateController) {
+            _expiryDateController.text = DateFormat(
+              'yyyy-MM-dd',
+            ).format(DateTime(picked.year + 1, picked.month, picked.day));
+          }
+        });
+      }
     }
   }
 
@@ -79,6 +98,7 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
     try {
       final data = {
         'guardian_id': _selectedGuardianId,
+        'renewal_number': _renewalNumberController.text,
         'renewal_date': _renewalDateController.text,
         'expiry_date': _expiryDateController.text,
         'receipt_number': _receiptNumberController.text,
@@ -117,12 +137,71 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
     showDialog(
       context: context,
       builder: (context) => const _GuardianSearchDialog(),
-    ).then((guardian) {
+    ).then((guardian) async {
       if (guardian is AdminGuardianModel) {
         setState(() {
           _selectedGuardianId = guardian.id;
           _selectedGuardianName = guardian.name;
+          _isLoading = true;
         });
+
+        try {
+          final repository = ref.read(adminRepositoryProvider);
+          final detailedGuardian = await repository.getGuardianDetails(
+            guardian.id,
+          );
+
+          if (mounted) {
+            setState(() {
+              final renewals = detailedGuardian.cardRenewals ?? [];
+              int nextNumber = 1;
+
+              if (renewals.isNotEmpty) {
+                nextNumber =
+                    renewals
+                        .map((r) => r['renewal_number'] as int? ?? 0)
+                        .reduce((a, b) => a > b ? a : b) +
+                    1;
+
+                renewals.sort(
+                  (a, b) => (b['renewal_number'] as int? ?? 0).compareTo(
+                    a['renewal_number'] as int? ?? 0,
+                  ),
+                );
+
+                final last = renewals.first;
+                _lastRenewalInfo = {
+                  'number': last['renewal_number'],
+                  'date': last['renewal_date'],
+                  'expiry': last['expiry_date'],
+                };
+              } else {
+                _lastRenewalInfo = null;
+              }
+
+              _renewalNumberController.text = nextNumber.toString();
+
+              if (_renewalDateController.text.isNotEmpty) {
+                try {
+                  final parsedDate = DateFormat(
+                    'yyyy-MM-dd',
+                  ).parse(_renewalDateController.text);
+                  _expiryDateController.text = DateFormat('yyyy-MM-dd').format(
+                    DateTime(
+                      parsedDate.year + 1,
+                      parsedDate.month,
+                      parsedDate.day,
+                    ),
+                  );
+                } catch (_) {}
+              }
+            });
+          }
+        } catch (e) {
+          if (mounted) _showSnackBar('تعذر جلب تفاصيل الأمين', isError: true);
+        } finally {
+          if (mounted) setState(() => _isLoading = false);
+        }
       }
     });
   }
@@ -207,7 +286,74 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
               ),
               const SizedBox(height: 24),
 
+              if (_lastRenewalInfo != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'آخر تجديد:',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Tajawal',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'رقم: ${_lastRenewalInfo!['number']}',
+                              style: const TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              'تاريخ: ${_lastRenewalInfo!['date']}',
+                              style: const TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              'انتهاء: ${_lastRenewalInfo!['expiry']}',
+                              style: const TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               _buildSectionTitle('بيانات التجديد'),
+              const SizedBox(height: 16),
+
+              _buildTextField(
+                controller: _renewalNumberController,
+                label: 'رقم التجديد',
+                icon: Icons.numbers,
+                readOnly: true,
+                keyboardType: TextInputType.number,
+              ),
               const SizedBox(height: 16),
 
               Row(

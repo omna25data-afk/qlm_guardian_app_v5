@@ -9,7 +9,7 @@ import 'interceptors/retry_interceptor.dart';
 class ApiClient {
   late final Dio _dio;
   final AuthInterceptor authInterceptor;
-  final CacheInterceptor? cacheInterceptor;
+  final SwrCacheInterceptor? cacheInterceptor;
 
   ApiClient({required this.authInterceptor, this.cacheInterceptor}) {
     _dio = Dio(
@@ -21,7 +21,11 @@ class ApiClient {
       ),
     );
 
-    // Add interceptors in order
+    // Add interceptors in order:
+    // 1. Auth (adds token)
+    // 2. Cache (SWR - return cached data early, intercept errors)
+    // 3. Retry (retry failed requests)
+    // 4. Logging
     _dio.interceptors.add(authInterceptor);
 
     if (cacheInterceptor != null) {
@@ -40,10 +44,10 @@ class ApiClient {
   /// Factory constructor with Hive cache
   static Future<ApiClient> create({Box<dynamic>? cacheBox}) async {
     final authInterceptor = AuthInterceptor();
-    CacheInterceptor? cacheInterceptor;
+    SwrCacheInterceptor? cacheInterceptor;
 
     if (cacheBox != null) {
-      cacheInterceptor = CacheInterceptor(cacheBox);
+      cacheInterceptor = SwrCacheInterceptor(cacheBox);
     }
 
     return ApiClient(

@@ -69,6 +69,7 @@ dependencies:
   hijri_picker:
     path: ./packages/hijri_picker
   flutter_slidable: ^4.0.3
+  image_cropper: ^11.0.0
 
 dev_dependencies:
   mockito: ^5.4.4

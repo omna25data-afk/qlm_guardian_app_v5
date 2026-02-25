@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/admin_area_model.dart';
 import '../../data/models/admin_guardian_model.dart';
@@ -50,7 +51,6 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
   final _qualificationController = TextEditingController();
   final _jobController = TextEditingController();
   final _workplaceController = TextEditingController();
-  final _experienceNotesController = TextEditingController();
 
   // 4. Ministerial & License
   final _ministerialNumController = TextEditingController();
@@ -79,12 +79,28 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
   void initState() {
     super.initState();
     if (widget.guardian != null) {
-      _loadGuardianData();
+      _loadGuardianData(widget.guardian!);
+      // Fetch fresh data from API to ensure we have the latest values
+      _fetchFreshGuardianData();
     }
   }
 
-  void _loadGuardianData() {
-    final g = widget.guardian!;
+  Future<void> _fetchFreshGuardianData() async {
+    try {
+      final repo = ref.read(adminRepositoryProvider);
+      final freshGuardian = await repo.getGuardianDetails(widget.guardian!.id);
+      if (mounted) {
+        setState(() {
+          _loadGuardianData(freshGuardian);
+        });
+      }
+    } catch (e) {
+      // If fetch fails, we still have the initial data loaded
+      debugPrint('Failed to fetch fresh guardian data: $e');
+    }
+  }
+
+  void _loadGuardianData(AdminGuardianModel g) {
     _serialNumberController.text = g.serialNumber ?? '';
     _firstNameController.text = g.firstName ?? '';
     _fatherNameController.text = g.fatherName ?? '';
@@ -109,7 +125,6 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
     _qualificationController.text = g.qualification ?? '';
     _jobController.text = g.job ?? '';
     _workplaceController.text = g.workplace ?? '';
-    _experienceNotesController.text = g.experienceNotes ?? '';
 
     _ministerialNumController.text = g.ministerialDecisionNumber ?? '';
     if (g.ministerialDecisionDate != null) {
@@ -175,7 +190,7 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
     _qualificationController.dispose();
     _jobController.dispose();
     _workplaceController.dispose();
-    _experienceNotesController.dispose();
+
     _ministerialNumController.dispose();
     _licenseNumController.dispose();
     _cardNumController.dispose();
@@ -185,11 +200,40 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
   }
 
   Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70, // 1. Compress during pick
+      maxWidth: 1024,
+      maxHeight: 1024,
+    );
     if (image != null) {
-      setState(() {
-        _selectedImage = File(image.path);
-      });
+      try {
+        final croppedFile = await ImageCropper().cropImage(
+          sourcePath: image.path,
+          compressQuality: 70, // 2. Compress after crop
+          compressFormat: ImageCompressFormat.jpg,
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: 'تعديل الصورة',
+              toolbarColor: AppColors.primary,
+              toolbarWidgetColor: Colors.white,
+              initAspectRatio: CropAspectRatioPreset.square,
+              lockAspectRatio: false,
+            ),
+            IOSUiSettings(title: 'تعديل الصورة'),
+          ],
+        );
+
+        if (croppedFile != null) {
+          setState(() {
+            _selectedImage = File(croppedFile.path);
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _selectedImage = File(image.path);
+        });
+      }
     }
   }
 
@@ -282,7 +326,6 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
         'qualification': _qualificationController.text,
         'job': _jobController.text,
         'workplace': _workplaceController.text,
-        'experience_notes': _experienceNotesController.text,
         'ministerial_decision_number': _ministerialNumController.text,
         'license_number': _licenseNumController.text,
         'profession_card_number': _cardNumController.text,
@@ -290,6 +333,9 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
         'stop_reason': _stopReasonController.text,
         'notes': _notesController.text,
       };
+
+      // Remove empty string values to avoid overwriting existing data with blanks
+      data.removeWhere((key, value) => value is String && value.trim().isEmpty);
 
       if (_birthDate != null) data['birth_date'] = _formatDate(_birthDate!);
       if (_issueDate != null) data['issue_date'] = _formatDate(_issueDate!);
@@ -779,12 +825,6 @@ class _AddEditGuardianScreenState extends ConsumerState<AddEditGuardianScreen> {
                 ),
               ),
             ],
-          ),
-          _buildTextField(
-            _experienceNotesController,
-            'ملاحظات الخبرة',
-            Icons.note,
-            maxLines: 3,
           ),
         ],
       ),

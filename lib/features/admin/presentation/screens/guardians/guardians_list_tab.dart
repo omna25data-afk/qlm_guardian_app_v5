@@ -92,7 +92,14 @@ class _GuardiansListTabState extends ConsumerState<GuardiansListTab> {
               );
             }
             final guardian = state.guardians[index];
-            return GuardianListCard(guardian: guardian);
+            return GuardianListCard(
+              guardian: guardian,
+              onRefresh: () {
+                ref
+                    .read(adminGuardiansProvider.notifier)
+                    .fetchGuardians(refresh: true);
+              },
+            );
           },
         ),
       ),
@@ -108,7 +115,13 @@ class _GuardiansListTabState extends ConsumerState<GuardiansListTab> {
           MaterialPageRoute(
             builder: (context) => const AddEditGuardianScreen(),
           ),
-        );
+        ).then((result) {
+          if (result == true) {
+            ref
+                .read(adminGuardiansProvider.notifier)
+                .fetchGuardians(refresh: true);
+          }
+        });
       },
       backgroundColor: AppColors.primary,
       child: const Icon(Icons.add, color: Colors.white),

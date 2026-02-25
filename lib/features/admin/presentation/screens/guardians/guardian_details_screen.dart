@@ -1,24 +1,93 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../data/models/admin_guardian_model.dart';
+import '../../providers/admin_dashboard_provider.dart';
 import '../../widgets/guardians/guardian_details_section.dart';
 import '../../widgets/guardians/guardian_info_grid_item.dart';
+import '../add_edit_guardian_screen.dart';
 
-class GuardianDetailsScreen extends StatelessWidget {
+class GuardianDetailsScreen extends ConsumerStatefulWidget {
   final AdminGuardianModel guardian;
 
   const GuardianDetailsScreen({super.key, required this.guardian});
+
+  @override
+  ConsumerState<GuardianDetailsScreen> createState() =>
+      _GuardianDetailsScreenState();
+}
+
+class _GuardianDetailsScreenState extends ConsumerState<GuardianDetailsScreen> {
+  late AdminGuardianModel _guardian;
+  bool _isLoading = false;
+  bool _hasChanges = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _guardian = widget.guardian;
+    _fetchFreshData();
+  }
+
+  Future<void> _fetchFreshData() async {
+    setState(() => _isLoading = true);
+    try {
+      final repo = ref.read(adminRepositoryProvider);
+      final freshGuardian = await repo.getGuardianDetails(_guardian.id);
+      if (mounted) {
+        setState(() {
+          _guardian = freshGuardian;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('تفاصيل الأمين'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context, _hasChanges),
+        ),
         actions: [
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _fetchFreshData,
+          ),
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             onPressed: () {
-              // TODO: Navigate to Edit screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      AddEditGuardianScreen(guardian: _guardian),
+                ),
+              ).then((result) {
+                if (result == true) {
+                  _hasChanges = true;
+                  _fetchFreshData();
+                }
+              });
             },
           ),
         ],
@@ -27,6 +96,49 @@ class GuardianDetailsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Profile Photo Header
+            if (_guardian.photoUrl != null)
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.primary, width: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 70,
+                    backgroundColor: Colors.grey.shade200,
+                    backgroundImage: NetworkImage(_guardian.photoUrl!),
+                  ),
+                ),
+              )
+            else
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.grey.shade300, width: 3),
+                  ),
+                  child: CircleAvatar(
+                    radius: 70,
+                    backgroundColor: Colors.grey.shade200,
+                    child: Icon(
+                      Icons.person,
+                      size: 70,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+                ),
+              ),
+
             // 1. المعلومات الشخصية الأساسية
             GuardianDetailsSection(
               title: 'المعلومات الشخصية الأساسية',
@@ -42,23 +154,23 @@ class GuardianDetailsScreen extends StatelessWidget {
                   GuardianInfoGridItem(
                     icon: Icons.badge_outlined,
                     label: 'الاسم الكامل',
-                    value: guardian.shortName,
+                    value: _guardian.shortName,
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.numbers,
                     label: 'الرقم التسلسلي',
-                    value: guardian.serialNumber ?? 'غير محدد',
+                    value: _guardian.serialNumber ?? 'غير محدد',
                     isCopyable: true,
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.calendar_today_outlined,
                     label: 'تاريخ الميلاد',
-                    value: guardian.birthDate ?? 'غير محدد',
+                    value: _guardian.birthDate ?? 'غير محدد',
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.cake_outlined,
                     label: 'العمر',
-                    value: _calculateAge(guardian.birthDate),
+                    value: _calculateAge(_guardian.birthDate),
                   ),
                 ],
               ),
@@ -80,19 +192,19 @@ class GuardianDetailsScreen extends StatelessWidget {
                   GuardianInfoGridItem(
                     icon: Icons.smartphone_outlined,
                     label: 'رقم الهاتف',
-                    value: guardian.phone ?? 'غير محدد',
+                    value: _guardian.phone ?? 'غير محدد',
                     isCopyable: true,
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.home_outlined,
                     label: 'هاتف المنزل',
-                    value: guardian.homePhone ?? 'غير محدد',
+                    value: _guardian.homePhone ?? 'غير محدد',
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.location_on_outlined,
                     label: 'محل الميلاد والإقامة',
                     value:
-                        '${guardian.birthPlace ?? ''} - ${guardian.mainDistrictName ?? ''}'
+                        '${_guardian.birthPlace ?? ''} - ${_guardian.mainDistrictName ?? ''}'
                             .trim()
                             .replaceAll(RegExp(r'^-|-$'), ''),
                   ),
@@ -115,29 +227,29 @@ class GuardianDetailsScreen extends StatelessWidget {
                   GuardianInfoGridItem(
                     icon: Icons.credit_card_outlined,
                     label: 'نوع الإثبات',
-                    value: guardian.proofType ?? 'غير محدد',
+                    value: _guardian.proofType ?? 'غير محدد',
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.numbers,
                     label: 'رقم الإثبات',
-                    value: guardian.proofNumber ?? 'غير محدد',
+                    value: _guardian.proofNumber ?? 'غير محدد',
                     isCopyable: true,
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.calendar_today_outlined,
                     label: 'تاريخ الإصدار',
-                    value: guardian.issueDate ?? 'غير محدد',
+                    value: _guardian.issueDate ?? 'غير محدد',
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.event_busy_outlined,
                     label: 'تاريخ الانتهاء',
-                    value: guardian.expiryDate ?? 'غير محدد',
-                    valueColor: guardian.identityStatusColor,
+                    value: _guardian.expiryDate ?? 'غير محدد',
+                    valueColor: _guardian.identityStatusColor,
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.account_balance_outlined,
                     label: 'جهة الإصدار',
-                    value: guardian.issuingAuthority ?? 'غير محدد',
+                    value: _guardian.issuingAuthority ?? 'غير محدد',
                   ),
                 ],
               ),
@@ -158,17 +270,17 @@ class GuardianDetailsScreen extends StatelessWidget {
                   GuardianInfoGridItem(
                     icon: Icons.school_outlined,
                     label: 'المؤهل',
-                    value: guardian.qualification ?? 'غير محدد',
+                    value: _guardian.qualification ?? 'غير محدد',
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.business_center_outlined,
                     label: 'المهنة',
-                    value: guardian.job ?? 'غير محدد',
+                    value: _guardian.job ?? 'غير محدد',
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.corporate_fare_outlined,
                     label: 'جهة العمل',
-                    value: guardian.workplace ?? 'غير محدد',
+                    value: _guardian.workplace ?? 'غير محدد',
                   ),
                 ],
               ),
@@ -189,23 +301,28 @@ class GuardianDetailsScreen extends StatelessWidget {
                   GuardianInfoGridItem(
                     icon: Icons.gavel_outlined,
                     label: 'رقم القرار الوزاري',
-                    value: guardian.ministerialDecisionNumber ?? 'غير محدد',
+                    value: _guardian.ministerialDecisionNumber ?? 'غير محدد',
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.calendar_today_outlined,
                     label: 'تاريخ القرار الوزاري',
-                    value: guardian.ministerialDecisionDate ?? 'غير محدد',
+                    value: _guardian.ministerialDecisionDate ?? 'غير محدد',
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.card_membership_outlined,
                     label: 'رقم الترخيص',
-                    value: guardian.licenseNumber ?? 'غير محدد',
+                    value: _guardian.licenseNumber ?? 'غير محدد',
+                  ),
+                  GuardianInfoGridItem(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'تاريخ الإصدار',
+                    value: _guardian.licenseIssueDate ?? 'غير محدد',
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.event_busy_outlined,
                     label: 'انتهاء الترخيص',
-                    value: guardian.licenseExpiryDate ?? 'غير محدد',
-                    valueColor: guardian.licenseStatusColor,
+                    value: _guardian.licenseExpiryDate ?? 'غير محدد',
+                    valueColor: _guardian.licenseStatusColor,
                   ),
                 ],
               ),
@@ -226,13 +343,18 @@ class GuardianDetailsScreen extends StatelessWidget {
                   GuardianInfoGridItem(
                     icon: Icons.numbers,
                     label: 'رقم البطاقة',
-                    value: guardian.professionCardNumber ?? 'غير محدد',
+                    value: _guardian.professionCardNumber ?? 'غير محدد',
+                  ),
+                  GuardianInfoGridItem(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'تاريخ الإصدار',
+                    value: _guardian.professionCardIssueDate ?? 'غير محدد',
                   ),
                   GuardianInfoGridItem(
                     icon: Icons.event_busy_outlined,
                     label: 'تاريخ الانتهاء',
-                    value: guardian.professionCardExpiryDate ?? 'غير محدد',
-                    valueColor: guardian.cardStatusColor,
+                    value: _guardian.professionCardExpiryDate ?? 'غير محدد',
+                    valueColor: _guardian.cardStatusColor,
                   ),
                 ],
               ),
@@ -247,14 +369,14 @@ class GuardianDetailsScreen extends StatelessWidget {
                   GuardianInfoGridItem(
                     icon: Icons.push_pin_outlined,
                     label: 'العزلة الرئيسية',
-                    value: guardian.mainDistrictName ?? 'غير محدد',
+                    value: _guardian.mainDistrictName ?? 'غير محدد',
                   ),
                   const SizedBox(height: 16),
                   GuardianInfoGridItem(
                     icon: Icons.location_city_outlined,
                     label: 'القرى',
                     value:
-                        guardian.villages?.map((e) => e.name).join('، ') ??
+                        _guardian.villages?.map((e) => e.name).join('، ') ??
                         'لا توجد قرى مخصصة',
                   ),
                   const SizedBox(height: 16),
@@ -262,7 +384,7 @@ class GuardianDetailsScreen extends StatelessWidget {
                     icon: Icons.home_work_outlined,
                     label: 'المحلات',
                     value:
-                        guardian.localities?.map((e) => e.name).join('، ') ??
+                        _guardian.localities?.map((e) => e.name).join('، ') ??
                         'لا توجد محلات مخصصة',
                   ),
                 ],
@@ -284,22 +406,23 @@ class GuardianDetailsScreen extends StatelessWidget {
                     childAspectRatio: 2.5,
                     children: [
                       GuardianInfoGridItem(
-                        icon: guardian.employmentStatus == 'على رأس العمل'
+                        icon: _guardian.employmentStatus == 'على رأس العمل'
                             ? Icons.check_circle
                             : Icons.cancel,
                         label: 'حالة العمل',
-                        value: guardian.employmentStatus ?? 'غير محدد',
-                        valueColor: guardian.employmentStatus == 'على رأس العمل'
+                        value: _guardian.employmentStatus ?? 'غير محدد',
+                        valueColor:
+                            _guardian.employmentStatus == 'على رأس العمل'
                             ? AppColors.success
                             : AppColors.error,
-                        iconColor: guardian.employmentStatus == 'على رأس العمل'
+                        iconColor: _guardian.employmentStatus == 'على رأس العمل'
                             ? AppColors.success
                             : AppColors.error,
                       ),
                     ],
                   ),
-                  if (guardian.stopDate != null ||
-                      guardian.stopReason != null) ...[
+                  if (_guardian.stopDate != null ||
+                      _guardian.stopReason != null) ...[
                     const SizedBox(height: 16),
                     GridView.count(
                       crossAxisCount: 2,
@@ -312,13 +435,13 @@ class GuardianDetailsScreen extends StatelessWidget {
                         GuardianInfoGridItem(
                           icon: Icons.warning_amber_rounded,
                           label: 'سبب الإيقاف',
-                          value: guardian.stopReason ?? 'غير محدد',
+                          value: _guardian.stopReason ?? 'غير محدد',
                           valueColor: AppColors.error,
                         ),
                         GuardianInfoGridItem(
                           icon: Icons.event_busy_outlined,
                           label: 'تاريخ الإيقاف',
-                          value: guardian.stopDate ?? 'غير محدد',
+                          value: _guardian.stopDate ?? 'غير محدد',
                           valueColor: AppColors.error,
                         ),
                       ],
