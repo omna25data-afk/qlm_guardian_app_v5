@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../providers/admin_licenses_provider.dart';
-import '../../data/models/admin_renewal_model.dart';
 import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/add_edit_license_screen.dart';
+import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/license_history_screen.dart';
+import 'guardians/guardian_list_card.dart';
 
 class LicensesListTab extends ConsumerStatefulWidget {
   const LicensesListTab({super.key});
@@ -31,9 +32,9 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
         children: [
           // List
           Expanded(
-            child: state.isLoading && state.licenses.isEmpty
+            child: state.isLoading && state.guardians.isEmpty
                 ? const Center(child: CircularProgressIndicator())
-                : state.error != null && state.licenses.isEmpty
+                : state.error != null && state.guardians.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -55,7 +56,7 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
                       ],
                     ),
                   )
-                : state.licenses.isEmpty
+                : state.guardians.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -99,17 +100,90 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
                           vertical: 8,
                         ),
                         itemCount:
-                            state.licenses.length + (state.hasMore ? 1 : 0),
+                            state.guardians.length + (state.hasMore ? 1 : 0),
                         itemBuilder: (context, index) {
-                          if (index == state.licenses.length) {
+                          if (index == state.guardians.length) {
                             return const Padding(
                               padding: EdgeInsets.all(16.0),
                               child: Center(child: CircularProgressIndicator()),
                             );
                           }
 
-                          final license = state.licenses[index];
-                          return _buildLicenseCard(context, license);
+                          final guardian = state.guardians[index];
+                          return GuardianListCard(
+                            guardian: guardian,
+                            onRefresh: () {
+                              ref
+                                  .read(adminLicensesProvider.notifier)
+                                  .fetchLicenses(refresh: true);
+                            },
+                            customActions: Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => LicenseHistoryScreen(
+                                            guardian: guardian,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.history),
+                                    label: const Text('سجل التجديدات'),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: AppColors.primary,
+                                      side: const BorderSide(
+                                        color: AppColors.primary,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const AddEditLicenseScreen(),
+                                          settings: RouteSettings(
+                                            arguments: guardian,
+                                          ),
+                                        ),
+                                      ).then((result) {
+                                        if (result == true) {
+                                          ref
+                                              .read(
+                                                adminLicensesProvider.notifier,
+                                              )
+                                              .fetchLicenses(refresh: true);
+                                        }
+                                      });
+                                    },
+                                    icon: const Icon(
+                                      Icons.autorenew,
+                                      color: Colors.white,
+                                    ),
+                                    label: const Text('تجديد الرخصة'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
                         },
                       ),
                     ),
@@ -122,144 +196,16 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddEditLicenseScreen()),
-          );
+          ).then((result) {
+            if (result == true) {
+              ref
+                  .read(adminLicensesProvider.notifier)
+                  .fetchLicenses(refresh: true);
+            }
+          });
         },
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
-  }
-
-  Widget _buildLicenseCard(BuildContext context, AdminRenewalModel license) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    license.guardianName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: AppColors.textPrimary,
-                      fontFamily: 'Tajawal',
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                _buildStatusBadge(
-                  license.status,
-                  _getStatusColor(license.statusColor),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(Icons.badge_outlined, size: 16, color: AppColors.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'رقم الرخصة: ${license.id}',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                    fontFamily: 'Tajawal',
-                  ),
-                ),
-                const Spacer(),
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 16,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'التاريخ: ${license.renewalDate}',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                    fontFamily: 'Tajawal',
-                  ),
-                ),
-              ],
-            ),
-            if (license.type.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.info_outline, size: 16, color: AppColors.primary),
-                  const SizedBox(width: 8),
-                  Text(
-                    license.type,
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                      fontFamily: 'Tajawal',
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Color _getStatusColor(String colorName) {
-    switch (colorName.toLowerCase()) {
-      case 'green':
-      case 'success':
-        return AppColors.success;
-      case 'red':
-      case 'error':
-      case 'danger':
-        return AppColors.error;
-      case 'orange':
-      case 'warning':
-        return AppColors.warning;
-      case 'blue':
-      case 'info':
-        return AppColors.info;
-      default:
-        return AppColors.textHint;
-    }
-  }
-
-  Widget _buildStatusBadge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Tajawal',
-        ),
       ),
     );
   }

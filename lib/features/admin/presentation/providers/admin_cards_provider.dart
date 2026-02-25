@@ -1,62 +1,74 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/models/admin_guardian_model.dart';
 import '../../data/models/admin_renewal_model.dart';
 import 'admin_dashboard_provider.dart';
 
 class AdminCardsState {
-  final List<AdminRenewalModel> cards;
+  final List<AdminGuardianModel> guardians;
   final bool isLoading;
   final String? error;
   final bool hasMore;
   final int page;
+  final String? searchQuery;
 
   const AdminCardsState({
-    this.cards = const [],
+    this.guardians = const [],
     this.isLoading = false,
     this.error,
     this.hasMore = true,
     this.page = 1,
+    this.searchQuery,
   });
 
   AdminCardsState copyWith({
-    List<AdminRenewalModel>? cards,
+    List<AdminGuardianModel>? guardians,
     bool? isLoading,
     String? error,
     bool? hasMore,
     int? page,
+    String? searchQuery,
   }) {
     return AdminCardsState(
-      cards: cards ?? this.cards,
+      guardians: guardians ?? this.guardians,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       hasMore: hasMore ?? this.hasMore,
       page: page ?? this.page,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 }
 
 class AdminCardsNotifier extends StateNotifier<AdminCardsState> {
-  final Ref _ref;
+  final dynamic _repository;
+  Timer? _debounceTimer;
 
-  AdminCardsNotifier(this._ref) : super(const AdminCardsState());
+  AdminCardsNotifier(this._repository) : super(const AdminCardsState());
 
-  Future<void> fetchCards({bool refresh = false}) async {
+  Future<void> fetchCards({bool refresh = false, String? query}) async {
     if (state.isLoading) return;
 
-    if (refresh) {
-      state = const AdminCardsState(isLoading: true);
-    } else {
-      if (!state.hasMore) return;
-      state = state.copyWith(isLoading: true, error: null);
-    }
+    final newState = refresh
+        ? AdminCardsState(
+            searchQuery: query ?? state.searchQuery,
+            isLoading: true,
+          )
+        : state.copyWith(isLoading: true, error: null);
+    state = newState;
+
+    if (!state.hasMore && !refresh) return;
 
     try {
-      final repository = _ref.read(adminRepositoryProvider);
-      final newItems = await repository.getCards(page: state.page);
+      final newItems = await _repository.getGuardians(
+        query: state.searchQuery,
+        page: state.page,
+      );
 
       state = state.copyWith(
-        cards: refresh ? newItems : [...state.cards, ...newItems],
+        guardians: refresh ? newItems : [...state.guardians, ...newItems],
         isLoading: false,
-        hasMore: newItems.length >= 20,
+        hasMore: newItems.length >= 10,
         page: state.page + 1,
       );
     } catch (e) {
@@ -64,10 +76,16 @@ class AdminCardsNotifier extends StateNotifier<AdminCardsState> {
     }
   }
 
+  void onSearchChanged(String query) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      fetchCards(refresh: true, query: query);
+    });
+  }
+
   Future<bool> renewCard(int guardianId, Map<String, dynamic> data) async {
     try {
-      final repository = _ref.read(adminRepositoryProvider);
-      await repository.submitCardRenewal(guardianId, data);
+      await _repository.submitCardRenewal(guardianId, data);
       // Refresh list after successful renewal
       fetchCards(refresh: true);
       return true;
@@ -76,9 +94,22 @@ class AdminCardsNotifier extends StateNotifier<AdminCardsState> {
       return false;
     }
   }
+
+  Future<List<AdminRenewalModel>> fetchCardHistory(int guardianId) async {
+    return await _repository.getCards(guardianId: guardianId);
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
 }
 
 final adminCardsProvider =
-    StateNotifierProvider<AdminCardsNotifier, AdminCardsState>((ref) {
-      return AdminCardsNotifier(ref);
+    StateNotifierProvider.autoDispose<AdminCardsNotifier, AdminCardsState>((
+      ref,
+    ) {
+      final repository = ref.watch(adminRepositoryProvider);
+      return AdminCardsNotifier(repository);
     });

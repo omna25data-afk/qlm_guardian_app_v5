@@ -11,12 +11,14 @@ class GuardianListCard extends StatefulWidget {
   final AdminGuardianModel guardian;
   final VoidCallback? onTap;
   final VoidCallback? onRefresh;
+  final Widget? customActions; // E.g., Renew/History buttons
 
   const GuardianListCard({
     super.key,
     required this.guardian,
     this.onTap,
     this.onRefresh,
+    this.customActions,
   });
 
   @override
@@ -256,40 +258,42 @@ class _GuardianListCardState extends State<GuardianListCard>
                 _buildQuickActions(context),
                 const SizedBox(height: 16),
                 // Removed Progress Bars from here as they are now in the header
-                // Action Button
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              GuardianDetailsScreen(guardian: widget.guardian),
+                // Action Buttons
+                widget.customActions ??
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GuardianDetailsScreen(
+                                guardian: widget.guardian,
+                              ),
+                            ),
+                          ).then((result) {
+                            if (result == true) {
+                              widget.onRefresh?.call();
+                            }
+                          });
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                      ).then((result) {
-                        if (result == true) {
-                          widget.onRefresh?.call();
-                        }
-                      });
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: const Text(
-                      'عرض الملف الكامل',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Tajawal',
+                        child: const Text(
+                          'عرض الملف الكامل',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
               ],
             )
           : const SizedBox.shrink(),

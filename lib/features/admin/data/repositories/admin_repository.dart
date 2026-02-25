@@ -204,11 +204,17 @@ class AdminRepository {
 
   // ─── Cards ───────────────────────────────────────────────
 
-  /// Fetch profession cards
-  Future<List<AdminRenewalModel>> getCards({int page = 1}) async {
+  /// Fetch profession cards (history for a specific guardian, or all)
+  Future<List<AdminRenewalModel>> getCards({
+    int page = 1,
+    int? guardianId,
+  }) async {
+    final params = <String, dynamic>{'page': page};
+    if (guardianId != null) params['guardian_id'] = guardianId;
+
     final response = await _apiClient.get(
       ApiEndpoints.adminCards,
-      queryParameters: {'page': page},
+      queryParameters: params,
     );
     return (response.data['data'] as List?)
             ?.map((e) => AdminRenewalModel.fromJson(e))
@@ -218,11 +224,17 @@ class AdminRepository {
 
   // ─── Licenses ────────────────────────────────────────────
 
-  /// Fetch licenses
-  Future<List<AdminRenewalModel>> getLicenses({int page = 1}) async {
+  /// Fetch licenses (history for a specific guardian, or all)
+  Future<List<AdminRenewalModel>> getLicenses({
+    int page = 1,
+    int? guardianId,
+  }) async {
+    final params = <String, dynamic>{'page': page};
+    if (guardianId != null) params['guardian_id'] = guardianId;
+
     final response = await _apiClient.get(
       ApiEndpoints.adminLicenses,
-      queryParameters: {'page': page},
+      queryParameters: params,
     );
     return (response.data['data'] as List?)
             ?.map((e) => AdminRenewalModel.fromJson(e))
