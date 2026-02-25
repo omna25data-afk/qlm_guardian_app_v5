@@ -5,7 +5,7 @@ import '../../data/models/admin_renewal_model.dart';
 import 'admin_dashboard_provider.dart';
 
 class AdminCardsState {
-  final List<AdminGuardianModel> guardians;
+  final List<AdminRenewalModel> renewals;
   final bool isLoading;
   final String? error;
   final bool hasMore;
@@ -13,7 +13,7 @@ class AdminCardsState {
   final String? searchQuery;
 
   const AdminCardsState({
-    this.guardians = const [],
+    this.renewals = const [],
     this.isLoading = false,
     this.error,
     this.hasMore = true,
@@ -22,7 +22,7 @@ class AdminCardsState {
   });
 
   AdminCardsState copyWith({
-    List<AdminGuardianModel>? guardians,
+    List<AdminRenewalModel>? renewals,
     bool? isLoading,
     String? error,
     bool? hasMore,
@@ -30,7 +30,7 @@ class AdminCardsState {
     String? searchQuery,
   }) {
     return AdminCardsState(
-      guardians: guardians ?? this.guardians,
+      renewals: renewals ?? this.renewals,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       hasMore: hasMore ?? this.hasMore,
@@ -60,13 +60,13 @@ class AdminCardsNotifier extends StateNotifier<AdminCardsState> {
     if (!state.hasMore && !refresh) return;
 
     try {
-      final newItems = await _repository.getGuardians(
+      final newItems = await _repository.getCards(
         query: state.searchQuery,
         page: state.page,
       );
 
       state = state.copyWith(
-        guardians: refresh ? newItems : [...state.guardians, ...newItems],
+        renewals: refresh ? newItems : [...state.renewals, ...newItems],
         isLoading: false,
         hasMore: newItems.length >= 10,
         page: state.page + 1,

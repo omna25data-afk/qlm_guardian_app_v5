@@ -6,9 +6,14 @@ import '../../../data/models/admin_renewal_model.dart';
 import '../../providers/admin_licenses_provider.dart';
 
 class LicenseHistoryScreen extends ConsumerStatefulWidget {
-  final AdminGuardianModel guardian;
+  final int guardianId;
+  final String guardianName;
 
-  const LicenseHistoryScreen({super.key, required this.guardian});
+  const LicenseHistoryScreen({
+    super.key,
+    required this.guardianId,
+    required this.guardianName,
+  });
 
   @override
   ConsumerState<LicenseHistoryScreen> createState() =>
@@ -30,7 +35,7 @@ class _LicenseHistoryScreenState extends ConsumerState<LicenseHistoryScreen> {
     try {
       final history = await ref
           .read(adminLicensesProvider.notifier)
-          .fetchLicenseHistory(widget.guardian.id);
+          .fetchLicenseHistory(widget.guardianId);
       if (mounted) {
         setState(() {
           _history = history;

@@ -4,7 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../providers/admin_licenses_provider.dart';
 import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/add_edit_license_screen.dart';
 import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/license_history_screen.dart';
-import 'guardians/guardian_list_card.dart';
+import 'guardians/admin_renewal_list_card.dart';
 
 class LicensesListTab extends ConsumerStatefulWidget {
   const LicensesListTab({super.key});
@@ -32,9 +32,9 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
         children: [
           // List
           Expanded(
-            child: state.isLoading && state.guardians.isEmpty
+            child: state.isLoading && state.renewals.isEmpty
                 ? const Center(child: CircularProgressIndicator())
-                : state.error != null && state.guardians.isEmpty
+                : state.error != null && state.renewals.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -56,7 +56,7 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
                       ],
                     ),
                   )
-                : state.guardians.isEmpty
+                : state.renewals.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -100,89 +100,47 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
                           vertical: 8,
                         ),
                         itemCount:
-                            state.guardians.length + (state.hasMore ? 1 : 0),
+                            state.renewals.length + (state.hasMore ? 1 : 0),
                         itemBuilder: (context, index) {
-                          if (index == state.guardians.length) {
+                          if (index == state.renewals.length) {
                             return const Padding(
                               padding: EdgeInsets.all(16.0),
                               child: Center(child: CircularProgressIndicator()),
                             );
                           }
 
-                          final guardian = state.guardians[index];
-                          return GuardianListCard(
-                            guardian: guardian,
-                            onRefresh: () {
-                              ref
-                                  .read(adminLicensesProvider.notifier)
-                                  .fetchLicenses(refresh: true);
+                          final renewal = state.renewals[index];
+                          return AdminRenewalListCard(
+                            renewal: renewal,
+                            numberLabel: 'رقم الترخيص',
+                            numberValue: renewal.licenseNumber,
+                            onHistoryPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LicenseHistoryScreen(
+                                    guardianId:
+                                        renewal.legitimateGuardianId ?? 0,
+                                    guardianName: renewal.guardianName,
+                                  ),
+                                ),
+                              );
                             },
-                            customActions: Row(
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => LicenseHistoryScreen(
-                                            guardian: guardian,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.history),
-                                    label: const Text('سجل التجديدات'),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: AppColors.primary,
-                                      side: const BorderSide(
-                                        color: AppColors.primary,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  ),
+                            onRenewPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const AddEditLicenseScreen(),
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              const AddEditLicenseScreen(),
-                                          settings: RouteSettings(
-                                            arguments: guardian,
-                                          ),
-                                        ),
-                                      ).then((result) {
-                                        if (result == true) {
-                                          ref
-                                              .read(
-                                                adminLicensesProvider.notifier,
-                                              )
-                                              .fetchLicenses(refresh: true);
-                                        }
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.autorenew,
-                                      color: Colors.white,
-                                    ),
-                                    label: const Text('تجديد الرخصة'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary,
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ).then((result) {
+                                if (result == true) {
+                                  ref
+                                      .read(adminLicensesProvider.notifier)
+                                      .fetchLicenses(refresh: true);
+                                }
+                              });
+                            },
                           );
                         },
                       ),

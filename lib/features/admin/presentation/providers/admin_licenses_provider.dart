@@ -5,7 +5,7 @@ import '../../data/models/admin_renewal_model.dart';
 import 'admin_dashboard_provider.dart';
 
 class AdminLicensesState {
-  final List<AdminGuardianModel> guardians;
+  final List<AdminRenewalModel> renewals;
   final bool isLoading;
   final String? error;
   final bool hasMore;
@@ -13,7 +13,7 @@ class AdminLicensesState {
   final String? searchQuery;
 
   const AdminLicensesState({
-    this.guardians = const [],
+    this.renewals = const [],
     this.isLoading = false,
     this.error,
     this.hasMore = true,
@@ -22,7 +22,7 @@ class AdminLicensesState {
   });
 
   AdminLicensesState copyWith({
-    List<AdminGuardianModel>? guardians,
+    List<AdminRenewalModel>? renewals,
     bool? isLoading,
     String? error,
     bool? hasMore,
@@ -30,7 +30,7 @@ class AdminLicensesState {
     String? searchQuery,
   }) {
     return AdminLicensesState(
-      guardians: guardians ?? this.guardians,
+      renewals: renewals ?? this.renewals,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       hasMore: hasMore ?? this.hasMore,
@@ -60,13 +60,13 @@ class AdminLicensesNotifier extends StateNotifier<AdminLicensesState> {
     if (!state.hasMore && !refresh) return;
 
     try {
-      final newItems = await _repository.getGuardians(
+      final newItems = await _repository.getLicenses(
         query: state.searchQuery,
         page: state.page,
       );
 
       state = state.copyWith(
-        guardians: refresh ? newItems : [...state.guardians, ...newItems],
+        renewals: refresh ? newItems : [...state.renewals, ...newItems],
         isLoading: false,
         hasMore: newItems.length >= 10,
         page: state.page + 1,

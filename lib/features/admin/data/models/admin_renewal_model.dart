@@ -9,12 +9,20 @@ class AdminRenewalModel {
   final int? legitimateGuardianId;
   @JsonKey(name: 'guardian_name', defaultValue: 'غير معروف')
   final String guardianName;
+  @JsonKey(name: 'serial_number')
+  final int? serialNumber;
+  @JsonKey(name: 'card_number')
+  final String? cardNumber;
+  @JsonKey(name: 'license_number')
+  final String? licenseNumber;
   @JsonKey(name: 'renewal_number')
   final int? renewalNumber;
   @JsonKey(name: 'renewal_date', defaultValue: '')
   final String renewalDate;
   @JsonKey(name: 'expiry_date')
   final String? expiryDate;
+  @JsonKey(name: 'days_until_expiry')
+  final int? daysUntilExpiry;
   @JsonKey(defaultValue: '')
   final String status;
   @JsonKey(name: 'status_color', defaultValue: 'grey')
@@ -34,9 +42,13 @@ class AdminRenewalModel {
     required this.id,
     this.legitimateGuardianId,
     required this.guardianName,
+    this.serialNumber,
+    this.cardNumber,
+    this.licenseNumber,
     this.renewalNumber,
     required this.renewalDate,
     this.expiryDate,
+    this.daysUntilExpiry,
     required this.status,
     required this.statusColor,
     required this.type,
