@@ -30,16 +30,23 @@ class RegistryRepository {
 
   /// Get all entries (offline-first)
   Future<List<RegistryEntrySections>> getEntries() async {
-    // 1. Try to sync if online
+    // 1. Try to fetch from API if online
     if (await _networkInfo.isConnected) {
       try {
-        final remoteEntries = await _remoteDataSource.fetchEntries();
+        final remoteEntries = await _remoteDataSource.fetchEntriesFromApi();
         for (var entry in remoteEntries) {
           await _localDataSource.insertEntry(entry);
         }
       } catch (e) {
-        // Ignore sync errors, fallback to local
-        debugPrint('Sync failed: $e');
+        // Fallback: try sync endpoint
+        try {
+          final syncEntries = await _remoteDataSource.fetchEntries();
+          for (var entry in syncEntries) {
+            await _localDataSource.insertEntry(entry);
+          }
+        } catch (e2) {
+          debugPrint('Sync failed: $e2');
+        }
       }
     }
 

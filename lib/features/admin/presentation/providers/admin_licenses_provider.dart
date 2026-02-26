@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/models/admin_guardian_model.dart';
 import '../../data/models/admin_renewal_model.dart';
 import 'admin_dashboard_provider.dart';
 
@@ -10,7 +9,6 @@ class AdminLicensesState {
   final String? error;
   final bool hasMore;
   final int page;
-  final String? searchQuery;
 
   const AdminLicensesState({
     this.renewals = const [],
@@ -18,7 +16,6 @@ class AdminLicensesState {
     this.error,
     this.hasMore = true,
     this.page = 1,
-    this.searchQuery,
   });
 
   AdminLicensesState copyWith({
@@ -27,7 +24,6 @@ class AdminLicensesState {
     String? error,
     bool? hasMore,
     int? page,
-    String? searchQuery,
   }) {
     return AdminLicensesState(
       renewals: renewals ?? this.renewals,
@@ -35,40 +31,32 @@ class AdminLicensesState {
       error: error,
       hasMore: hasMore ?? this.hasMore,
       page: page ?? this.page,
-      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 }
 
 class AdminLicensesNotifier extends StateNotifier<AdminLicensesState> {
   final dynamic _repository;
-  Timer? _debounceTimer;
 
   AdminLicensesNotifier(this._repository) : super(const AdminLicensesState());
 
-  Future<void> fetchLicenses({bool refresh = false, String? query}) async {
+  Future<void> fetchLicenses({bool refresh = false}) async {
     if (state.isLoading) return;
 
-    final newState = refresh
-        ? AdminLicensesState(
-            searchQuery: query ?? state.searchQuery,
-            isLoading: true,
-          )
-        : state.copyWith(isLoading: true, error: null);
-    state = newState;
-
-    if (!state.hasMore && !refresh) return;
+    if (refresh) {
+      state = const AdminLicensesState(isLoading: true);
+    } else {
+      if (!state.hasMore) return;
+      state = state.copyWith(isLoading: true, error: null);
+    }
 
     try {
-      final newItems = await _repository.getLicenses(
-        query: state.searchQuery,
-        page: state.page,
-      );
+      final newItems = await _repository.getLicenses(page: state.page);
 
       state = state.copyWith(
         renewals: refresh ? newItems : [...state.renewals, ...newItems],
         isLoading: false,
-        hasMore: newItems.length >= 10,
+        hasMore: newItems.length >= 20,
         page: state.page + 1,
       );
     } catch (e) {
@@ -76,17 +64,13 @@ class AdminLicensesNotifier extends StateNotifier<AdminLicensesState> {
     }
   }
 
-  void onSearchChanged(String query) {
-    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      fetchLicenses(refresh: true, query: query);
-    });
+  Future<List<AdminRenewalModel>> fetchLicenseHistory(int guardianId) async {
+    return await _repository.getLicenses(guardianId: guardianId);
   }
 
   Future<bool> renewLicense(int guardianId, Map<String, dynamic> data) async {
     try {
       await _repository.submitLicenseRenewal(guardianId, data);
-      // Refresh list after successful renewal
       fetchLicenses(refresh: true);
       return true;
     } catch (e) {
@@ -95,14 +79,26 @@ class AdminLicensesNotifier extends StateNotifier<AdminLicensesState> {
     }
   }
 
-  Future<List<AdminRenewalModel>> fetchLicenseHistory(int guardianId) async {
-    return await _repository.getLicenses(guardianId: guardianId);
+  Future<bool> updateRenewal(int id, Map<String, dynamic> data) async {
+    try {
+      await _repository.updateLicenseRenewal(id, data);
+      fetchLicenses(refresh: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
   }
 
-  @override
-  void dispose() {
-    _debounceTimer?.cancel();
-    super.dispose();
+  Future<bool> deleteRenewal(int id) async {
+    try {
+      await _repository.deleteLicenseRenewal(id);
+      fetchLicenses(refresh: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
   }
 }
 

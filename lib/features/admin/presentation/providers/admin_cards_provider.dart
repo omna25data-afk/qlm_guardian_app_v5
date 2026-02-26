@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/models/admin_guardian_model.dart';
 import '../../data/models/admin_renewal_model.dart';
 import 'admin_dashboard_provider.dart';
 
@@ -10,7 +9,6 @@ class AdminCardsState {
   final String? error;
   final bool hasMore;
   final int page;
-  final String? searchQuery;
 
   const AdminCardsState({
     this.renewals = const [],
@@ -18,7 +16,6 @@ class AdminCardsState {
     this.error,
     this.hasMore = true,
     this.page = 1,
-    this.searchQuery,
   });
 
   AdminCardsState copyWith({
@@ -27,7 +24,6 @@ class AdminCardsState {
     String? error,
     bool? hasMore,
     int? page,
-    String? searchQuery,
   }) {
     return AdminCardsState(
       renewals: renewals ?? this.renewals,
@@ -35,40 +31,32 @@ class AdminCardsState {
       error: error,
       hasMore: hasMore ?? this.hasMore,
       page: page ?? this.page,
-      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 }
 
 class AdminCardsNotifier extends StateNotifier<AdminCardsState> {
   final dynamic _repository;
-  Timer? _debounceTimer;
 
   AdminCardsNotifier(this._repository) : super(const AdminCardsState());
 
-  Future<void> fetchCards({bool refresh = false, String? query}) async {
+  Future<void> fetchCards({bool refresh = false}) async {
     if (state.isLoading) return;
 
-    final newState = refresh
-        ? AdminCardsState(
-            searchQuery: query ?? state.searchQuery,
-            isLoading: true,
-          )
-        : state.copyWith(isLoading: true, error: null);
-    state = newState;
-
-    if (!state.hasMore && !refresh) return;
+    if (refresh) {
+      state = const AdminCardsState(isLoading: true);
+    } else {
+      if (!state.hasMore) return;
+      state = state.copyWith(isLoading: true, error: null);
+    }
 
     try {
-      final newItems = await _repository.getCards(
-        query: state.searchQuery,
-        page: state.page,
-      );
+      final newItems = await _repository.getCards(page: state.page);
 
       state = state.copyWith(
         renewals: refresh ? newItems : [...state.renewals, ...newItems],
         isLoading: false,
-        hasMore: newItems.length >= 10,
+        hasMore: newItems.length >= 20,
         page: state.page + 1,
       );
     } catch (e) {
@@ -76,17 +64,13 @@ class AdminCardsNotifier extends StateNotifier<AdminCardsState> {
     }
   }
 
-  void onSearchChanged(String query) {
-    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      fetchCards(refresh: true, query: query);
-    });
+  Future<List<AdminRenewalModel>> fetchCardHistory(int guardianId) async {
+    return await _repository.getCards(guardianId: guardianId);
   }
 
   Future<bool> renewCard(int guardianId, Map<String, dynamic> data) async {
     try {
       await _repository.submitCardRenewal(guardianId, data);
-      // Refresh list after successful renewal
       fetchCards(refresh: true);
       return true;
     } catch (e) {
@@ -95,14 +79,26 @@ class AdminCardsNotifier extends StateNotifier<AdminCardsState> {
     }
   }
 
-  Future<List<AdminRenewalModel>> fetchCardHistory(int guardianId) async {
-    return await _repository.getCards(guardianId: guardianId);
+  Future<bool> updateRenewal(int id, Map<String, dynamic> data) async {
+    try {
+      await _repository.updateCardRenewal(id, data);
+      fetchCards(refresh: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
   }
 
-  @override
-  void dispose() {
-    _debounceTimer?.cancel();
-    super.dispose();
+  Future<bool> deleteRenewal(int id) async {
+    try {
+      await _repository.deleteCardRenewal(id);
+      fetchCards(refresh: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return false;
+    }
   }
 }
 

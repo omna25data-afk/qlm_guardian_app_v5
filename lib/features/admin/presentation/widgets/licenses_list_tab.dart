@@ -4,7 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../providers/admin_licenses_provider.dart';
 import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/add_edit_license_screen.dart';
 import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/license_history_screen.dart';
-import 'guardians/admin_renewal_list_card.dart';
+import 'renewal_card.dart';
 
 class LicensesListTab extends ConsumerStatefulWidget {
   const LicensesListTab({super.key});
@@ -22,6 +22,36 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
     });
   }
 
+  void _confirmDelete(int id) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          'تأكيد الحذف',
+          style: TextStyle(fontFamily: 'Tajawal'),
+        ),
+        content: const Text(
+          'هل أنت متأكد من حذف هذا التجديد؟ لا يمكن التراجع عن هذا الإجراء.',
+          style: TextStyle(fontFamily: 'Tajawal'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('إلغاء', style: TextStyle(fontFamily: 'Tajawal')),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(adminLicensesProvider.notifier).deleteRenewal(id);
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('حذف', style: TextStyle(fontFamily: 'Tajawal')),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(adminLicensesProvider);
@@ -30,7 +60,6 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
       backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          // List
           Expanded(
             child: state.isLoading && state.renewals.isEmpty
                 ? const Center(child: CircularProgressIndicator())
@@ -68,7 +97,7 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'لا توجد رخص',
+                          'لا توجد تجديدات رخص',
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 16,
@@ -110,28 +139,55 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
                           }
 
                           final renewal = state.renewals[index];
-                          return AdminRenewalListCard(
+                          return RenewalCard(
                             renewal: renewal,
-                            numberLabel: 'رقم الترخيص',
-                            numberValue: renewal.licenseNumber,
-                            onHistoryPressed: () {
+                            onHistory: renewal.legitimateGuardianId != null
+                                ? () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => LicenseHistoryScreen(
+                                          guardianId:
+                                              renewal.legitimateGuardianId!,
+                                          guardianName: renewal.guardianName,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                : null,
+                            onRenew: renewal.legitimateGuardianId != null
+                                ? () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const AddEditLicenseScreen(),
+                                        settings: RouteSettings(
+                                          arguments: renewal,
+                                        ),
+                                      ),
+                                    ).then((result) {
+                                      if (result == true) {
+                                        ref
+                                            .read(
+                                              adminLicensesProvider.notifier,
+                                            )
+                                            .fetchLicenses(refresh: true);
+                                      }
+                                    });
+                                  }
+                                : null,
+                            onEdit: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => LicenseHistoryScreen(
-                                    guardianId:
-                                        renewal.legitimateGuardianId ?? 0,
-                                    guardianName: renewal.guardianName,
+                                  builder: (_) => const AddEditLicenseScreen(),
+                                  settings: RouteSettings(
+                                    arguments: {
+                                      'editMode': true,
+                                      'renewal': renewal,
+                                    },
                                   ),
-                                ),
-                              );
-                            },
-                            onRenewPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const AddEditLicenseScreen(),
                                 ),
                               ).then((result) {
                                 if (result == true) {
@@ -141,6 +197,7 @@ class _LicensesListTabState extends ConsumerState<LicensesListTab> {
                                 }
                               });
                             },
+                            onDelete: () => _confirmDelete(renewal.id),
                           );
                         },
                       ),

@@ -223,10 +223,33 @@ class RegistryEntryModel extends Equatable {
       }
     }
 
+    // Pre-process: convert string numbers to actual numbers
+    // The backend may send financial fields as strings like "0.00"
+    void ensureNum(String key) {
+      if (data[key] is String) {
+        data[key] = double.tryParse(data[key] as String);
+      }
+    }
+
     stripTime('document_hijri_date');
     stripTime('doc_hijri_date');
     stripTime('guardian_hijri_date');
     stripTime('hijri_date');
+
+    // Financial fields that backend may send as strings
+    for (final key in [
+      'fee_amount',
+      'penalty_amount',
+      'authentication_fee_amount',
+      'transfer_fee_amount',
+      'other_fee_amount',
+      'support_amount',
+      'sustainability_amount',
+      'total_amount',
+      'paid_amount',
+    ]) {
+      ensureNum(key);
+    }
 
     return _$RegistryEntryModelFromJson(data);
   }

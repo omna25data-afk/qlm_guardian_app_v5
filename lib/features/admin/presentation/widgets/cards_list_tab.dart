@@ -4,7 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../providers/admin_cards_provider.dart';
 import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/add_edit_card_screen.dart';
 import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/card_history_screen.dart';
-import 'guardians/admin_renewal_list_card.dart';
+import 'renewal_card.dart';
 
 class CardsListTab extends ConsumerStatefulWidget {
   const CardsListTab({super.key});
@@ -22,6 +22,36 @@ class _CardsListTabState extends ConsumerState<CardsListTab> {
     });
   }
 
+  void _confirmDelete(int id) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          'تأكيد الحذف',
+          style: TextStyle(fontFamily: 'Tajawal'),
+        ),
+        content: const Text(
+          'هل أنت متأكد من حذف هذا التجديد؟ لا يمكن التراجع عن هذا الإجراء.',
+          style: TextStyle(fontFamily: 'Tajawal'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('إلغاء', style: TextStyle(fontFamily: 'Tajawal')),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(adminCardsProvider.notifier).deleteRenewal(id);
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('حذف', style: TextStyle(fontFamily: 'Tajawal')),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(adminCardsProvider);
@@ -30,7 +60,6 @@ class _CardsListTabState extends ConsumerState<CardsListTab> {
       backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          // List
           Expanded(
             child: state.isLoading && state.renewals.isEmpty
                 ? const Center(child: CircularProgressIndicator())
@@ -68,7 +97,7 @@ class _CardsListTabState extends ConsumerState<CardsListTab> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'لا توجد بطاقات',
+                          'لا توجد تجديدات بطاقات',
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 16,
@@ -108,28 +137,53 @@ class _CardsListTabState extends ConsumerState<CardsListTab> {
                           }
 
                           final renewal = state.renewals[index];
-                          return AdminRenewalListCard(
+                          return RenewalCard(
                             renewal: renewal,
-                            numberLabel: 'رقم البطاقة',
-                            numberValue: renewal.cardNumber,
-                            onHistoryPressed: () {
+                            onHistory: renewal.legitimateGuardianId != null
+                                ? () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => CardHistoryScreen(
+                                          guardianId:
+                                              renewal.legitimateGuardianId!,
+                                          guardianName: renewal.guardianName,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                : null,
+                            onRenew: renewal.legitimateGuardianId != null
+                                ? () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const AddEditCardScreen(),
+                                        settings: RouteSettings(
+                                          arguments: renewal,
+                                        ),
+                                      ),
+                                    ).then((result) {
+                                      if (result == true) {
+                                        ref
+                                            .read(adminCardsProvider.notifier)
+                                            .fetchCards(refresh: true);
+                                      }
+                                    });
+                                  }
+                                : null,
+                            onEdit: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => CardHistoryScreen(
-                                    guardianId:
-                                        renewal.legitimateGuardianId ?? 0,
-                                    guardianName: renewal.guardianName,
+                                  builder: (_) => const AddEditCardScreen(),
+                                  settings: RouteSettings(
+                                    arguments: {
+                                      'editMode': true,
+                                      'renewal': renewal,
+                                    },
                                   ),
-                                ),
-                              );
-                            },
-                            onRenewPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const AddEditCardScreen(),
                                 ),
                               ).then((result) {
                                 if (result == true) {
@@ -139,6 +193,7 @@ class _CardsListTabState extends ConsumerState<CardsListTab> {
                                 }
                               });
                             },
+                            onDelete: () => _confirmDelete(renewal.id),
                           );
                         },
                       ),

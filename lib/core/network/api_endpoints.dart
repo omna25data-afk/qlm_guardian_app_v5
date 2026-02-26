@@ -66,6 +66,10 @@ class ApiEndpoints {
       '$baseUrl/admin/guardians/$id/renew-license';
   static String adminRenewCard(int id) =>
       '$baseUrl/admin/guardians/$id/renew-card';
+  static String adminLicenseUpdate(int id) => '$baseUrl/admin/licenses/$id';
+  static String adminLicenseDelete(int id) => '$baseUrl/admin/licenses/$id';
+  static String adminCardUpdate(int id) => '$baseUrl/admin/cards/$id';
+  static String adminCardDelete(int id) => '$baseUrl/admin/cards/$id';
 
   // Admin: Record Book Actions
   static String adminRecordBookUpdate(int id) =>

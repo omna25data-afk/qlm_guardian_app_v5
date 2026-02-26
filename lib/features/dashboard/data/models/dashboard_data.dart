@@ -66,19 +66,24 @@ class DashboardStats {
   });
 
   factory DashboardStats.fromJson(Map<String, dynamic> json) {
+    // Safely parse any value to int (handles int, double, String like "0.00", null)
+    int safeInt(dynamic value) {
+      if (value == null) return 0;
+      if (value is int) return value;
+      if (value is double) return value.toInt();
+      if (value is String) return double.tryParse(value)?.toInt() ?? 0;
+      return 0;
+    }
+
     // Handle both new nested structure and old flat structure
     if (json.containsKey('registry_entries')) {
       final reg = json['registry_entries'] as Map<String, dynamic>? ?? {};
       final books = json['record_books'] as Map<String, dynamic>? ?? {};
 
       return DashboardStats(
-        registry: reg.map(
-          (key, value) => MapEntry(key, (value as num).toInt()),
-        ),
-        recordBooks: books.map(
-          (key, value) => MapEntry(key, (value as num).toInt()),
-        ),
-        thisMonthEntries: json['this_month_entries'] ?? 0,
+        registry: reg.map((key, value) => MapEntry(key, safeInt(value))),
+        recordBooks: books.map((key, value) => MapEntry(key, safeInt(value))),
+        thisMonthEntries: safeInt(json['this_month_entries']),
       );
     } else {
       // Backward compatibility

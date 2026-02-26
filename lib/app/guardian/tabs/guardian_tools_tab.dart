@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../features/records/presentation/providers/records_provider.dart';
 import '../../../features/registry/presentation/screens/entries_list_screen.dart';
-import '../../../features/registry/presentation/screens/add_registry_entry_screen.dart';
+import '../../../features/registry/presentation/screens/guardian_entry_screen.dart';
 
 /// تبويب أدوات الأمين الشرعي
 class GuardianToolsTab extends ConsumerWidget {
@@ -50,9 +50,7 @@ class GuardianToolsTab extends ConsumerWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const AddRegistryEntryScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const GuardianEntryScreen()),
               );
             },
           ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qlm_guardian_app_v5/core/theme/app_colors.dart';
-import '../../../data/models/admin_guardian_model.dart';
 import '../../../data/models/admin_renewal_model.dart';
 import '../../providers/admin_licenses_provider.dart';
 
@@ -56,9 +55,13 @@ class _LicenseHistoryScreenState extends ConsumerState<LicenseHistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'سجل تجديدات الرخصة',
-          style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold),
+        title: Text(
+          'سجل تجديدات الرخصة - ${widget.guardianName}',
+          style: const TextStyle(
+            fontFamily: 'Tajawal',
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
@@ -134,7 +137,7 @@ class _LicenseHistoryScreenState extends ConsumerState<LicenseHistoryScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'تجديد رقم: ${renewal.id}',
+                                'التجديد #${renewal.renewalNumber ?? renewal.id}',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Tajawal',

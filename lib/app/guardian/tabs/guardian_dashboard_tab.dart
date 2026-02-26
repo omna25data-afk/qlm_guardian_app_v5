@@ -339,7 +339,7 @@ class GuardianDashboardTab extends ConsumerWidget {
           ),
         ),
         subtitle: Text(
-          entry.contractTypeName ?? '',
+          entry.contractType?.name ?? '',
           style: TextStyle(
             fontSize: 12,
             color: Colors.grey,

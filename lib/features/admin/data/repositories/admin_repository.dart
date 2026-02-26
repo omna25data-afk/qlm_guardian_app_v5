@@ -274,6 +274,26 @@ class AdminRepository {
     );
   }
 
+  /// Update a license renewal
+  Future<void> updateLicenseRenewal(int id, Map<String, dynamic> data) async {
+    await _apiClient.put(ApiEndpoints.adminLicenseUpdate(id), data: data);
+  }
+
+  /// Delete a license renewal
+  Future<void> deleteLicenseRenewal(int id) async {
+    await _apiClient.delete(ApiEndpoints.adminLicenseDelete(id));
+  }
+
+  /// Update a card renewal
+  Future<void> updateCardRenewal(int id, Map<String, dynamic> data) async {
+    await _apiClient.put(ApiEndpoints.adminCardUpdate(id), data: data);
+  }
+
+  /// Delete a card renewal
+  Future<void> deleteCardRenewal(int id) async {
+    await _apiClient.delete(ApiEndpoints.adminCardDelete(id));
+  }
+
   // ─── Record Books ────────────────────────────────────────
 
   /// Fetch record books (Admin)

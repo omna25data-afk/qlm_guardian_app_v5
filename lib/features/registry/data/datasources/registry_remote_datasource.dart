@@ -13,6 +13,7 @@ abstract class RegistryRemoteDataSource {
     String? attachmentPath,
   });
   Future<List<RegistryEntrySections>> fetchEntries({DateTime? lastSyncedAt});
+  Future<List<RegistryEntrySections>> fetchEntriesFromApi();
   Future<void> pushEntries(List<RegistryEntrySections> entries);
 }
 
@@ -24,8 +25,19 @@ class RegistryRemoteDataSourceImpl implements RegistryRemoteDataSource {
   @override
   Future<List<ContractTypeModel>> getContractTypes() async {
     final response = await _client.get(ApiEndpoints.contractTypes);
-    final data = response.data['data'] as List;
-    return data
+    final responseData = response.data;
+
+    // Handle both structures: direct List or wrapped {data: List}
+    List rawList;
+    if (responseData is List) {
+      rawList = responseData;
+    } else if (responseData is Map && responseData['data'] is List) {
+      rawList = responseData['data'] as List;
+    } else {
+      return [];
+    }
+
+    return rawList
         .map(
           (json) => ContractTypeModel.fromJson(Map<String, dynamic>.from(json)),
         )
@@ -93,8 +105,39 @@ class RegistryRemoteDataSourceImpl implements RegistryRemoteDataSource {
           : null,
     );
 
-    final data = response.data['registry_entries'] as List;
+    final data = response.data['registry_entries'] as List? ?? [];
     return data
+        .map(
+          (json) =>
+              RegistryEntrySections.fromJson(Map<String, dynamic>.from(json)),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<RegistryEntrySections>> fetchEntriesFromApi() async {
+    final response = await _client.get(ApiEndpoints.registryEntries);
+    final responseData = response.data;
+
+    // Handle: List, {data: List}, or {data: {data: List}} (paginated)
+    List rawList;
+    if (responseData is List) {
+      rawList = responseData;
+    } else if (responseData is Map) {
+      final inner = responseData['data'];
+      if (inner is List) {
+        rawList = inner;
+      } else if (inner is Map && inner['data'] is List) {
+        // Paginated: {data: {data: [...], current_page: ...}}
+        rawList = inner['data'] as List;
+      } else {
+        return [];
+      }
+    } else {
+      return [];
+    }
+
+    return rawList
         .map(
           (json) =>
               RegistryEntrySections.fromJson(Map<String, dynamic>.from(json)),

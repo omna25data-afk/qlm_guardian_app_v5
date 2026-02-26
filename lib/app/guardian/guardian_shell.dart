@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
-import '../../features/registry/presentation/screens/add_registry_entry_screen.dart';
+import '../../features/registry/presentation/screens/guardian_entry_screen.dart';
 import '../../features/sync/presentation/sync_status_widget.dart';
 import '../../features/notifications/presentation/widgets/notification_icon.dart';
 
@@ -55,7 +55,7 @@ class _GuardianShellState extends ConsumerState<GuardianShell> {
   void _openAddEntry() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const AddRegistryEntryScreen()),
+      MaterialPageRoute(builder: (_) => const GuardianEntryScreen()),
     );
   }
 
