@@ -60,6 +60,15 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
   final _guardianEntryNumberCtrl = TextEditingController();
   final _guardianHijriDateCtrl = TextEditingController();
   final _guardianGregorianDateCtrl = TextEditingController();
+
+  // Delivery controllers
+  String _deliveryStatus = 'kept';
+  final _deliveryHijriDateCtrl = TextEditingController();
+  final _deliveryGregorianDateCtrl = TextEditingController();
+  final _recipientNameCtrl = TextEditingController();
+  String?
+  _deliveryProofPath; // In a full implementation, you'd allow picking an image
+
   final Map<String, TextEditingController> _dynamicControllers = {};
 
   @override
@@ -118,6 +127,9 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
     _guardianEntryNumberCtrl.dispose();
     _guardianHijriDateCtrl.dispose();
     _guardianGregorianDateCtrl.dispose();
+    _deliveryHijriDateCtrl.dispose();
+    _deliveryGregorianDateCtrl.dispose();
+    _recipientNameCtrl.dispose();
     for (final c in _dynamicControllers.values) {
       c.dispose();
     }
@@ -176,7 +188,18 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
       'guardian_entry_number': int.tryParse(_guardianEntryNumberCtrl.text),
       'guardian_hijri_date': _guardianHijriDateCtrl.text,
       'guardian_gregorian_date': _guardianGregorianDateCtrl.text,
+      // Delivery
+      'delivery_status': _deliveryStatus,
     };
+
+    if (_deliveryStatus == 'delivered') {
+      data['delivery_hijri_date'] = _deliveryHijriDateCtrl.text;
+      data['delivery_gregorian_date'] = _deliveryGregorianDateCtrl.text;
+      data['recipient_name'] = _recipientNameCtrl.text;
+      if (_deliveryProofPath != null) {
+        data['delivery_proof_path'] = _deliveryProofPath;
+      }
+    }
 
     if (_selectedSubtype1 != null) data['subtype_1'] = _selectedSubtype1;
     if (_selectedSubtype2 != null) data['subtype_2'] = _selectedSubtype2;
@@ -364,6 +387,17 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
                           onRecordBookIdChanged: (v) =>
                               setState(() => _guardianRecordBookId = v),
                         ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // ══════════════════════════════════════
+                      // القسم الرابع: حالة التسليم
+                      // ══════════════════════════════════════
+                      FormSectionCard(
+                        title: 'حالة التسليم',
+                        icon: Icons.local_shipping,
+                        accentColor: Colors.blueGrey,
+                        child: _buildDeliverySection(state),
                       ),
                       const SizedBox(height: 24),
 
@@ -615,6 +649,162 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
       gregCtrl.text =
           '${greg.year}-${greg.month.toString().padLeft(2, '0')}-${greg.day.toString().padLeft(2, '0')}';
     }
+  }
+
+  // ── Delivery section ──
+  Widget _buildDeliverySection(AddEntryState state) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Status Toggle
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            children: [
+              RadioListTile<String>(
+                title: const Text(
+                  'الوثيقة محفوظة لدى الأمين',
+                  style: TextStyle(
+                    fontFamily: 'Tajawal',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                subtitle: const Text(
+                  'لم يتم تسليمها لصاحب الشأن بعد',
+                  style: TextStyle(fontSize: 12),
+                ),
+                value: 'kept',
+                groupValue: _deliveryStatus,
+                activeColor: AppColors.primary,
+                onChanged: (v) {
+                  setState(() => _deliveryStatus = v!);
+                },
+              ),
+              const Divider(height: 1),
+              RadioListTile<String>(
+                title: const Text(
+                  'تم استلام الوثيقة من قبل صاحب الشأن',
+                  style: TextStyle(
+                    fontFamily: 'Tajawal',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                value: 'delivered',
+                groupValue: _deliveryStatus,
+                activeColor: AppColors.success,
+                onChanged: (v) {
+                  setState(() {
+                    _deliveryStatus = v!;
+                    // Set default dates if empty
+                    if (_deliveryHijriDateCtrl.text.isEmpty) {
+                      _deliveryHijriDateCtrl.text = _documentHijriDateCtrl.text;
+                      _deliveryGregorianDateCtrl.text =
+                          _documentGregorianDateCtrl.text;
+                    }
+                    if (_recipientNameCtrl.text.isEmpty) {
+                      _recipientNameCtrl.text = _secondPartyCtrl.text.isEmpty
+                          ? _firstPartyCtrl.text
+                          : _secondPartyCtrl.text;
+                    }
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+
+        // Show extra fields if 'delivered'
+        if (_deliveryStatus == 'delivered') ...[
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _deliveryHijriDateCtrl,
+                  readOnly: true,
+                  validator: (v) => v == null || v.isEmpty ? 'مطلوب' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'تاريخ التسليم (هـ)',
+                    prefixIcon: Icon(Icons.calendar_month, size: 20),
+                  ),
+                  onTap: () => _selectHijriDate(
+                    context,
+                    _deliveryHijriDateCtrl,
+                    _deliveryGregorianDateCtrl,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextFormField(
+                  controller: _deliveryGregorianDateCtrl,
+                  readOnly: true,
+                  decoration: const InputDecoration(
+                    labelText: 'تاريخ التسليم (م)',
+                    prefixIcon: Icon(Icons.date_range, size: 20),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _recipientNameCtrl,
+            validator: (v) =>
+                v == null || v.isEmpty ? 'اسم المستلم مطلوب' : null,
+            decoration: const InputDecoration(
+              labelText: 'اسم المستلم',
+              prefixIcon: Icon(Icons.person, size: 20),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Proof Placeholder
+          InkWell(
+            onTap: () {
+              // Placeholder for file picker
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('خاصية إرفاق صورة محضر التسليم ستفعّل لاحقاً'),
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.grey.shade400,
+                  style: BorderStyle.solid,
+                ),
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey.shade50,
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.upload_file, color: Colors.blue),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'إرفاق صورة محضر التسليم',
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.add, color: Colors.blue),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
   }
 
   // ── AppBar ──
