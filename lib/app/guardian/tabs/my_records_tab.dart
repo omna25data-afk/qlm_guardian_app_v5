@@ -4,7 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../features/records/data/models/record_book.dart';
 import '../../../features/records/presentation/providers/records_provider.dart';
 import '../../../features/records/presentation/screens/record_books_screen.dart';
-import '../../../features/registry/presentation/screens/entries_list_screen.dart';
+import 'guardian_entries_list_screen.dart';
 
 /// سجلاتي + قيودي — TabBar يبدل بينهما (كما في v4)
 class MyRecordsTab extends ConsumerStatefulWidget {
@@ -81,7 +81,7 @@ class _MyRecordsTabState extends ConsumerState<MyRecordsTab>
               // سجلاتي - record books
               _buildRecordBooksTab(),
               // قيودي - entries
-              const EntriesListScreen(),
+              const GuardianEntriesListScreen(),
             ],
           ),
         ),
