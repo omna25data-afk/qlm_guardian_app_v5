@@ -285,6 +285,55 @@ class GuardianEntriesListScreen extends ConsumerWidget {
                           ),
                         );
                       },
+                      onEdit: () {
+                        // TODO: Navigate to edit screen
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'ميزة التعديل قيد التطوير',
+                              style: TextStyle(fontFamily: 'Tajawal'),
+                            ),
+                          ),
+                        );
+                      },
+                      onRequestDocumentation:
+                          (entry.statusInfo.status == 'draft' ||
+                              entry.statusInfo.status == 'registered_guardian')
+                          ? () async {
+                              try {
+                                final targetId = entry.remoteId ?? entry.id;
+                                await ref
+                                    .read(registryRepositoryProvider)
+                                    .requestDocumentation(targetId);
+                                ref.invalidate(rawEntriesProvider);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'تم إرسال طلب التوثيق بنجاح',
+                                        style: TextStyle(fontFamily: 'Tajawal'),
+                                      ),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'خطأ: ${e.toString()}',
+                                        style: const TextStyle(
+                                          fontFamily: 'Tajawal',
+                                        ),
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+                          : null,
                     );
                   },
                 ),
