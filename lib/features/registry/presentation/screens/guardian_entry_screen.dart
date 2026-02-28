@@ -601,34 +601,7 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
 
   // ── Contract-specific fields (divorce/return) ──
   List<Widget> _buildContractSpecificFields() {
-    if (_selectedContractTypeId == 8) {
-      return [
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _divorceContractNumberCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'رقم عقد الطلاق',
-                  prefixIcon: Icon(Icons.numbers, size: 20),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextFormField(
-                controller: _returnDateCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'تاريخ الرجعة',
-                  prefixIcon: Icon(Icons.calendar_today, size: 20),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ];
-    }
+    // Hidden per user request; these are now handled dynamically
     return [];
   }
 

@@ -443,35 +443,7 @@ class _PartiesSectionState extends ConsumerState<PartiesSection> {
   }
 
   List<Widget> _buildContractSpecificFields() {
-    if (widget.selectedContractTypeId == 8) {
-      // Return contract
-      return [
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: widget.divorceContractNumberController,
-                decoration: const InputDecoration(
-                  labelText: 'رقم عقد الطلاق',
-                  prefixIcon: Icon(Icons.numbers, size: 20),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextFormField(
-                controller: widget.returnDateController,
-                decoration: const InputDecoration(
-                  labelText: 'تاريخ الرجعة',
-                  prefixIcon: Icon(Icons.calendar_today, size: 20),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ];
-    }
+    // Hidden per user request; handled dynamically
     return [];
   }
 }
