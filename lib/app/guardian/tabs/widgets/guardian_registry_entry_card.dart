@@ -436,6 +436,23 @@ class GuardianRegistryEntryCard extends ConsumerWidget {
 
   IconData _getTypeIcon(ContractType? type) {
     if (type == null) return Icons.description_outlined;
-    return Icons.description;
+    switch (type.id) {
+      case 1:
+        return Icons.favorite; // زواج
+      case 4:
+        return Icons.gavel; // وكالة
+      case 5:
+        return Icons.swap_horiz; // تصرف
+      case 6:
+        return Icons.account_tree; // قسمة
+      case 7:
+        return Icons.heart_broken; // طلاق
+      case 8:
+        return Icons.replay; // رجعة
+      case 10:
+        return Icons.shopping_cart_outlined; // مبيع
+      default:
+        return Icons.description_outlined;
+    }
   }
 }

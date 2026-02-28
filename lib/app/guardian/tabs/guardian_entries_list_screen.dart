@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../features/registry/presentation/providers/entries_provider.dart';
 import '../../../../features/registry/presentation/providers/contract_types_provider.dart';
 import 'widgets/guardian_registry_entry_card.dart';
@@ -12,7 +11,8 @@ class GuardianEntriesListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final filteredEntriesAsync = ref.watch(filteredEntriesProvider);
-    final selectedFilter = ref.watch(entryStatusFilterProvider);
+    final selectedStatuses = ref.watch(entryStatusesFilterProvider);
+    final sortOption = ref.watch(entrySortProvider);
     ref.watch(contractTypesProvider); // Trigger fetch
 
     return Column(
@@ -49,74 +49,170 @@ class GuardianEntriesListScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-              PopupMenuButton<String?>(
+              // Sort Menu
+              PopupMenuButton<String>(
                 icon: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: selectedFilter != null
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: const Icon(Icons.sort, color: Color(0xFF006400)),
+                ),
+                tooltip: 'ترتيب حسب',
+                initialValue: sortOption,
+                onSelected: (value) {
+                  ref.read(entrySortProvider.notifier).state = value;
+                },
+                itemBuilder: (context) => const [
+                  PopupMenuItem(
+                    value: 'newest',
+                    child: Text(
+                      'الأحدث أضافة',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'oldest',
+                    child: Text(
+                      'الأقدم أضافة',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'highest_amount',
+                    child: Text(
+                      'الأعلى مبلغاً',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'lowest_amount',
+                    child: Text(
+                      'الأقل مبلغاً',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 10),
+              // Filter Menu (Multiple Select)
+              PopupMenuButton<String>(
+                icon: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: selectedStatuses.isNotEmpty
                         ? const Color(0xFF006400)
                         : Colors.white,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: selectedFilter != null
+                      color: selectedStatuses.isNotEmpty
                           ? const Color(0xFF006400)
                           : Colors.grey.shade300,
                     ),
                   ),
                   child: Icon(
                     Icons.filter_list,
-                    color: selectedFilter != null
+                    color: selectedStatuses.isNotEmpty
                         ? Colors.white
                         : const Color(0xFF006400),
                   ),
                 ),
                 tooltip: 'تصفية حسب الحالة',
-                initialValue: selectedFilter,
-                onSelected: (value) {
-                  ref.read(entryStatusFilterProvider.notifier).state = value;
-                },
                 itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: null,
-                    child: Text(
-                      'الكل',
-                      style: TextStyle(fontFamily: 'Tajawal'),
-                    ),
+                  _buildFilterItem(ref, selectedStatuses, 'draft', 'مسودة'),
+                  _buildFilterItem(
+                    ref,
+                    selectedStatuses,
+                    'pending',
+                    'قيد المعالجة',
+                    'pending_documentation',
                   ),
-                  PopupMenuItem(
-                    value: 'draft',
-                    child: Text(
-                      'مسودة',
-                      style: TextStyle(fontFamily: 'Tajawal'),
-                    ),
+                  _buildFilterItem(
+                    ref,
+                    selectedStatuses,
+                    'ready',
+                    'جاهز',
+                    'registered_guardian',
                   ),
-                  PopupMenuItem(
-                    value: 'pending',
-                    child: Text(
-                      'قيد المعالجة',
-                      style: TextStyle(fontFamily: 'Tajawal'),
-                    ),
+                  _buildFilterItem(
+                    ref,
+                    selectedStatuses,
+                    'approved',
+                    'مكتمل',
+                    'documented',
                   ),
-                  PopupMenuItem(
-                    value: 'approved',
-                    child: Text(
-                      'مكتمل',
-                      style: TextStyle(fontFamily: 'Tajawal'),
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'rejected',
-                    child: Text(
-                      'مرفوض',
-                      style: TextStyle(fontFamily: 'Tajawal'),
-                    ),
-                  ),
+                  _buildFilterItem(ref, selectedStatuses, 'rejected', 'مرفوض'),
                 ],
               ),
             ],
           ),
         ),
+
+        // Active Filters Chips Row
+        if (selectedStatuses.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+            ).copyWith(bottom: 12),
+            child: SizedBox(
+              height: 36,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  ...selectedStatuses.map((status) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Chip(
+                        label: Text(
+                          _getStatusName(status),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
+                        onDeleted: () {
+                          final current = List<String>.from(
+                            ref.read(entryStatusesFilterProvider),
+                          );
+                          current.remove(status);
+                          ref.read(entryStatusesFilterProvider.notifier).state =
+                              current;
+                        },
+                        deleteIconColor: Colors.white,
+                        backgroundColor: const Color(0xFF006400),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: const BorderSide(color: Colors.transparent),
+                        ),
+                      ),
+                    );
+                  }),
+                  // Clear all button
+                  ActionChip(
+                    label: const Text(
+                      'مسح الكل',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.red,
+                        fontFamily: 'Tajawal',
+                      ),
+                    ),
+                    backgroundColor: Colors.red.withOpacity(0.1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(color: Colors.red.withOpacity(0.3)),
+                    ),
+                    onPressed: () {
+                      ref.read(entryStatusesFilterProvider.notifier).state = [];
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
 
         // Entries List
         Expanded(
@@ -198,5 +294,64 @@ class GuardianEntriesListScreen extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  PopupMenuItem<String> _buildFilterItem(
+    WidgetRef ref,
+    List<String> selectedStatuses,
+    String value,
+    String label, [
+    String? alternateValue,
+  ]) {
+    final effectiveValue = alternateValue ?? value;
+    final isSelected = selectedStatuses.contains(effectiveValue);
+
+    return PopupMenuItem(
+      value: effectiveValue,
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          return CheckboxListTile(
+            title: Text(label, style: const TextStyle(fontFamily: 'Tajawal')),
+            value: isSelected,
+            onChanged: (bool? checked) {
+              final current = List<String>.from(
+                ref.read(entryStatusesFilterProvider),
+              );
+              if (checked == true) {
+                current.add(effectiveValue);
+              } else {
+                current.remove(effectiveValue);
+              }
+              ref.read(entryStatusesFilterProvider.notifier).state = current;
+              // Close the popup after selection (optional, or keep open for multiple selections)
+              Navigator.pop(context);
+            },
+            controlAffinity: ListTileControlAffinity.leading,
+            activeColor: const Color(0xFF006400),
+            contentPadding: EdgeInsets.zero,
+          );
+        },
+      ),
+    );
+  }
+
+  String _getStatusName(String status) {
+    switch (status) {
+      case 'draft':
+        return 'مسودة';
+      case 'pending':
+      case 'pending_documentation':
+        return 'قيد المعالجة';
+      case 'documented':
+      case 'approved':
+      case 'completed':
+        return 'مكتمل';
+      case 'registered_guardian':
+        return 'جاهز';
+      case 'rejected':
+        return 'مرفوض';
+      default:
+        return status;
+    }
   }
 }

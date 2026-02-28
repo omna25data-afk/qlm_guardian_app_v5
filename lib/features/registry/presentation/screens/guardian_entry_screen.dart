@@ -309,7 +309,7 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
                       FormSectionCard(
                         title: 'نوع المحرر وبيانات السجل',
                         icon: Icons.edit_document,
-                        accentColor: AppColors.primary,
+                        accentColor: const Color(0xFF006400),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -369,7 +369,7 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
                         FormSectionCard(
                           title: 'بيانات الأطراف والمحرر',
                           icon: Icons.people,
-                          accentColor: AppColors.primaryLight,
+                          accentColor: const Color(0xFF008000),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -665,7 +665,7 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
                 ),
                 value: 'kept',
                 groupValue: _deliveryStatus,
-                activeColor: AppColors.primary,
+                activeColor: const Color(0xFF006400),
                 onChanged: (v) {
                   setState(() => _deliveryStatus = v!);
                 },
@@ -795,6 +795,8 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
   // ── AppBar ──
   PreferredSizeWidget _buildAppBar(AddEntryState state) {
     return AppBar(
+      backgroundColor: const Color(0xFF006400),
+      foregroundColor: Colors.white,
       title: const Text(
         'إضافة قيد جديد',
         style: TextStyle(fontFamily: 'Tajawal'),

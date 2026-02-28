@@ -11,8 +11,11 @@ final registryRepositoryProvider = Provider<RegistryRepository>((ref) {
 // Search Query Provider
 final entrySearchQueryProvider = StateProvider<String>((ref) => '');
 
-// Filter Status Provider (null = all, or specific status string)
-final entryStatusFilterProvider = StateProvider<String?>((ref) => null);
+// Filter Statuses Provider (empty = all)
+final entryStatusesFilterProvider = StateProvider<List<String>>((ref) => []);
+
+// Sort Provider
+final entrySortProvider = StateProvider<String>((ref) => 'newest');
 
 // Raw Entries Provider (Fetched from Repo)
 final rawEntriesProvider = FutureProvider<List<RegistryEntrySections>>((
@@ -30,12 +33,14 @@ final filteredEntriesProvider =
           .watch(entrySearchQueryProvider)
           .trim()
           .toLowerCase();
-      final statusFilter = ref.watch(entryStatusFilterProvider);
+      final statusesFilter = ref.watch(entryStatusesFilterProvider);
+      final sortOption = ref.watch(entrySortProvider);
 
       return entriesAsync.whenData((entries) {
-        return entries.where((entry) {
-          // 1. Filter by Status
-          if (statusFilter != null && entry.statusInfo.status != statusFilter) {
+        var filtered = entries.where((entry) {
+          // 1. Filter by Statuses
+          if (statusesFilter.isNotEmpty &&
+              !statusesFilter.contains(entry.statusInfo.status)) {
             return false;
           }
 
@@ -50,8 +55,23 @@ final filteredEntriesProvider =
             final matchesParty2 = entry.basicInfo.secondPartyName
                 .toLowerCase()
                 .contains(searchQuery);
-            final matchesNumber =
+
+            // Check all possible identifiers
+            final matchesRegNum =
                 entry.basicInfo.registerNumber?.toString().contains(
+                  searchQuery,
+                ) ??
+                false;
+            final matchesSerialNum = entry.basicInfo.serialNumber
+                .toString()
+                .contains(searchQuery);
+            final matchesGuardianNum =
+                entry.guardianInfo.guardianEntryNumber?.toString().contains(
+                  searchQuery,
+                ) ??
+                false;
+            final matchesDocNum =
+                entry.documentInfo.docEntryNumber?.toString().contains(
                   searchQuery,
                 ) ??
                 false;
@@ -59,10 +79,42 @@ final filteredEntriesProvider =
             return matchesSubject ||
                 matchesParty1 ||
                 matchesParty2 ||
-                matchesNumber;
+                matchesRegNum ||
+                matchesSerialNum ||
+                matchesGuardianNum ||
+                matchesDocNum;
           }
 
           return true;
         }).toList();
+
+        // 3. Sort
+        if (sortOption == 'newest') {
+          filtered.sort(
+            (a, b) => (b.metadata.createdAt ?? '').compareTo(
+              a.metadata.createdAt ?? '',
+            ),
+          );
+        } else if (sortOption == 'oldest') {
+          filtered.sort(
+            (a, b) => (a.metadata.createdAt ?? '').compareTo(
+              b.metadata.createdAt ?? '',
+            ),
+          );
+        } else if (sortOption == 'highest_amount') {
+          filtered.sort(
+            (a, b) => b.financialInfo.totalAmount.compareTo(
+              a.financialInfo.totalAmount,
+            ),
+          );
+        } else if (sortOption == 'lowest_amount') {
+          filtered.sort(
+            (a, b) => a.financialInfo.totalAmount.compareTo(
+              b.financialInfo.totalAmount,
+            ),
+          );
+        }
+
+        return filtered;
       });
     });
