@@ -38,7 +38,7 @@ class ContractTypeSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'نوع العقد',
+          'نوع المحرر',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
             color: AppColors.textSecondary,
             fontWeight: FontWeight.w600,

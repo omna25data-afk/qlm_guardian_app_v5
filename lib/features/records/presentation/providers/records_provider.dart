@@ -8,6 +8,13 @@ final recordsRepositoryProvider = Provider<RecordsRepository>((ref) {
   return getIt<RecordsRepository>();
 });
 
+final recordBookTypesProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
+  final repository = ref.watch(recordsRepositoryProvider);
+  return repository.getRecordBookTypes();
+});
+
 final recordBooksProvider =
     StateNotifierProvider<RecordBooksNotifier, AsyncValue<List<RecordBook>>>((
       ref,

@@ -25,3 +25,52 @@ final registryEntryProvider =
       // return repository.getEntryByUuid(uuid);
       return null; // Placeholder until repo method added
     });
+
+// Filter entries by record book
+final entriesByRecordBookProvider =
+    FutureProvider.family<
+      List<RegistryEntrySections>,
+      ({int contractTypeId, int bookNumber})
+    >((ref, args) async {
+      final allEntries = await ref.watch(registryEntriesProvider.future);
+      return allEntries.where((e) {
+        // Extract possible book numbers
+        final docBook = e.documentInfo.docRecordBookNumber;
+        final guardianBook = e.guardianInfo.guardianRecordBookNumber;
+
+        // Fallback to checking the record_book map directly if fields were null
+        final Map<String, dynamic>? rawFormData = e.formData;
+        int? rawGuardianBookNum;
+
+        if (rawFormData != null && rawFormData.containsKey('record_book')) {
+          final bookNode = rawFormData['record_book'];
+          if (bookNode is Map) {
+            final tempNum = bookNode['number'] ?? bookNode['book_number'];
+            if (tempNum is String) {
+              rawGuardianBookNum = int.tryParse(tempNum);
+            } else if (tempNum is int) {
+              rawGuardianBookNum = tempNum;
+            }
+          }
+        }
+
+        final bookNum = guardianBook ?? docBook ?? rawGuardianBookNum;
+
+        // Just match the bookNumber directly for simplicity and robustness.
+        // If a guardian has two books across different categories with same number,
+        // we attempt to match contract_type_id if available on the entry.
+        final matchesBook = bookNum != null && bookNum == args.bookNumber;
+
+        if (!matchesBook) return false;
+
+        // If book matches, ensure contract type matches if it exists on the basicInfo
+        if (e.basicInfo.contractTypeId != null) {
+          // We allow it to pass if contract type matches, or if front-end passed fallback typeId
+          return e.basicInfo.contractTypeId == args.contractTypeId ||
+              e.basicInfo.contractTypeId.toString() ==
+                  args.contractTypeId.toString();
+        }
+
+        return true;
+      }).toList();
+    });

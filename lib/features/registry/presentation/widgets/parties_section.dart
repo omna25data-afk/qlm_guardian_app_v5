@@ -114,7 +114,7 @@ class _PartiesSectionState extends ConsumerState<PartiesSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── الجزء الأول: نوع العقد والأنواع الفرعية ──
+        // ── القسم الأول: نوع المحرر وبيانات السجل ──
         ContractTypeSelector(
           contractTypes: widget.contractTypes,
           selectedId: widget.selectedContractTypeId,

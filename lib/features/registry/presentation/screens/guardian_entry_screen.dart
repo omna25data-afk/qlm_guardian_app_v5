@@ -304,10 +304,10 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
                       if (!_isOnline) _buildOfflineBanner(),
 
                       // ══════════════════════════════════════
-                      // القسم الأول: نوع العقد وبيانات الأطراف
+                      // القسم الأول: نوع المحرر وبيانات السجل
                       // ══════════════════════════════════════
                       FormSectionCard(
-                        title: 'نوع المحرر وبيانات الأطراف',
+                        title: 'نوع المحرر وبيانات السجل',
                         icon: Icons.edit_document,
                         accentColor: AppColors.primary,
                         child: Column(
@@ -330,68 +330,80 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
                             const Divider(),
                             const SizedBox(height: 16),
 
-                            // Document date
+                            // ── Record data (date) ──
                             _buildDocumentDateRow(),
+                            const SizedBox(height: 24),
 
-                            const SizedBox(height: 16),
-
-                            // Party fields
-                            ..._buildPartyFields(),
-
-                            // Contract-specific fields (divorce/return)
-                            ..._buildContractSpecificFields(),
+                            // ── بيانات القيد في سجل الأمين ──
+                            const Text(
+                              'بيانات القيد بالمرجع',
+                              style: TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            GuardianSection(
+                              guardianRecordBookId: _guardianRecordBookId,
+                              guardianRecordBooks: state.guardianRecordBooks,
+                              recordBookNumberCtrl:
+                                  _guardianRecordBookNumberCtrl,
+                              pageNumberCtrl: _guardianPageNumberCtrl,
+                              entryNumberCtrl: _guardianEntryNumberCtrl,
+                              hijriDateCtrl: _guardianHijriDateCtrl,
+                              gregorianDateCtrl: _guardianGregorianDateCtrl,
+                              onRecordBookIdChanged: (v) =>
+                                  setState(() => _guardianRecordBookId = v),
+                            ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 16),
 
                       // ══════════════════════════════════════
-                      // القسم الثاني: بيانات القيد/العقد (الحقول الديناميكية)
+                      // القسم الثاني: بيانات الأطراف والمحرر (الحقول الثابتة + الديناميكية)
                       // ══════════════════════════════════════
-                      if (_selectedContractTypeId != null &&
-                          (state.filteredFields.isNotEmpty ||
-                              state.isLoadingFields)) ...[
+                      if (_selectedContractTypeId != null) ...[
                         FormSectionCard(
-                          title: 'بيانات العقد',
-                          icon: Icons.description,
-                          accentColor: AppColors.accent,
-                          child: DynamicFieldBuilder(
-                            fields: state.filteredFields,
-                            isLoading: state.isLoadingFields,
-                            controllers: _dynamicControllers,
-                            onFieldChanged: (entry) {
-                              ref
-                                  .read(addEntryProvider.notifier)
-                                  .updateFormData(entry.key, entry.value);
-                            },
+                          title: 'بيانات الأطراف والمحرر',
+                          icon: Icons.people,
+                          accentColor: AppColors.primaryLight,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Party fields
+                              ..._buildPartyFields(),
+
+                              // Contract-specific fields (divorce/return)
+                              ..._buildContractSpecificFields(),
+
+                              // Dynamic fields
+                              if (state.filteredFields.isNotEmpty ||
+                                  state.isLoadingFields) ...[
+                                const SizedBox(height: 16),
+                                const Divider(),
+                                const SizedBox(height: 8),
+                                DynamicFieldBuilder(
+                                  fields: state.filteredFields,
+                                  isLoading: state.isLoadingFields,
+                                  controllers: _dynamicControllers,
+                                  onFieldChanged: (entry) {
+                                    ref
+                                        .read(addEntryProvider.notifier)
+                                        .updateFormData(entry.key, entry.value);
+                                  },
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                         const SizedBox(height: 16),
                       ],
 
                       // ══════════════════════════════════════
-                      // القسم الثالث: بيانات سجل الأمين
-                      // ══════════════════════════════════════
-                      FormSectionCard(
-                        title: 'بيانات القيد في سجل الأمين',
-                        icon: Icons.book,
-                        accentColor: const Color(0xFF006400),
-                        child: GuardianSection(
-                          guardianRecordBookId: _guardianRecordBookId,
-                          guardianRecordBooks: state.guardianRecordBooks,
-                          recordBookNumberCtrl: _guardianRecordBookNumberCtrl,
-                          pageNumberCtrl: _guardianPageNumberCtrl,
-                          entryNumberCtrl: _guardianEntryNumberCtrl,
-                          hijriDateCtrl: _guardianHijriDateCtrl,
-                          gregorianDateCtrl: _guardianGregorianDateCtrl,
-                          onRecordBookIdChanged: (v) =>
-                              setState(() => _guardianRecordBookId = v),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // ══════════════════════════════════════
-                      // القسم الرابع: حالة التسليم
+                      // القسم الثالث: حالة التسليم
                       // ══════════════════════════════════════
                       FormSectionCard(
                         title: 'حالة التسليم',

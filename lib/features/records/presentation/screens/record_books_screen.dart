@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/record_book.dart';
 import '../providers/records_provider.dart';
+import 'record_book_entries_screen.dart';
 
 class RecordBooksScreen extends ConsumerWidget {
   const RecordBooksScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recordsState = ref.watch(recordBooksProvider);
+    final typesState = ref.watch(recordBookTypesProvider);
+    final booksState = ref.watch(recordBooksProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -18,85 +20,103 @@ class RecordBooksScreen extends ConsumerWidget {
         ),
         centerTitle: true,
       ),
-      body: recordsState.when(
+      body: typesState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
-              const SizedBox(height: 16),
-              Text(
-                'خطأ في تحميل السجلات',
-                style: TextStyle(fontSize: 16, fontFamily: 'Tajawal'),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () =>
-                    ref.read(recordBooksProvider.notifier).fetchRecordBooks(),
-                child: Text(
-                  'إعادة المحاولة',
-                  style: TextStyle(fontFamily: 'Tajawal'),
+        error: (error, _) => _buildError(ref, error.toString()),
+        data: (types) {
+          return booksState.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => _buildError(ref, error.toString()),
+            data: (books) {
+              return RefreshIndicator(
+                onRefresh: () async {
+                  // ignore: unused_result
+                  ref.refresh(recordBookTypesProvider);
+                  // ignore: unused_result
+                  ref.refresh(recordBooksProvider);
+                },
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: types.length,
+                  itemBuilder: (context, index) {
+                    final typeMap = types[index];
+                    final typeId = typeMap['id'] as int;
+                    final typeName = typeMap['name'] as String;
+                    final contractTypeId = typeMap['contract_type_id'] as int?;
+
+                    // Frontend grouping vs backend grouping handling
+                    // Match by contract_type_id since backend groups by it, or fallback to name/recordBookTypeId
+                    final matchingBooks = books.where((b) {
+                      if (contractTypeId != null &&
+                          b.contractTypeId == contractTypeId)
+                        return true;
+                      if (b.recordBookTypeId == typeId) return true;
+                      if (b.contractType.isNotEmpty &&
+                          typeName.contains(b.contractType))
+                        return true;
+                      return false;
+                    }).toList();
+
+                    return _buildTypeCard(
+                      context,
+                      typeName,
+                      contractTypeId ?? typeId,
+                      matchingBooks,
+                    );
+                  },
                 ),
-              ),
-            ],
-          ),
-        ),
-        data: (books) {
-          if (books.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.book_outlined, size: 64, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  Text(
-                    'لا توجد سجلات',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[600],
-                      fontFamily: 'Tajawal',
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          // Group by contract type
-          final grouped = <String, List<RecordBook>>{};
-          for (final book in books) {
-            final key = book.contractType.isNotEmpty
-                ? book.contractType
-                : 'غير مصنف';
-            grouped.putIfAbsent(key, () => []).add(book);
-          }
-
-          return RefreshIndicator(
-            onRefresh: () =>
-                ref.read(recordBooksProvider.notifier).fetchRecordBooks(),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: grouped.length,
-              itemBuilder: (context, index) {
-                final type = grouped.keys.elementAt(index);
-                final typeBooks = grouped[type]!;
-                return _buildContractTypeCard(context, type, typeBooks);
-              },
-            ),
+              );
+            },
           );
         },
       ),
     );
   }
 
-  Widget _buildContractTypeCard(
+  Widget _buildError(WidgetRef ref, String msg) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+          const SizedBox(height: 16),
+          Text(
+            'خطأ في التحميل',
+            style: TextStyle(fontSize: 16, fontFamily: 'Tajawal'),
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: () {
+              // ignore: unused_result
+              ref.refresh(recordBookTypesProvider);
+              // ignore: unused_result
+              ref.refresh(recordBooksProvider);
+            },
+            child: Text(
+              'إعادة المحاولة',
+              style: TextStyle(fontFamily: 'Tajawal'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeCard(
     BuildContext context,
-    String type,
+    String typeName,
+    int contractTypeId,
     List<RecordBook> books,
   ) {
-    final totalEntries = books.fold<int>(0, (sum, b) => sum + b.totalEntries);
-    final activeBooks = books.where((b) => b.isActive).length;
+    // Determine counts from the first matching book which holds aggregate totals
+    int totalEntries = 0;
+    int activeBooks = 0;
+
+    if (books.isNotEmpty) {
+      // Backend already grouped these into `books` where each is an aggregate
+      totalEntries = books.fold<int>(0, (sum, b) => sum + b.totalEntries);
+      activeBooks = books.fold<int>(0, (sum, b) => sum + b.notebooksCount);
+    }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -105,18 +125,15 @@ class RecordBooksScreen extends ConsumerWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          // Navigate to notebooks for this contract type
-          if (books.isNotEmpty) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => RecordBookNotebooksScreen(
-                  contractTypeId: books.first.contractTypeId ?? books.first.id,
-                  contractTypeName: type,
-                ),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => RecordBookNotebooksScreen(
+                contractTypeId: contractTypeId,
+                contractTypeName: typeName,
               ),
-            );
-          }
+            ),
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -143,7 +160,7 @@ class RecordBooksScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          type,
+                          typeName,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -152,7 +169,7 @@ class RecordBooksScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '$activeBooks سجل نشط • $totalEntries قيد',
+                          '$activeBooks دفتر • $totalEntries قيد',
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey[600],
@@ -169,35 +186,6 @@ class RecordBooksScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              if (books.length > 1) ...[
-                const Divider(height: 24),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: books
-                      .take(5)
-                      .map(
-                        (b) => Chip(
-                          label: Text(
-                            '${b.hijriYear} هـ',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'Tajawal',
-                            ),
-                          ),
-                          backgroundColor: b.isActive
-                              ? Colors.green[50]
-                              : Colors.grey[100],
-                          side: BorderSide(
-                            color: b.isActive
-                                ? Colors.green
-                                : Colors.grey[300]!,
-                          ),
-                        ),
-                      )
-                      .toList(),
-                ),
-              ],
             ],
           ),
         ),
@@ -309,80 +297,95 @@ class _RecordBookNotebooksScreenState
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '${book.bookNumber}',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF006400),
-                      fontFamily: 'Tajawal',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => RecordBookEntriesScreen(
+                contractTypeId: book.contractTypeId ?? widget.contractTypeId,
+                contractTypeName: widget.contractTypeName,
+                bookNumber: book.bookNumber,
+              ),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '${book.bookNumber}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF006400),
+                        fontFamily: 'Tajawal',
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'الدفتر رقم ${book.bookNumber}',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Tajawal',
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'الدفتر رقم ${book.bookNumber}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Tajawal',
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'عدد القيود والمحررات: ${book.entriesCount}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                          fontFamily: 'Tajawal',
+                        const SizedBox(height: 4),
+                        Text(
+                          'عدد القيود والمحررات: ${book.entriesCount}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                            fontFamily: 'Tajawal',
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.info_outline),
-                  onPressed: () => _showInfoDialog(book),
-                ),
-              ],
-            ),
-            const Divider(height: 24),
-            _buildDetailRow(
-              Icons.account_balance,
-              'رقم السجل بالوزارة',
-              book.ministryRecordNumber ?? 'غير محدد',
-            ),
-            const SizedBox(height: 8),
-            _buildDetailRow(
-              Icons.description,
-              'القالب المستخدم',
-              book.templateName ?? 'غير محدد',
-            ),
-            const SizedBox(height: 8),
-            _buildDetailRow(
-              Icons.calendar_today,
-              'سنة الصرف',
-              '${book.issuanceYear} هـ',
-            ),
-            const SizedBox(height: 8),
-            _buildDetailRow(Icons.history, 'السنوات', book.years.join('، ')),
-          ],
+                  IconButton(
+                    icon: const Icon(Icons.info_outline),
+                    onPressed: () => _showInfoDialog(book),
+                  ),
+                ],
+              ),
+              const Divider(height: 24),
+              _buildDetailRow(
+                Icons.account_balance,
+                'رقم السجل بالوزارة',
+                book.ministryRecordNumber ?? 'غير محدد',
+              ),
+              const SizedBox(height: 8),
+              _buildDetailRow(
+                Icons.description,
+                'القالب المستخدم',
+                book.templateName ?? 'غير محدد',
+              ),
+              const SizedBox(height: 8),
+              _buildDetailRow(
+                Icons.calendar_today,
+                'سنة الصرف',
+                '${book.issuanceYear} هـ',
+              ),
+              const SizedBox(height: 8),
+              _buildDetailRow(Icons.history, 'السنوات', book.years.join('، ')),
+            ],
+          ),
         ),
       ),
     );
