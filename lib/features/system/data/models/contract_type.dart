@@ -8,6 +8,8 @@ class ContractType {
   final bool isActive;
   final int sortOrder;
   final String? category;
+  final String? color;
+  final String? icon;
   final double? defaultFee;
   final String? requiredDocuments;
   final String? validationRules;
@@ -27,6 +29,8 @@ class ContractType {
     required this.isActive,
     required this.sortOrder,
     this.category,
+    this.color,
+    this.icon,
     this.defaultFee,
     this.requiredDocuments,
     this.validationRules,
@@ -59,6 +63,8 @@ class ContractType {
                 : int.tryParse(json['sort_order'].toString()) ?? 0)
           : 0,
       category: json['category'] ?? null,
+      color: json['color'] ?? null,
+      icon: json['icon'] ?? null,
       defaultFee: json['default_fee'] != null
           ? (json['default_fee'] is num
                 ? json['default_fee'].toDouble()
@@ -89,6 +95,8 @@ class ContractType {
       'is_active': isActive,
       'sort_order': sortOrder,
       'category': category,
+      'color': color,
+      'icon': icon,
       'default_fee': defaultFee,
       'required_documents': requiredDocuments,
       'validation_rules': validationRules,

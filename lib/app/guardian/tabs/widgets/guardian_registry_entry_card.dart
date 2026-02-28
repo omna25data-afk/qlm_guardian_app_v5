@@ -37,6 +37,7 @@ class GuardianRegistryEntryCard extends ConsumerWidget {
     // Use contract type from basicInfo if available
     final contractTypeName =
         entry.basicInfo.contractType?.name ?? 'محرر غير محدد';
+    final contractTypeColor = _parseColor(entry.basicInfo.contractType?.color);
 
     final canRequestDocumentation =
         entry.statusInfo.status == 'draft' ||
@@ -61,13 +62,15 @@ class GuardianRegistryEntryCard extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.05),
+              color: contractTypeColor.withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
               border: Border(
-                bottom: BorderSide(color: statusColor.withValues(alpha: 0.1)),
+                bottom: BorderSide(
+                  color: contractTypeColor.withValues(alpha: 0.1),
+                ),
               ),
             ),
             child: Row(
@@ -88,7 +91,7 @@ class GuardianRegistryEntryCard extends ConsumerWidget {
                   ),
                   child: Icon(
                     _getTypeIcon(entry.basicInfo.contractType),
-                    color: guardianPrimary,
+                    color: contractTypeColor,
                     size: 20,
                   ),
                 ),
@@ -500,7 +503,8 @@ class GuardianRegistryEntryCard extends ConsumerWidget {
     );
   }
 
-  Color _parseColor(String colorName) {
+  Color _parseColor(String? colorName) {
+    if (colorName == null || colorName.isEmpty) return guardianPrimary;
     switch (colorName.toLowerCase()) {
       case 'success':
       case 'green':
