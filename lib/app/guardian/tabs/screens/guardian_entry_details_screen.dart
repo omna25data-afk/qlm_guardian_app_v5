@@ -1,15 +1,95 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart';
+import '../../../../features/registry/presentation/providers/entries_provider.dart';
 
-class GuardianEntryDetailsScreen extends StatelessWidget {
+class GuardianEntryDetailsScreen extends ConsumerStatefulWidget {
   final RegistryEntrySections entry;
 
   // Guardian Specific Green Theme
   static const Color guardianPrimary = Color(0xFF006400);
 
   const GuardianEntryDetailsScreen({super.key, required this.entry});
+
+  @override
+  ConsumerState<GuardianEntryDetailsScreen> createState() =>
+      _GuardianEntryDetailsScreenState();
+}
+
+class _GuardianEntryDetailsScreenState
+    extends ConsumerState<GuardianEntryDetailsScreen> {
+  bool _isLoading = false;
+  late RegistryEntrySections _entry;
+
+  @override
+  void initState() {
+    super.initState();
+    _entry = widget.entry;
+  }
+
+  Future<void> _requestDocumentation() async {
+    setState(() => _isLoading = true);
+    try {
+      // The backend expects the remote ID
+      final targetId = _entry.remoteId ?? _entry.id;
+      await ref.read(registryRepositoryProvider).requestDocumentation(targetId);
+
+      // Refresh entries list to reflect new status
+      ref.invalidate(rawEntriesProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'تم إرسال طلب التوثيق بنجاح',
+              style: TextStyle(fontFamily: 'Tajawal'),
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Locally update the UI
+        setState(() {
+          _entry = RegistryEntrySections(
+            id: _entry.id,
+            uuid: _entry.uuid,
+            remoteId: _entry.remoteId,
+            basicInfo: _entry.basicInfo,
+            writerInfo: _entry.writerInfo,
+            documentInfo: _entry.documentInfo,
+            financialInfo: _entry.financialInfo,
+            guardianInfo: _entry.guardianInfo,
+            statusInfo: RegistryStatusInfo(
+              status: 'pending_documentation',
+              deliveryStatus: _entry.statusInfo.deliveryStatus,
+              statusLabel: 'بانتظار التوثيق',
+              statusColor: 'warning',
+              deliveryStatusLabel: _entry.statusInfo.deliveryStatusLabel,
+              deliveryStatusColor: _entry.statusInfo.deliveryStatusColor,
+              notes: _entry.statusInfo.notes,
+            ),
+            metadata: _entry.metadata,
+            formData: _entry.formData,
+          );
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'خطأ: ${e.toString()}',
+              style: const TextStyle(fontFamily: 'Tajawal'),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,20 +109,20 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
             _buildInfoGrid([
               _buildGridItem(
                 'نوع العقد',
-                entry.basicInfo.contractType?.name ?? 'غير محدد',
+                _entry.basicInfo.contractType?.name ?? 'غير محدد',
                 Icons.description_outlined,
               ),
               _buildGridItem(
                 'تاريخ المحرر (هـ)',
-                entry.documentInfo.documentHijriDate?.split('T').first ?? '-',
+                _entry.documentInfo.documentHijriDate?.split('T').first ?? '-',
                 Icons.calendar_today,
               ),
               _buildGridItem(
                 'تاريخ المحرر (م)',
-                entry.documentInfo.documentGregorianDate != null
+                _entry.documentInfo.documentGregorianDate != null
                     ? intl.DateFormat('yyyy/MM/dd').format(
                         DateTime.tryParse(
-                              entry.documentInfo.documentGregorianDate!,
+                              _entry.documentInfo.documentGregorianDate!,
                             ) ??
                             DateTime.now(),
                       )
@@ -51,17 +131,17 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
               ),
               _buildGridItem(
                 'الطرف الأول',
-                entry.basicInfo.firstPartyName,
+                _entry.basicInfo.firstPartyName,
                 Icons.person,
               ),
               _buildGridItem(
                 'الطرف الثاني',
-                entry.basicInfo.secondPartyName,
+                _entry.basicInfo.secondPartyName,
                 Icons.person_outline,
               ),
               // Dynamic Form Data
-              if (entry.formData != null && entry.formData!.isNotEmpty)
-                ...entry.formData!.entries
+              if (_entry.formData != null && _entry.formData!.isNotEmpty)
+                ..._entry.formData!.entries
                     .where(
                       (e) => e.value != null && e.value.toString().isNotEmpty,
                     )
@@ -97,7 +177,7 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    entry.basicInfo.subject ?? '-',
+                    _entry.basicInfo.subject ?? '-',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -115,7 +195,7 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    entry.basicInfo.content ?? '-',
+                    _entry.basicInfo.content ?? '-',
                     style: const TextStyle(
                       fontSize: 14,
                       fontFamily: 'Tajawal',
@@ -128,128 +208,28 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
             const SizedBox(height: 32),
 
             // ==========================================
-            // 2. بيانات القيد في قلم التوثيق
-            // ==========================================
-            _buildSectionTitle('بيانات القيد في قلم التوثيق'),
-            _buildInfoGrid([
-              _buildGridItem(
-                'قيد',
-                entry.documentInfo.docEntryNumber?.toString() ?? '-',
-                Icons.numbers_outlined,
-              ),
-              _buildGridItem(
-                'رقم السجل',
-                entry.documentInfo.docRecordBookNumber?.toString() ?? '-',
-                Icons.book_outlined,
-              ),
-              _buildGridItem(
-                'رقم الصفحة',
-                entry.documentInfo.docPageNumber?.toString() ?? '-',
-                Icons.find_in_page_outlined,
-              ),
-              _buildGridItem(
-                'رقم الصندوق',
-                entry.documentInfo.docBoxNumber?.toString() ?? '-',
-                Icons.inventory_2_outlined,
-              ),
-              _buildGridItem(
-                'رقم الوثيقة',
-                entry.documentInfo.docDocumentNumber?.toString() ?? '-',
-                Icons.insert_drive_file_outlined,
-              ),
-              _buildGridItem(
-                'تاريخ التوثيق (هـ)',
-                entry.documentInfo.docHijriDate?.split('T').first ?? '-',
-                Icons.calendar_today_outlined,
-              ),
-              _buildGridItem(
-                'تاريخ التوثيق (م)',
-                entry.documentInfo.docGregorianDate != null
-                    ? intl.DateFormat('yyyy/MM/dd').format(
-                        DateTime.tryParse(
-                              entry.documentInfo.docGregorianDate!,
-                            ) ??
-                            DateTime.now(),
-                      )
-                    : '-',
-                Icons.event_outlined,
-              ),
-
-              // Financials embedded in Documentation Group
-              _buildGridItem(
-                'مبلغ الرسوم',
-                '${entry.financialInfo.feeAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
-                Icons.payments_outlined,
-              ),
-              _buildGridItem(
-                'مبلغ الغرامة',
-                '${entry.financialInfo.penaltyAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
-                Icons.money_off_csred_outlined,
-              ),
-              _buildGridItem(
-                'رسوم المصادقة',
-                '${entry.financialInfo.authenticationFeeAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
-                Icons.verified_outlined,
-              ),
-              _buildGridItem(
-                'رسوم الانتقال',
-                '${entry.financialInfo.transferFeeAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
-                Icons.transfer_within_a_station,
-              ),
-              _buildGridItem(
-                'مبلغ الدعم',
-                '${entry.financialInfo.supportAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
-                Icons.volunteer_activism,
-              ),
-              _buildGridItem(
-                'الاستدامة',
-                '${entry.financialInfo.sustainabilityAmount?.toStringAsFixed(2) ?? "0.00"} ر.ي',
-                Icons.nature_people_outlined,
-              ),
-              _buildGridItem(
-                'الإجمالي',
-                '${entry.financialInfo.totalAmount.toStringAsFixed(2)} ر.ي',
-                Icons.account_balance_wallet,
-                isBold: true,
-                valueColor: guardianPrimary,
-              ),
-              _buildGridItem(
-                'رقم السند',
-                entry.financialInfo.receiptNumber ?? '-',
-                Icons.receipt_long,
-              ),
-              if (entry.financialInfo.exemptionType != null)
-                _buildGridItem(
-                  'نوع الإعفاء',
-                  entry.financialInfo.exemptionType!,
-                  Icons.money_off,
-                ),
-            ]),
-            const SizedBox(height: 32),
-
-            // ==========================================
-            // 3. بيانات القيد في سجل الأمين
+            // 2. بيانات القيد في سجل الأمين
             // ==========================================
             _buildSectionTitle('بيانات القيد في سجل الأمين'),
             _buildInfoGrid([
               _buildGridItem(
                 'رقم القيد لدى الأمين',
-                entry.guardianInfo.guardianEntryNumber?.toString() ?? '-',
+                _entry.guardianInfo.guardianEntryNumber?.toString() ?? '-',
                 Icons.numbers_outlined,
               ),
               _buildGridItem(
                 'رقم السجل',
-                entry.guardianInfo.guardianRecordBookNumber?.toString() ?? '-',
+                _entry.guardianInfo.guardianRecordBookNumber?.toString() ?? '-',
                 Icons.menu_book_outlined,
               ),
               _buildGridItem(
                 'رقم الصفحة',
-                entry.guardianInfo.guardianPageNumber?.toString() ?? '-',
+                _entry.guardianInfo.guardianPageNumber?.toString() ?? '-',
                 Icons.find_in_page_outlined,
               ),
               _buildGridItem(
                 'تاريخ القيد (هـ)',
-                entry.guardianInfo.guardianHijriDate?.split('T').first ?? '-',
+                _entry.guardianInfo.guardianHijriDate?.split('T').first ?? '-',
                 Icons.calendar_month_outlined,
               ),
               _buildGridItem('تاريخ القيد (م)', '-', Icons.event_outlined),
@@ -257,20 +237,20 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
             const SizedBox(height: 32),
 
             // ==========================================
-            // 4. معلومات النظام
+            // 3. معلومات النظام
             // ==========================================
             _buildSectionTitle('معلومات النظام'),
             _buildInfoGrid([
               _buildGridItem(
                 'الحالة',
-                _getStatusLabel(entry.statusInfo.status),
+                _getStatusLabel(_entry.statusInfo.status),
                 Icons.info_outline,
               ),
               _buildGridItem(
                 'تاريخ الإنشاء',
-                entry.metadata.createdAt != null
+                _entry.metadata.createdAt != null
                     ? intl.DateFormat('yyyy/MM/dd HH:mm').format(
-                        DateTime.tryParse(entry.metadata.createdAt!) ??
+                        DateTime.tryParse(_entry.metadata.createdAt!) ??
                             DateTime.now(),
                       )
                     : '-',
@@ -278,9 +258,9 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
               ),
               _buildGridItem(
                 'تاريخ آخر تحديث',
-                entry.metadata.updatedAt != null
+                _entry.metadata.updatedAt != null
                     ? intl.DateFormat('yyyy/MM/dd HH:mm').format(
-                        DateTime.tryParse(entry.metadata.updatedAt!) ??
+                        DateTime.tryParse(_entry.metadata.updatedAt!) ??
                             DateTime.now(),
                       )
                     : '-',
@@ -288,15 +268,53 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
               ),
               _buildGridItem(
                 'نوع الكاتب',
-                entry.writerInfo.writerType ?? '-',
+                _entry.writerInfo.writerType ?? '-',
                 Icons.person_pin_outlined,
               ),
               _buildGridItem(
                 'اسم الكاتب',
-                entry.writerInfo.writerName ?? '-',
+                _entry.writerInfo.writerName ?? '-',
                 Icons.person_search_outlined,
               ),
             ]),
+            const SizedBox(height: 40),
+
+            // Status Actions
+            if (_entry.statusInfo.status == 'draft' ||
+                _entry.statusInfo.status == 'registered_guardian')
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _requestDocumentation,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Icon(Icons.send_outlined, color: Colors.white),
+                  label: Text(
+                    _isLoading ? 'جاري الإرسال...' : 'طلب توثيق العقد',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Tajawal',
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: GuardianEntryDetailsScreen.guardianPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+
             const SizedBox(height: 40),
           ],
         ),
@@ -305,7 +323,7 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildHeaderSection() {
-    final headerColor = _getContractColor(entry.basicInfo.contractTypeId);
+    final headerColor = _getContractColor(_entry.basicInfo.contractTypeId);
 
     return Container(
       width: double.infinity,
@@ -324,13 +342,13 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
       child: Column(
         children: [
           Icon(
-            _getContractIcon(entry.basicInfo.contractTypeId),
+            _getContractIcon(_entry.basicInfo.contractTypeId),
             color: Colors.white,
             size: 48,
           ),
           const SizedBox(height: 12),
           Text(
-            entry.basicInfo.contractType?.name ?? 'محرر غير محدد',
+            _entry.basicInfo.contractType?.name ?? 'محرر غير محدد',
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -347,7 +365,7 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              'الرقم المتسلسل: ${entry.basicInfo.serialNumber}',
+              'الرقم المتسلسل: ${_entry.basicInfo.serialNumber}',
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.white,
@@ -368,7 +386,7 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
         style: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: guardianPrimary,
+          color: GuardianEntryDetailsScreen.guardianPrimary,
           fontFamily: 'Tajawal',
         ),
       ),
@@ -426,10 +444,16 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: guardianPrimary.withValues(alpha: 0.05),
+              color: GuardianEntryDetailsScreen.guardianPrimary.withValues(
+                alpha: 0.05,
+              ),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 16, color: guardianPrimary),
+            child: Icon(
+              icon,
+              size: 16,
+              color: GuardianEntryDetailsScreen.guardianPrimary,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -506,7 +530,7 @@ class GuardianEntryDetailsScreen extends StatelessWidget {
         return const Color(0xFF4CAF50); // أخضر للمبيعات
       default:
         // Use guardian primary default here instead of AppColors.primary
-        return guardianPrimary;
+        return GuardianEntryDetailsScreen.guardianPrimary;
     }
   }
 

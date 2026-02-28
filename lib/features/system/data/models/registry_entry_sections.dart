@@ -129,7 +129,20 @@ class RegistryBasicInfo extends Equatable {
       registerNumber: json['register_number'],
       contractType: json['contract_type'] != null
           ? ContractType.fromJson(json['contract_type'])
-          : null,
+          : (json['contract_type_name'] != null
+                ? ContractType(
+                    id: json['contract_type_id'] is int
+                        ? json['contract_type_id']
+                        : int.tryParse(
+                                json['contract_type_id']?.toString() ?? '0',
+                              ) ??
+                              0,
+                    name: json['contract_type_name'],
+                    code: '',
+                    isActive: true,
+                    sortOrder: 0,
+                  )
+                : null),
     );
   }
 
@@ -233,18 +246,22 @@ class RegistryDocumentInfo extends Equatable {
   });
 
   factory RegistryDocumentInfo.fromJson(Map<String, dynamic> json) {
+    // API v2 parsing:
+    // Some data might be nested inside `document_date` or flat
     final rawDocHDate = json['doc_hijri_date'];
     final docHDate = rawDocHDate?.toString().split('T').first;
 
     final rawDocGDate = json['doc_gregorian_date'];
     final docGDate = rawDocGDate?.toString().split('T').first;
 
+    final documentDateMap = json['document_date'] as Map<String, dynamic>?;
+
     final rawDocumentHDate =
-        json['document_hijri_date'] ?? json['document_date']?['hijri'];
+        json['document_hijri_date'] ?? documentDateMap?['hijri'];
     final documentHDate = rawDocumentHDate?.toString().split('T').first;
 
     final rawDocumentGDate =
-        json['document_gregorian_date'] ?? json['document_date']?['gregorian'];
+        json['document_gregorian_date'] ?? documentDateMap?['gregorian'];
     final documentGDate = rawDocumentGDate?.toString().split('T').first;
 
     return RegistryDocumentInfo(
@@ -413,22 +430,32 @@ class RegistryGuardianInfo extends Equatable {
   factory RegistryGuardianInfo.fromJson(Map<String, dynamic> json) {
     final book = json['record_book'] as Map<String, dynamic>?;
 
+    // Handle nested record_book structure for book numbers/pages if present
+    // OR flat structure for older/sync APIs.
+    final guardianRecordBookId = json['guardian_record_book_id'] ?? book?['id'];
+    final guardianRecordBookNumber =
+        json['guardian_record_book_number'] ?? book?['number'];
+    final guardianPageNumber =
+        json['guardian_page_number'] ?? book?['page_number'];
+    final guardianEntryNumber =
+        json['guardian_entry_number'] ?? book?['entry_number'];
+
+    // Dates
+    final rawGuardianHDate =
+        json['guardian_hijri_date'] ?? book?['guardian_hijri_date'];
+    final guardianHijriDate = rawGuardianHDate?.toString().split('T').first;
+
+    final rawGuardianGDate = json['guardian_gregorian_date'];
+    final guardianGregorianDate = rawGuardianGDate?.toString().split('T').first;
+
     return RegistryGuardianInfo(
       guardianId: json['guardian_id'],
-      guardianRecordBookId: json['guardian_record_book_id'] ?? book?['id'],
-      guardianRecordBookNumber:
-          json['guardian_record_book_number'] ?? book?['number'],
-      guardianPageNumber: json['guardian_page_number'] ?? book?['page_number'],
-      guardianEntryNumber:
-          json['guardian_entry_number'] ?? book?['entry_number'],
-      guardianHijriDate: json['guardian_hijri_date']
-          ?.toString()
-          .split('T')
-          .first,
-      guardianGregorianDate: json['guardian_gregorian_date']
-          ?.toString()
-          .split('T')
-          .first,
+      guardianRecordBookId: guardianRecordBookId,
+      guardianRecordBookNumber: guardianRecordBookNumber,
+      guardianPageNumber: guardianPageNumber,
+      guardianEntryNumber: guardianEntryNumber,
+      guardianHijriDate: guardianHijriDate,
+      guardianGregorianDate: guardianGregorianDate,
     );
   }
 

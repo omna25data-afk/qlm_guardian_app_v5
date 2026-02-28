@@ -191,4 +191,12 @@ class RegistryRepository {
 
     return entryWithUuid;
   }
+
+  Future<void> requestDocumentation(int remoteId) async {
+    if (await _networkInfo.isConnected) {
+      await _remoteDataSource.requestDocumentation(remoteId);
+    } else {
+      throw Exception('لا يوجد اتصال بالإنترنت لإرسال الطلب.');
+    }
+  }
 }

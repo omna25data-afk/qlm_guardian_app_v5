@@ -12,6 +12,7 @@ abstract class RegistryRemoteDataSource {
     RegistryEntrySections entry, {
     String? attachmentPath,
   });
+  Future<void> requestDocumentation(int id);
   Future<List<RegistryEntrySections>> fetchEntries({DateTime? lastSyncedAt});
   Future<List<RegistryEntrySections>> fetchEntriesFromApi();
   Future<void> pushEntries(List<RegistryEntrySections> entries);
@@ -92,6 +93,11 @@ class RegistryRemoteDataSourceImpl implements RegistryRemoteDataSource {
         Map<String, dynamic>.from(response.data['data']),
       );
     }
+  }
+
+  @override
+  Future<void> requestDocumentation(int id) async {
+    await _client.put(ApiEndpoints.requestDocumentation(id));
   }
 
   @override
