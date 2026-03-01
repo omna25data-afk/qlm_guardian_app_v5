@@ -8,6 +8,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/searchable_dropdown.dart';
 import '../../../admin/presentation/providers/add_entry_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../system/data/models/registry_entry_sections.dart';
+import '../../../registry/presentation/providers/entries_provider.dart';
 import '../widgets/contract_type_selector.dart';
 import '../widgets/guardian_section.dart';
 import '../widgets/form_section_card.dart';
@@ -28,7 +30,12 @@ const Map<int, Map<String, String>> _contractPartyLabels = {
 /// يحتوي فقط على: نوع العقد، بيانات الأطراف، تاريخ المحرر، سجل الأمين، والحقول الديناميكية.
 /// لا يحتوي على: بيانات قلم التوثيق، الرسوم المالية، الضريبة، الزكاة.
 class GuardianEntryScreen extends ConsumerStatefulWidget {
-  const GuardianEntryScreen({super.key});
+  final RegistryEntrySections?
+  entry; // null = create mode, non-null = edit mode
+
+  const GuardianEntryScreen({super.key, this.entry});
+
+  bool get isEditMode => entry != null;
 
   @override
   ConsumerState<GuardianEntryScreen> createState() =>
@@ -93,18 +100,71 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
       }
     });
 
-    // Set default dates
-    final todayHijri = HijriCalendar.now();
-    final hijriFormatted =
-        '${todayHijri.hYear}-${todayHijri.hMonth.toString().padLeft(2, '0')}-${todayHijri.hDay.toString().padLeft(2, '0')}';
-    final gregFormatted = DateTime.now().toString().split(' ')[0];
-    _documentHijriDateCtrl.text = hijriFormatted;
-    _documentGregorianDateCtrl.text = gregFormatted;
-    _guardianHijriDateCtrl.text = hijriFormatted;
-    _guardianGregorianDateCtrl.text = gregFormatted;
+    if (widget.isEditMode) {
+      _populateForEdit();
+    } else {
+      // Set default dates for new entries
+      final todayHijri = HijriCalendar.now();
+      final hijriFormatted =
+          '${todayHijri.hYear}-${todayHijri.hMonth.toString().padLeft(2, '0')}-${todayHijri.hDay.toString().padLeft(2, '0')}';
+      final gregFormatted = DateTime.now().toString().split(' ')[0];
+      _documentHijriDateCtrl.text = hijriFormatted;
+      _documentGregorianDateCtrl.text = gregFormatted;
+      _guardianHijriDateCtrl.text = hijriFormatted;
+      _guardianGregorianDateCtrl.text = gregFormatted;
+    }
 
     // Sync guardian date with document date
     _documentHijriDateCtrl.addListener(_syncGuardianDate);
+  }
+
+  /// Pre-populate all form fields from the existing entry
+  void _populateForEdit() {
+    final entry = widget.entry!;
+
+    // Contract type
+    _selectedContractTypeId = entry.basicInfo.contractTypeId;
+    _selectedSubtype1 = entry.basicInfo.subtype1?.toString();
+    _selectedSubtype2 = entry.basicInfo.subtype2?.toString();
+
+    // Party names
+    _firstPartyCtrl.text = entry.basicInfo.firstPartyName;
+    _secondPartyCtrl.text = entry.basicInfo.secondPartyName;
+
+    // Document dates
+    _documentHijriDateCtrl.text = entry.documentInfo.documentHijriDate ?? '';
+    _documentGregorianDateCtrl.text =
+        entry.documentInfo.documentGregorianDate ?? '';
+
+    // Guardian record book
+    _guardianRecordBookId = entry.guardianInfo.guardianRecordBookId;
+    _guardianRecordBookNumberCtrl.text =
+        entry.guardianInfo.guardianRecordBookNumber?.toString() ?? '';
+    _guardianPageNumberCtrl.text =
+        entry.guardianInfo.guardianPageNumber?.toString() ?? '';
+    _guardianEntryNumberCtrl.text =
+        entry.guardianInfo.guardianEntryNumber?.toString() ?? '';
+    _guardianHijriDateCtrl.text = entry.guardianInfo.guardianHijriDate ?? '';
+    _guardianGregorianDateCtrl.text =
+        entry.guardianInfo.guardianGregorianDate ?? '';
+
+    // Load dynamic fields for this contract type
+    if (_selectedContractTypeId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final notifier = ref.read(addEntryProvider.notifier);
+        notifier.loadFormFields(_selectedContractTypeId!);
+        notifier.loadGuardianRecordBooks(
+          _selectedContractTypeId!,
+          _guardianId ?? 0,
+        );
+        notifier.loadSubtypes(_selectedContractTypeId!);
+
+        // Pre-populate dynamic form data
+        if (entry.formData != null && entry.formData!.isNotEmpty) {
+          notifier.setFormData(entry.formData!);
+        }
+      });
+    }
   }
 
   void _syncGuardianDate() {
@@ -212,18 +272,36 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
 
     data.removeWhere((key, value) => value == null || value == '');
 
-    final success = await ref.read(addEntryProvider.notifier).submitEntry(data);
+    final notifier = ref.read(addEntryProvider.notifier);
+    final bool success;
+    if (widget.isEditMode) {
+      final entryId = widget.entry!.remoteId ?? widget.entry!.id;
+      success = await notifier.updateEntry(entryId, data);
+    } else {
+      success = await notifier.submitEntry(data);
+    }
 
-    if (success && mounted && !_isOnline) {
+    if (success && mounted) {
+      // Refresh entries list
+      ref.invalidate(rawEntriesProvider);
+
+      final message = widget.isEditMode
+          ? 'تم تعديل القيد بنجاح'
+          : (_isOnline
+                ? 'تم حفظ القيد بنجاح'
+                : 'تم الحفظ محلياً - سيُرفع عند الاتصال');
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.white, size: 20),
-              SizedBox(width: 8),
-              Text(
-                'تم الحفظ محلياً - سيُرفع عند الاتصال',
-                style: TextStyle(fontFamily: 'Tajawal'),
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(fontFamily: 'Tajawal'),
+                ),
               ),
             ],
           ),
@@ -797,9 +875,9 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
     return AppBar(
       backgroundColor: const Color(0xFF006400),
       foregroundColor: Colors.white,
-      title: const Text(
-        'إضافة قيد جديد',
-        style: TextStyle(fontFamily: 'Tajawal'),
+      title: Text(
+        widget.isEditMode ? 'تعديل القيد' : 'إضافة قيد جديد',
+        style: const TextStyle(fontFamily: 'Tajawal'),
       ),
       actions: [
         Container(
@@ -893,10 +971,17 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(_isOnline ? Icons.save : Icons.save_alt, size: 22),
+                  Icon(
+                    widget.isEditMode
+                        ? Icons.edit
+                        : (_isOnline ? Icons.save : Icons.save_alt),
+                    size: 22,
+                  ),
                   const SizedBox(width: 10),
                   Text(
-                    _isOnline ? 'حفظ القيد' : 'حفظ محلياً',
+                    widget.isEditMode
+                        ? 'حفظ التعديلات'
+                        : (_isOnline ? 'حفظ القيد' : 'حفظ محلياً'),
                     style: const TextStyle(
                       fontFamily: 'Tajawal',
                       fontSize: 17,

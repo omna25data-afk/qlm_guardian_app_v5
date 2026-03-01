@@ -28,29 +28,37 @@ class RegistryRepository {
        _cacheBox = cacheBox,
        _syncService = syncService;
 
-  /// Get all entries (offline-first)
+  /// Get all entries (online-first, local fallback)
   Future<List<RegistryEntrySections>> getEntries() async {
-    // 1. Try to fetch from API if online
     if (await _networkInfo.isConnected) {
+      // 1. Try primary API endpoint
       try {
         final remoteEntries = await _remoteDataSource.fetchEntriesFromApi();
+        // Save to local DB for offline fallback (best-effort)
         for (var entry in remoteEntries) {
-          await _localDataSource.insertEntry(entry);
+          try {
+            await _localDataSource.insertEntry(entry);
+          } catch (_) {}
         }
+        return remoteEntries; // Return API data directly (complete fields)
       } catch (e) {
-        // Fallback: try sync endpoint
+        debugPrint('Primary API failed: $e');
+        // 2. Fallback: try sync endpoint
         try {
           final syncEntries = await _remoteDataSource.fetchEntries();
           for (var entry in syncEntries) {
-            await _localDataSource.insertEntry(entry);
+            try {
+              await _localDataSource.insertEntry(entry);
+            } catch (_) {}
           }
+          return syncEntries; // Return sync data directly
         } catch (e2) {
-          debugPrint('Sync failed: $e2');
+          debugPrint('Sync endpoint also failed: $e2');
         }
       }
     }
 
-    // 2. Return local data
+    // 3. Offline fallback: return local data (may have limited fields)
     return _localDataSource.getAllEntries();
   }
 

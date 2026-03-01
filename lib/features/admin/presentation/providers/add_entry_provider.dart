@@ -271,9 +271,11 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
       successMessage: null,
     );
     try {
-      // Merge dynamic formData
+      // Include dynamic formData nested inside 'form_data' key
       final mergedData = Map<String, dynamic>.from(data);
-      mergedData.addAll(state.formData);
+      if (state.formData.isNotEmpty) {
+        mergedData['form_data'] = state.formData;
+      }
 
       await _repo.storeRegistryEntry(mergedData);
 
@@ -359,9 +361,11 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
       successMessage: null,
     );
     try {
-      // Merge dynamic formData
+      // Include dynamic formData nested inside 'form_data' key
       final mergedData = Map<String, dynamic>.from(data);
-      mergedData.addAll(state.formData);
+      if (state.formData.isNotEmpty) {
+        mergedData['form_data'] = state.formData;
+      }
 
       await _repo.updateRegistryEntry(entryId, mergedData);
 
