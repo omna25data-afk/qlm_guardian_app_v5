@@ -122,7 +122,12 @@ class RegistryRemoteDataSourceImpl implements RegistryRemoteDataSource {
 
   @override
   Future<List<RegistryEntrySections>> fetchEntriesFromApi() async {
-    final response = await _client.get(ApiEndpoints.registryEntries);
+    final response = await _client.get(
+      ApiEndpoints.registryEntries,
+      queryParameters: {
+        'per_page': 1000,
+      }, // جلب جميع القيود بدلاً من الـ pagination الافتراضي
+    );
     final responseData = response.data;
 
     // Handle: List, {data: List}, or {data: {data: List}} (paginated)

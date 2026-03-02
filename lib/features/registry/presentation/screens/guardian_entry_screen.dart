@@ -152,6 +152,19 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
     if (_selectedContractTypeId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final notifier = ref.read(addEntryProvider.notifier);
+
+        // ① تعيين formData أولاً (قبل loadFormFields لمنع مسحها)
+        if (entry.formData != null && entry.formData!.isNotEmpty) {
+          notifier.setFormData(entry.formData!);
+        }
+
+        // ② تنظيف الـ controllers القديمة من أي تعديل سابق
+        for (final c in _dynamicControllers.values) {
+          c.dispose();
+        }
+        _dynamicControllers.clear();
+
+        // ③ تحميل الحقول والدفاتر والأنواع الفرعية
         notifier.loadFormFields(_selectedContractTypeId!);
         notifier.loadGuardianRecordBooks(
           _selectedContractTypeId!,
@@ -159,12 +172,38 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
         );
         notifier.loadSubtypes(_selectedContractTypeId!);
 
-        // Pre-populate dynamic form data
-        if (entry.formData != null && entry.formData!.isNotEmpty) {
-          notifier.setFormData(entry.formData!);
-        }
+        // ④ ملء الـ controllers الديناميكية بالقيم المحفوظة (بعد تأخير لضمان بناء الحقول)
+        _populateDynamicControllers(entry.formData);
       });
     }
+  }
+
+  /// ملء controllers الحقول الديناميكية من formData بعد تحميل الحقول
+  void _populateDynamicControllers(Map<String, dynamic>? formData) {
+    if (formData == null || formData.isEmpty) return;
+
+    // تأخير بسيط لضمان أن DynamicFieldBuilder أنشأ الـ controllers
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
+      for (final entry in formData.entries) {
+        final controller = _dynamicControllers[entry.key];
+        if (controller != null && entry.value != null) {
+          controller.text = entry.value.toString();
+        }
+      }
+      // محاولة ثانية بتأخير أطول (في حال الحقول لم تُبنى بعد)
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (!mounted) return;
+        for (final entry in formData.entries) {
+          final controller = _dynamicControllers[entry.key];
+          if (controller != null &&
+              entry.value != null &&
+              controller.text.isEmpty) {
+            controller.text = entry.value.toString();
+          }
+        }
+      });
+    });
   }
 
   void _syncGuardianDate() {
@@ -273,46 +312,78 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
     data.removeWhere((key, value) => value == null || value == '');
 
     final notifier = ref.read(addEntryProvider.notifier);
-    final bool success;
-    if (widget.isEditMode) {
-      final entryId = widget.entry!.remoteId ?? widget.entry!.id;
-      success = await notifier.updateEntry(entryId, data);
-    } else {
-      success = await notifier.submitEntry(data);
-    }
 
-    if (success && mounted) {
-      // Refresh entries list
-      ref.invalidate(rawEntriesProvider);
+    try {
+      final bool success;
+      if (widget.isEditMode) {
+        final entryId = widget.entry!.remoteId ?? widget.entry!.id;
+        success = await notifier.updateEntry(entryId, data);
+      } else {
+        success = await notifier.submitEntry(data);
+      }
 
-      final message = widget.isEditMode
-          ? 'تم تعديل القيد بنجاح'
-          : (_isOnline
-                ? 'تم حفظ القيد بنجاح'
-                : 'تم الحفظ محلياً - سيُرفع عند الاتصال');
+      if (!mounted) return;
 
+      if (success) {
+        // Refresh entries list
+        ref.invalidate(rawEntriesProvider);
+
+        final message = widget.isEditMode
+            ? 'تم تعديل القيد بنجاح'
+            : (_isOnline
+                  ? 'تم حفظ القيد بنجاح'
+                  : 'تم الحفظ محلياً - سيُرفع عند الاتصال');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: const TextStyle(fontFamily: 'Tajawal'),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+        Navigator.pop(context);
+      } else {
+        // عرض رسالة الخطأ من الـ provider
+        final errorState = ref.read(addEntryProvider);
+        if (errorState.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                errorState.error!,
+                style: const TextStyle(fontFamily: 'Tajawal'),
+              ),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  message,
-                  style: const TextStyle(fontFamily: 'Tajawal'),
-                ),
-              ),
-            ],
+          content: Text(
+            'حدث خطأ غير متوقع: ${e.toString()}',
+            style: const TextStyle(fontFamily: 'Tajawal'),
           ),
-          backgroundColor: AppColors.success,
+          backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
         ),
       );
-      Navigator.pop(context);
     }
   }
 
@@ -651,28 +722,20 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
     }
 
     return [
-      Row(
-        children: [
-          Expanded(
-            child: TextFormField(
-              controller: _firstPartyCtrl,
-              decoration: InputDecoration(
-                labelText: labels['first'],
-                prefixIcon: const Icon(Icons.person, size: 20),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: TextFormField(
-              controller: _secondPartyCtrl,
-              decoration: InputDecoration(
-                labelText: labels['second'],
-                prefixIcon: const Icon(Icons.person_outline, size: 20),
-              ),
-            ),
-          ),
-        ],
+      TextFormField(
+        controller: _firstPartyCtrl,
+        decoration: InputDecoration(
+          labelText: labels['first'],
+          prefixIcon: const Icon(Icons.person, size: 20),
+        ),
+      ),
+      const SizedBox(height: 12),
+      TextFormField(
+        controller: _secondPartyCtrl,
+        decoration: InputDecoration(
+          labelText: labels['second'],
+          prefixIcon: const Icon(Icons.person_outline, size: 20),
+        ),
       ),
     ];
   }

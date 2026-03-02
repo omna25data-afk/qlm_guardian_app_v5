@@ -358,8 +358,18 @@ class AddRegistryEntryNotifier extends StateNotifier<AddRegistryEntryState> {
           )
           .toList();
 
-      state = state.copyWith(allFields: rawFields, isLoadingFields: false);
-      filterFields();
+      // مقارنة hash للبيانات الجديدة مع الحالية لاكتشاف التغيير
+      final newHash = rawFields.toString().hashCode;
+      final oldHash = state.allFields.toString().hashCode;
+
+      if (newHash != oldHash) {
+        // تغيير مُكتشَف → تحديث الـ state
+        state = state.copyWith(allFields: rawFields, isLoadingFields: false);
+        filterFields();
+      } else {
+        // لا تغيير → إيقاف التحميل فقط
+        state = state.copyWith(isLoadingFields: false);
+      }
     } catch (e) {
       state = state.copyWith(
         isLoadingFields: false,

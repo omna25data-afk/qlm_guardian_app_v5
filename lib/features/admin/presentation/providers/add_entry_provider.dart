@@ -443,43 +443,67 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
   Future<void> loadFormFields(int contractTypeId) async {
     state = state.copyWith(isLoadingFields: true);
 
-    // Instant cache
+    // مفتاح الكاش ومفتاح الـ hash
     final cacheKey = 'fields_$contractTypeId';
+    final hashKey = 'fields_hash_$contractTypeId';
     final cached = _cacheBox?.get(cacheKey);
+
+    // ① عرض فوري من الكاش (إن وُجد)
     if (cached != null) {
       try {
         final fields = (cached as List)
             .map((e) => Map<String, dynamic>.from(e))
             .toList();
+        // الحفاظ على formData الحالية (مهم لوضع التعديل)
+        final existingFormData = state.formData;
         state = state.copyWith(
           allFields: fields,
           isLoadingFields: false,
           filteredFields: [],
-          formData: {},
+          formData: (existingFormData.isNotEmpty) ? existingFormData : {},
         );
         filterFields();
       } catch (_) {}
     }
 
+    // ② جلب البيانات من الشبكة في الخلفية
     try {
       final fields = await _repo.getFormFields(contractTypeId);
-      // Update cache
-      _cacheBox?.put(cacheKey, fields);
 
-      state = state.copyWith(
-        allFields: fields,
-        isLoadingFields: false,
-        filteredFields: [],
-        formData: {},
-      );
-      filterFields();
+      // ③ حساب hash للبيانات الجديدة ومقارنته بالقديم
+      final newHash = fields.toString().hashCode.toString();
+      final oldHash = _cacheBox?.get(hashKey) as String?;
+
+      if (newHash != oldHash) {
+        // تغيير مُكتشَف → تحديث الكاش والـ state
+        _cacheBox?.put(cacheKey, fields);
+        _cacheBox?.put(hashKey, newHash);
+
+        // الحفاظ على formData الحالية (مهم لوضع التعديل)
+        final existingData = state.formData;
+        state = state.copyWith(
+          allFields: fields,
+          isLoadingFields: false,
+          filteredFields: [],
+          formData: (existingData.isNotEmpty) ? existingData : {},
+        );
+        filterFields();
+      } else {
+        // لا تغيير → إيقاف التحميل فقط دون إعادة بناء
+        if (state.isLoadingFields) {
+          state = state.copyWith(isLoadingFields: false);
+        }
+      }
     } catch (e) {
+      // فشل الشبكة → إبقاء الكاش إن وُجد
       if (cached == null) {
         state = state.copyWith(
           isLoadingFields: false,
           allFields: [],
           filteredFields: [],
         );
+      } else {
+        state = state.copyWith(isLoadingFields: false);
       }
     }
   }

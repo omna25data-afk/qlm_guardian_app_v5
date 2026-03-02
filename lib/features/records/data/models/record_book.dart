@@ -225,7 +225,7 @@ class RecordBook {
 
   /// Dynamic composite name for UI display
   String get compositeName {
-    final baseName = '$contractType (رقم $bookNumber - $hijriYear)';
+    final baseName = '$contractType (رقم $bookNumber)';
     if (writerName.isNotEmpty) {
       return '$baseName - $writerName';
     }

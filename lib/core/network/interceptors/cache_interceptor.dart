@@ -24,7 +24,6 @@ class SwrCacheInterceptor extends Interceptor {
     '/admin/assignments': Duration(hours: 6),
     '/admin/record-books': Duration(hours: 6),
     '/contract-types': Duration(hours: 24),
-    '/form-fields': Duration(hours: 24),
     '/record-book-types': Duration(hours: 24),
     '/admin/districts': Duration(hours: 24),
     '/admin/villages': Duration(hours: 24),
@@ -36,6 +35,7 @@ class SwrCacheInterceptor extends Interceptor {
     '/admin/registry-entries': Duration(minutes: 5),
     '/admin/dashboard': Duration(minutes: 5),
     '/notifications': Duration(minutes: 2),
+    '/form-fields': Duration(minutes: 5), // تُدار من Filament وتتغير باستمرار
   };
 
   /// Mutation endpoints → which cache groups to invalidate
