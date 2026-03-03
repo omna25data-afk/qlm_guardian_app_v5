@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' as intl;
 import '../../../../core/theme/app_colors.dart';
-import '../../data/models/notification_model.dart';
-import '../providers/notifications_provider.dart';
+import '../../data/models/app_notification_model.dart';
+import '../providers/notification_provider.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notificationsAsync = ref.watch(notificationsListProvider);
+    final state = ref.watch(notificationProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'الإشعارات',
           style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
         ),
@@ -23,110 +23,185 @@ class NotificationsScreen extends ConsumerWidget {
         foregroundColor: Colors.black,
         elevation: 0.5,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.done_all),
-            tooltip: 'تحديد الكل كمقروء',
-            onPressed: () {
-              ref.read(notificationsControllerProvider).markAllAsRead();
-            },
-          ),
+          if (state.unreadCount > 0)
+            IconButton(
+              icon: const Icon(Icons.done_all),
+              tooltip: 'تحديد الكل كمقروء',
+              onPressed: () {
+                ref.read(notificationProvider.notifier).markAllAsRead();
+              },
+            ),
         ],
       ),
       backgroundColor: const Color(0xFFF9FAFB),
-      body: notificationsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
+      body: RefreshIndicator(
+        onRefresh: () async =>
+            ref.read(notificationProvider.notifier).refresh(),
+        child: _buildBody(state, ref),
+      ),
+    );
+  }
+
+  Widget _buildBody(NotificationState state, WidgetRef ref) {
+    if (state.isLoading && state.notifications.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.error != null && state.notifications.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            const Text(
+              'حدث خطأ أثناء تحميل الإشعارات',
+              style: TextStyle(fontFamily: 'Tajawal'),
+            ),
+            if (state.error != null)
               Text(
-                'حدث خطأ أثناء تحميل الإشعارات',
-                style: TextStyle(fontFamily: 'Tajawal'),
-              ),
-              TextButton(
-                onPressed: () => ref.refresh(notificationsListProvider),
-                child: Text(
-                  'إعادة المحاولة',
-                  style: TextStyle(fontFamily: 'Tajawal'),
+                state.error!,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                  fontFamily: 'Tajawal',
                 ),
               ),
-            ],
-          ),
-        ),
-        data: (notifications) {
-          if (notifications.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.notifications_none,
-                    size: 64,
-                    color: Colors.grey[300],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'لا توجد إشعارات جديدة',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[500],
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Tajawal',
-                    ),
-                  ),
-                ],
+            TextButton(
+              onPressed: () =>
+                  ref.read(notificationProvider.notifier).refresh(),
+              child: const Text(
+                'إعادة المحاولة',
+                style: TextStyle(fontFamily: 'Tajawal'),
               ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async =>
-                ref.refresh(notificationsListProvider.future),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: notifications.length,
-              itemBuilder: (context, index) {
-                return _NotificationCard(notification: notifications[index]);
-              },
             ),
-          );
-        },
-      ),
+          ],
+        ),
+      );
+    }
+
+    if (state.notifications.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.notifications_none, size: 64, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text(
+              'لا توجد إشعارات جديدة',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey[500],
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Tajawal',
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: state.notifications.length,
+      itemBuilder: (context, index) {
+        final notification = state.notifications[index];
+        return Dismissible(
+          key: Key(notification.id),
+          direction: DismissDirection.endToStart,
+          background: Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(left: 20),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.red.shade400,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.delete_outline,
+              color: Colors.white,
+              size: 28,
+            ),
+          ),
+          confirmDismiss: (_) async {
+            return await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text(
+                      'حذف الإشعار',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
+                    content: const Text(
+                      'هل تريد حذف هذا الإشعار؟',
+                      style: TextStyle(fontFamily: 'Tajawal'),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text(
+                          'إلغاء',
+                          style: TextStyle(fontFamily: 'Tajawal'),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: const Text(
+                          'حذف',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ) ??
+                false;
+          },
+          onDismissed: (_) {
+            ref
+                .read(notificationProvider.notifier)
+                .deleteNotification(notification.id);
+          },
+          child: _NotificationCard(notification: notification),
+        );
+      },
     );
   }
 }
 
 class _NotificationCard extends ConsumerWidget {
-  final NotificationModel notification;
+  final AppNotificationModel notification;
 
   const _NotificationCard({required this.notification});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isRead = notification.readAt != null;
+    final title = notification.data['title'] ?? 'إشعار جديد';
+    final body =
+        notification.data['body'] ?? notification.data['message'] ?? '';
+    final type =
+        notification.data['action_type'] ?? notification.data['type'] ?? 'info';
+
     return Card(
-      elevation: notification.isRead ? 0.5 : 2,
+      elevation: isRead ? 0.5 : 2,
       margin: const EdgeInsets.only(bottom: 12),
-      color: notification.isRead
-          ? Colors.white
-          : Colors.blue.shade50.withValues(alpha: 0.3),
+      color: isRead ? Colors.white : Colors.blue.shade50.withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: notification.isRead
+          color: isRead
               ? Colors.transparent
               : Colors.blue.withValues(alpha: 0.2),
         ),
       ),
       child: InkWell(
         onTap: () {
-          if (!notification.isRead) {
-            ref
-                .read(notificationsControllerProvider)
-                .markAsRead(notification.id);
+          if (!isRead) {
+            ref.read(notificationProvider.notifier).markAsRead(notification.id);
           }
-          // Handle tap action based on type if needed
+          // Handle tap action based on link if provided
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -134,7 +209,7 @@ class _NotificationCard extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildIcon(notification.type),
+              _buildIcon(type),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -144,20 +219,20 @@ class _NotificationCard extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            notification.title,
+                            title,
                             style: TextStyle(
-                              fontWeight: notification.isRead
+                              fontWeight: isRead
                                   ? FontWeight.w600
                                   : FontWeight.bold,
                               fontSize: 16,
-                              color: notification.isRead
+                              color: isRead
                                   ? AppColors.textPrimary
                                   : Colors.black,
                               fontFamily: 'Tajawal',
                             ),
                           ),
                         ),
-                        if (!notification.isRead)
+                        if (!isRead)
                           Container(
                             width: 8,
                             height: 8,
@@ -170,7 +245,7 @@ class _NotificationCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      notification.body,
+                      body,
                       style: TextStyle(
                         fontSize: 14,
                         color: AppColors.textSecondary,
@@ -203,20 +278,27 @@ class _NotificationCard extends ConsumerWidget {
 
     switch (type) {
       case 'success':
+      case 'entry_approved':
         icon = Icons.check_circle;
         color = Colors.green;
         break;
       case 'warning':
-        icon = Icons.warning_amber_rounded;
+      case 'entry_status_changed':
+        icon = Icons.sync;
         color = Colors.orange;
         break;
       case 'error':
+      case 'entry_rejected':
         icon = Icons.error_outline;
         color = Colors.red;
         break;
+      case 'entry_created':
+        icon = Icons.post_add;
+        color = Colors.blue;
+        break;
       case 'info':
       default:
-        icon = Icons.info_outline;
+        icon = Icons.notifications_active;
         color = Colors.blue;
         break;
     }

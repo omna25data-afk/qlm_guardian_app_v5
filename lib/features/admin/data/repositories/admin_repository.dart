@@ -624,6 +624,34 @@ class AdminRepository {
     return response.data['data'] ?? response.data;
   }
 
+  /// Fetch activity log for a specific registry entry
+  Future<List<Map<String, dynamic>>> getActivityLogRaw(int entryId) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.entryActivityLog(entryId),
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
+  /// Fetch recent activity logs (dashboard — عملياتي / عمليات الأمناء)
+  Future<List<Map<String, dynamic>>> getRecentActivityLogs({
+    bool mine = false,
+  }) async {
+    final params = <String, dynamic>{};
+    if (mine) params['mine'] = '1';
+
+    final response = await _apiClient.get(
+      ApiEndpoints.adminActivityLogs,
+      queryParameters: params.isNotEmpty ? params : null,
+    );
+    return (response.data['data'] as List?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        [];
+  }
+
   // ─── Registry Entry Creation ─────────────────────────────
 
   /// Store a new registry entry (offline-first)

@@ -593,14 +593,11 @@ class _AdminDashboardTabState extends ConsumerState<AdminDashboardTab>
               },
             ),
             SizedBox(
-              height: 200,
+              height: 300,
               child: TabBarView(
                 children: [
-                  _buildLogPlaceholder(
-                    'لا توجد عمليات مسجلة حالياً',
-                    Icons.admin_panel_settings,
-                  ),
-                  _buildLogPlaceholder('لا توجد سجلات حالياً', Icons.history),
+                  _ActivityLogList(filterMine: true),
+                  _ActivityLogList(filterMine: false),
                 ],
               ),
             ),
@@ -609,21 +606,182 @@ class _AdminDashboardTabState extends ConsumerState<AdminDashboardTab>
       ),
     );
   }
+}
 
-  Widget _buildLogPlaceholder(String message, IconData icon) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 48, color: Colors.grey[300]),
-          const SizedBox(height: 12),
-          Text(
-            message,
-            style: TextStyle(color: Colors.grey[500], fontFamily: 'Tajawal'),
-          ),
-        ],
+/// ويدجت قائمة سجل العمليات في الداشبورد
+class _ActivityLogList extends ConsumerStatefulWidget {
+  final bool filterMine;
+  const _ActivityLogList({required this.filterMine});
+
+  @override
+  ConsumerState<_ActivityLogList> createState() => _ActivityLogListState();
+}
+
+class _ActivityLogListState extends ConsumerState<_ActivityLogList>
+    with AutomaticKeepAliveClientMixin {
+  List<Map<String, dynamic>> _logs = [];
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLogs();
+  }
+
+  Future<void> _fetchLogs() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final repository = ref.read(adminRepositoryProvider);
+      final logs = await repository.getRecentActivityLogs(
+        mine: widget.filterMine,
+      );
+      if (mounted) {
+        setState(() {
+          _logs = logs;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'تعذر تحميل السجل';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, color: Colors.red[300], size: 36),
+            const SizedBox(height: 8),
+            Text(
+              _error!,
+              style: TextStyle(color: Colors.grey[500], fontFamily: 'Tajawal'),
+            ),
+            TextButton(
+              onPressed: _fetchLogs,
+              child: const Text('إعادة المحاولة'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_logs.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              widget.filterMine ? Icons.admin_panel_settings : Icons.history,
+              size: 48,
+              color: Colors.grey[300],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'لا توجد عمليات مسجلة حالياً',
+              style: TextStyle(color: Colors.grey[500], fontFamily: 'Tajawal'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _fetchLogs,
+      child: ListView.separated(
+        padding: const EdgeInsets.all(12),
+        itemCount: _logs.length,
+        separatorBuilder: (_, __) => const Divider(height: 1),
+        itemBuilder: (context, index) {
+          final log = _logs[index];
+          final (icon, color) = _getActionStyle(log['action'] ?? '');
+          return ListTile(
+            dense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 4,
+              vertical: 2,
+            ),
+            leading: Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 16, color: color),
+            ),
+            title: Text(
+              log['description'] ?? log['action_label'] ?? log['action'] ?? '',
+              style: const TextStyle(
+                fontSize: 12,
+                fontFamily: 'Tajawal',
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              '${log['user_name'] ?? 'النظام'} • ${log['time_ago'] ?? log['created_at'] ?? ''}',
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.grey[500],
+                fontFamily: 'Tajawal',
+              ),
+            ),
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                log['action_label'] ?? log['action'] ?? '',
+                style: TextStyle(
+                  fontSize: 9,
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Tajawal',
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
+  }
+
+  (IconData, Color) _getActionStyle(String action) {
+    return switch (action) {
+      'created' => (Icons.add_circle_outline, Colors.blue),
+      'updated' => (Icons.edit_outlined, Colors.orange),
+      'documented' => (Icons.check_circle, Colors.green),
+      'rejected' => (Icons.cancel_outlined, Colors.red),
+      'deleted' => (Icons.delete_outline, Colors.red.shade700),
+      'status_changed' => (Icons.sync, Colors.purple),
+      'requested_documentation' => (Icons.send, Colors.teal),
+      _ => (Icons.info_outline, Colors.grey),
+    };
   }
 }
 

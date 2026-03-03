@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import '../../../../core/theme/app_colors.dart';
 import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart';
+import '../../../admin/presentation/widgets/activity_log_widget.dart';
 
 class EntryDetailsScreen extends StatelessWidget {
   final RegistryEntrySections entry;
@@ -295,6 +296,15 @@ class EntryDetailsScreen extends StatelessWidget {
               ),
             ]),
             const SizedBox(height: 40),
+
+            // ==========================================
+            // 5. سجل العمليات
+            // ==========================================
+            if (entry.id > 0) ...[
+              _buildSectionTitle('سجل العمليات'),
+              ActivityLogWidget(entryId: entry.id),
+              const SizedBox(height: 40),
+            ],
           ],
         ),
       ),

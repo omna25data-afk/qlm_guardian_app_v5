@@ -93,6 +93,11 @@ class ApiEndpoints {
   static String calculateFees(int id) =>
       '$baseUrl/registry-entries/$id/calculate-fees';
 
+  // Activity Log (سجل العمليات)
+  static String entryActivityLog(int id) =>
+      '$baseUrl/admin/entries/$id/activity-log';
+  static String get adminActivityLogs => '$baseUrl/admin/activity-logs';
+
   // Admin: Basic Data Management
   static String get adminFeeCustomizations =>
       '$baseUrl/admin/fee-customizations';

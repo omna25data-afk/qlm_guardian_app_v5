@@ -19,6 +19,7 @@ dependencies:
   # Network
   dio: ^5.8.0+1
   connectivity_plus: ^6.1.4
+  flutter_local_notifications: ^20.1.0
   
   # Local Database (SQLite)
   drift: ^2.27.0

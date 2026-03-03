@@ -6,7 +6,7 @@ part of 'field_management_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$fieldManagementHash() => r'11007673bfb7df292947951396c951a09b8bed58';
+String _$fieldManagementHash() => r'da95e73b3c5c2f5294903c8724572def225e1140';
 
 /// See also [FieldManagement].
 @ProviderFor(FieldManagement)

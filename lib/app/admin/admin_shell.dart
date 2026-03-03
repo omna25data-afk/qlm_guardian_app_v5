@@ -11,6 +11,7 @@ import '../../features/admin/presentation/screens/guardians/admin_guardians_scre
 import 'tabs/records_tab.dart';
 import '../../features/reports/presentation/screens/main_dashboard_screen.dart';
 import 'tabs/admin_settings_tab.dart';
+import '../../features/notifications/presentation/widgets/notification_bell_widget.dart';
 
 /// Admin Shell — واجهة رئيس القلم
 /// 5 تبويبات: الرئيسية، الأمناء، السجلات، التقارير، الأدوات
@@ -76,12 +77,10 @@ class _AdminShellState extends ConsumerState<AdminShell> {
           ),
         ),
         actions: [
-          // Notifications
+          // Notifications — باستخدام _AppBarIcon
           _AppBarIcon(
-            icon: Icons.notifications_outlined,
-            onPressed: () {
-              // TODO: Notifications
-            },
+            child: const NotificationBellWidget(),
+            tooltip: 'الإشعارات',
           ),
           const SizedBox(width: 4),
           // Profile / Logout
@@ -316,26 +315,25 @@ class _NavItem extends StatelessWidget {
   }
 }
 
-/// AppBar icon button
+/// مكوّن أيقونة شريط التطبيق — تصميم موحّد لجميع أيقونات AppBar
 class _AppBarIcon extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onPressed;
+  final Widget child;
+  final String? tooltip;
 
-  const _AppBarIcon({required this.icon, required this.onPressed});
+  const _AppBarIcon({required this.child, this.tooltip});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: Colors.white, size: 22),
-        onPressed: onPressed,
-        padding: const EdgeInsets.all(8),
-        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+    return Tooltip(
+      message: tooltip ?? '',
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        ),
+        child: child,
       ),
     );
   }

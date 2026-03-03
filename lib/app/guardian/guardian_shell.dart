@@ -6,7 +6,7 @@ import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/registry/presentation/screens/guardian_entry_screen.dart';
 import '../../features/sync/presentation/sync_status_widget.dart';
-import '../../features/notifications/presentation/widgets/notification_icon.dart';
+import '../../features/notifications/presentation/widgets/notification_bell_widget.dart';
 
 import 'tabs/guardian_dashboard_tab.dart';
 import 'tabs/my_records_tab.dart';
@@ -83,7 +83,7 @@ class _GuardianShellState extends ConsumerState<GuardianShell> {
           // Sync indicator
           const SyncStatusWidget(),
           // Notifications
-          const NotificationIcon(),
+          const NotificationBellWidget(),
           // Profile menu
           PopupMenuButton<String>(
             offset: const Offset(0, 50),
