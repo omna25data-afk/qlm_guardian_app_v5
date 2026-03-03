@@ -259,7 +259,7 @@ class EntriesListScreen extends ConsumerWidget {
 
               return RefreshIndicator(
                 onRefresh: () async {
-                  return ref.refresh(rawEntriesProvider.future);
+                  return ref.read(rawEntriesProvider.notifier).loadInitial();
                 },
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -83,7 +83,13 @@ Future<void> initDependencies() async {
   // --- Migrated Features (v4 → v5) ---
 
   getIt.registerLazySingleton<AdminRepository>(
-    () => AdminRepository(getIt<ApiClient>(), getIt<SystemRepository>()),
+    () => AdminRepository(
+      getIt<ApiClient>(),
+      getIt<SystemRepository>(),
+      networkInfo: getIt<NetworkInfo>(),
+      syncService: getIt<SyncService>(),
+      cacheBox: getIt<Box<dynamic>>(instanceName: 'cacheBox'),
+    ),
   );
 
   getIt.registerLazySingleton<RecordsRepository>(

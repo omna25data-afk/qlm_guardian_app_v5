@@ -29,11 +29,17 @@ class RegistryRepository {
        _syncService = syncService;
 
   /// Get all entries (online-first, local fallback)
-  Future<List<RegistryEntrySections>> getEntries() async {
+  Future<List<RegistryEntrySections>> getEntries({
+    int page = 1,
+    int perPage = 15,
+  }) async {
     if (await _networkInfo.isConnected) {
       // 1. Try primary API endpoint
       try {
-        final remoteEntries = await _remoteDataSource.fetchEntriesFromApi();
+        final remoteEntries = await _remoteDataSource.fetchEntriesFromApi(
+          page: page,
+          perPage: perPage,
+        );
         // Save to local DB for offline fallback (best-effort)
         for (var entry in remoteEntries) {
           try {

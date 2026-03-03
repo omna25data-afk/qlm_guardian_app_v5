@@ -78,6 +78,10 @@ class ApiEndpoints {
       '$baseUrl/admin/record-books/$id/open';
   static String adminRecordBookClose(int id) =>
       '$baseUrl/admin/record-books/$id/close';
+  static String adminRecordBookIssue(int id) =>
+      '$baseUrl/admin/record-books/$id/issue';
+  static String adminRecordBookArchive(int id) =>
+      '$baseUrl/admin/record-books/$id/archive';
   static String adminRecordBookProcedures(int id) =>
       '$baseUrl/admin/record-books/$id/procedures';
 

@@ -4,12 +4,21 @@ import '../../../../core/network/api_client.dart';
 import '../../data/models/admin_dashboard_data.dart';
 import '../../data/repositories/admin_repository.dart';
 
+import 'package:hive/hive.dart';
+import '../../../../core/network/network_info.dart';
+import '../../../../core/sync/sync_service.dart';
 import '../../../system/data/repositories/system_repository.dart';
 
 final adminRepositoryProvider = Provider<AdminRepository>((ref) {
   final apiClient = getIt<ApiClient>();
   final systemRepository = getIt<SystemRepository>();
-  return AdminRepository(apiClient, systemRepository);
+  return AdminRepository(
+    apiClient,
+    systemRepository,
+    networkInfo: getIt<NetworkInfo>(),
+    syncService: getIt<SyncService>(),
+    cacheBox: getIt<Box<dynamic>>(instanceName: 'cacheBox'),
+  );
 });
 
 final adminDashboardProvider =

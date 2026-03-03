@@ -5,6 +5,7 @@ import '../../../features/admin/presentation/widgets/areas_list_tab.dart';
 import '../../../features/admin/presentation/widgets/assignments_list_tab.dart';
 import '../../../features/admin/presentation/widgets/cards_list_tab.dart';
 import '../../../features/admin/presentation/widgets/licenses_list_tab.dart';
+import '../../../features/admin/presentation/screens/field_management_screen.dart';
 import '../../../features/debug/presentation/screens/debug_screen.dart';
 
 /// الأدوات والإعدادات — للمشرف
@@ -126,6 +127,17 @@ class AdminSettingsTab extends StatelessWidget {
                 body: const LicensesListTab(),
               ),
             ),
+          ),
+        ),
+        _buildSettingsTile(
+          context,
+          icon: Icons.edit_note_outlined,
+          title: 'إدارة حقول النظام',
+          subtitle: 'تعديل تخصيص الحقول (إظهار/إخفاء/تسمية)',
+          color: AppColors.primary, // Using primary for settings
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const FieldManagementScreen()),
           ),
         ),
         const SizedBox(height: 24),

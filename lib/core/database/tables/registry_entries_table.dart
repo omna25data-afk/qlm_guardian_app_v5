@@ -31,6 +31,9 @@ class RegistryEntries extends Table {
   RealColumn get totalAmount => real().withDefault(const Constant(0.0))();
   RealColumn get paidAmount => real().withDefault(const Constant(0.0))();
 
+  // Dynamic/Static Form Data
+  TextColumn get formData => text().nullable()();
+
   // Sync Status
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();

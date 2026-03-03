@@ -1,6 +1,10 @@
 import 'package:dio/dio.dart';
+import 'package:hive/hive.dart';
+import 'package:uuid/uuid.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/network_info.dart';
+import '../../../../core/sync/sync_service.dart';
 import '../models/admin_area_model.dart';
 import '../models/admin_assignment_model.dart';
 import '../models/admin_dashboard_data.dart';
@@ -14,8 +18,19 @@ import '../../../system/data/repositories/system_repository.dart';
 class AdminRepository {
   final ApiClient _apiClient;
   final SystemRepository _systemRepository;
+  final NetworkInfo _networkInfo;
+  final SyncService _syncService;
+  final Box<dynamic> _cacheBox;
 
-  AdminRepository(this._apiClient, this._systemRepository);
+  AdminRepository(
+    this._apiClient,
+    this._systemRepository, {
+    required NetworkInfo networkInfo,
+    required SyncService syncService,
+    required Box<dynamic> cacheBox,
+  }) : _networkInfo = networkInfo,
+       _syncService = syncService,
+       _cacheBox = cacheBox;
 
   // ─── Guardians ───────────────────────────────────────────
 
@@ -534,10 +549,26 @@ class AdminRepository {
   }
 
   /// Close a record book
-  Future<void> closeRecordBook(int id, {String? date}) async {
+  Future<void> closeRecordBook(int id, {String? notes}) async {
     await _apiClient.post(
       ApiEndpoints.adminRecordBookClose(id),
-      data: date != null ? {'closing_date': date} : null,
+      data: notes != null ? {'notes': notes} : null,
+    );
+  }
+
+  /// Issue a record book
+  Future<void> issueRecordBook(int id, Map<String, dynamic> data) async {
+    await _apiClient.post(ApiEndpoints.adminRecordBookIssue(id), data: data);
+  }
+
+  /// Archive a record book
+  Future<void> archiveRecordBook(int id, {String? notes, String? date}) async {
+    await _apiClient.post(
+      ApiEndpoints.adminRecordBookArchive(id),
+      data: {
+        if (notes != null) 'notes': notes,
+        if (date != null) 'procedure_date': date,
+      },
     );
   }
 
@@ -595,22 +626,129 @@ class AdminRepository {
 
   // ─── Registry Entry Creation ─────────────────────────────
 
-  /// Store a new registry entry (Admin)
+  /// Store a new registry entry (offline-first)
   Future<Map<String, dynamic>> storeRegistryEntry(
     Map<String, dynamic> data,
   ) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.adminRegistryEntries,
-      data: data,
-    );
-    return response.data is Map<String, dynamic>
-        ? response.data
-        : {'status': true};
+    // توليد UUID للقيد المحلي
+    final uuid = data['uuid'] ?? const Uuid().v4();
+    data['uuid'] = uuid;
+
+    // حفظ كمسودة في الكاش المحلي
+    await _saveDraftLocally(uuid, data, 'create');
+
+    if (await _networkInfo.isConnected) {
+      try {
+        final response = await _apiClient.post(
+          ApiEndpoints.adminRegistryEntries,
+          data: data,
+        );
+        // نجح الإرسال — حذف المسودة المحلية
+        await _removeDraft(uuid);
+        return response.data is Map<String, dynamic>
+            ? response.data
+            : {'status': true, 'offline': false};
+      } catch (e) {
+        // فشل الإرسال — وضع في SyncQueue
+        await _syncService.enqueue(
+          SyncOperation(
+            uuid: uuid,
+            entityType: 'registry_entry',
+            operationType: SyncOperationType.create,
+            data: data,
+          ),
+        );
+        return {'status': true, 'offline': true, 'uuid': uuid};
+      }
+    } else {
+      // أوفلاين — وضع في SyncQueue
+      await _syncService.enqueue(
+        SyncOperation(
+          uuid: uuid,
+          entityType: 'registry_entry',
+          operationType: SyncOperationType.create,
+          data: data,
+        ),
+      );
+      return {'status': true, 'offline': true, 'uuid': uuid};
+    }
   }
 
-  /// Update a registry entry (Correction)
-  Future<void> updateRegistryEntry(int id, Map<String, dynamic> data) async {
-    await _apiClient.put(ApiEndpoints.registryEntry(id), data: data);
+  /// Update a registry entry (offline-first)
+  Future<Map<String, dynamic>> updateRegistryEntry(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
+    final uuid = data['uuid'] ?? 'update_$id';
+
+    // حفظ التحديث محلياً
+    await _saveDraftLocally(uuid, {...data, 'id': id}, 'update');
+
+    if (await _networkInfo.isConnected) {
+      try {
+        await _apiClient.put(ApiEndpoints.registryEntry(id), data: data);
+        await _removeDraft(uuid);
+        return {'status': true, 'offline': false};
+      } catch (e) {
+        // فشل — وضع في SyncQueue
+        await _syncService.enqueue(
+          SyncOperation(
+            uuid: uuid,
+            entityType: 'registry_entry',
+            operationType: SyncOperationType.update,
+            data: {...data, 'id': id},
+          ),
+        );
+        return {'status': true, 'offline': true};
+      }
+    } else {
+      await _syncService.enqueue(
+        SyncOperation(
+          uuid: uuid,
+          entityType: 'registry_entry',
+          operationType: SyncOperationType.update,
+          data: {...data, 'id': id},
+        ),
+      );
+      return {'status': true, 'offline': true};
+    }
+  }
+
+  /// حفظ مسودة محلياً
+  Future<void> _saveDraftLocally(
+    String uuid,
+    Map<String, dynamic> data,
+    String operation,
+  ) async {
+    final drafts = Map<String, dynamic>.from(
+      _cacheBox.get('offline_drafts', defaultValue: <String, dynamic>{}) ?? {},
+    );
+    drafts[uuid] = {
+      'data': data,
+      'operation': operation,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+    await _cacheBox.put('offline_drafts', drafts);
+  }
+
+  /// حذف مسودة محلية بعد النجاح
+  Future<void> _removeDraft(String uuid) async {
+    final drafts = Map<String, dynamic>.from(
+      _cacheBox.get('offline_drafts', defaultValue: <String, dynamic>{}) ?? {},
+    );
+    drafts.remove(uuid);
+    await _cacheBox.put('offline_drafts', drafts);
+  }
+
+  /// الحصول على المسودات المحلية
+  List<Map<String, dynamic>> getOfflineDrafts() {
+    final drafts = _cacheBox.get('offline_drafts', defaultValue: {});
+    if (drafts == null || drafts is! Map) return [];
+    return drafts.entries
+        .map(
+          (e) => {'uuid': e.key, ...Map<String, dynamic>.from(e.value as Map)},
+        )
+        .toList();
   }
 
   /// Fetch contract types list

@@ -615,8 +615,8 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
                                 color: AppColors.primary,
                               ),
                               title: Text(
-                                proc['procedure_type_label']?.toString() ??
-                                    proc['procedure_type']?.toString() ??
+                                proc['type_label']?.toString() ??
+                                    proc['type']?.toString() ??
                                     'إجراء',
                                 style: const TextStyle(
                                   fontFamily: 'Tajawal',
@@ -624,14 +624,14 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
                                 ),
                               ),
                               subtitle: Text(
-                                proc['created_at']?.toString() ?? '',
+                                '${proc['procedure_date_hijri'] ?? ''} (${proc['procedure_date'] ?? ''})',
                                 style: const TextStyle(
                                   fontFamily: 'Tajawal',
                                   fontSize: 12,
                                 ),
                               ),
                               trailing: Text(
-                                proc['user_name']?.toString() ?? '',
+                                proc['performer']?.toString() ?? '',
                                 style: const TextStyle(
                                   fontFamily: 'Tajawal',
                                   fontSize: 11,
@@ -653,16 +653,25 @@ class _RecordBooksTabState extends ConsumerState<RecordBooksTab> {
   }
 
   IconData _getProcedureIcon(String type) {
+    if (type.isEmpty) return Icons.description;
+
     switch (type.toLowerCase()) {
+      case 'issued':
       case 'issuance':
+      case 'صرف':
       case 'إصدار':
         return Icons.add_circle_outline;
+      case 'opened':
       case 'opening':
       case 'فتح':
         return Icons.lock_open;
+      case 'closed':
       case 'closing':
       case 'إغلاق':
         return Icons.lock;
+      case 'archived':
+      case 'أرشفة':
+        return Icons.archive;
       default:
         return Icons.description;
     }

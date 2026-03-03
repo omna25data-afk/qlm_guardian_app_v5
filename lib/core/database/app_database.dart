@@ -11,7 +11,19 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (Migrator m) async {
+      await m.createAll();
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      if (from == 1) {
+        await m.addColumn(registryEntries, registryEntries.formData);
+      }
+    },
+  );
 
   // Registry Entries DAO
   Future<List<RegistryEntry>> getAllEntries() => select(registryEntries).get();

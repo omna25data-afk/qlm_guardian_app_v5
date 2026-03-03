@@ -44,10 +44,22 @@ class RecordBookActionNotifier extends StateNotifier<RecordBookActionState> {
   RecordBookActionNotifier(this._repository)
     : super(const RecordBookActionState());
 
-  Future<bool> openRecordBook(int id, {String? date}) async {
+  Future<bool> openRecordBook(
+    int id, {
+    int? hijriYear,
+    int? startPage,
+    String? notes,
+  }) async {
     state = state.copyWith(isLoading: true, error: null, successMessage: null);
     try {
-      await _repository.openRecordBook(id, date: date);
+      await _repository.openRecordBook(
+        id,
+        data: {
+          if (hijriYear != null) 'hijri_year': hijriYear,
+          if (startPage != null) 'start_page': startPage,
+          if (notes != null) 'notes': notes,
+        },
+      );
       state = state.copyWith(
         isLoading: false,
         successMessage: 'تم فتح السجل بنجاح',
@@ -59,13 +71,43 @@ class RecordBookActionNotifier extends StateNotifier<RecordBookActionState> {
     }
   }
 
-  Future<bool> closeRecordBook(int id, {String? date}) async {
+  Future<bool> closeRecordBook(int id, {String? notes}) async {
     state = state.copyWith(isLoading: true, error: null, successMessage: null);
     try {
-      await _repository.closeRecordBook(id, date: date);
+      await _repository.closeRecordBook(id, notes: notes);
       state = state.copyWith(
         isLoading: false,
         successMessage: 'تم إغلاق السجل بنجاح',
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> issueRecordBook(int id, Map<String, dynamic> data) async {
+    state = state.copyWith(isLoading: true, error: null, successMessage: null);
+    try {
+      await _repository.issueRecordBook(id, data);
+      state = state.copyWith(
+        isLoading: false,
+        successMessage: 'تم صرف السجل بنجاح',
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> archiveRecordBook(int id, {String? notes}) async {
+    state = state.copyWith(isLoading: true, error: null, successMessage: null);
+    try {
+      await _repository.archiveRecordBook(id, notes: notes);
+      state = state.copyWith(
+        isLoading: false,
+        successMessage: 'تمت أرشفة السجل بنجاح',
       );
       return true;
     } catch (e) {

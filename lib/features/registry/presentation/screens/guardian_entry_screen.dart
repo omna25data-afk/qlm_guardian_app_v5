@@ -13,7 +13,7 @@ import '../../../registry/presentation/providers/entries_provider.dart';
 import '../widgets/contract_type_selector.dart';
 import '../widgets/guardian_section.dart';
 import '../widgets/form_section_card.dart';
-import '../widgets/dynamic_field_builder.dart';
+// contract_static_fields_widget removed — dynamic fields used instead
 
 /// Contract type party labels (same as PartiesSection)
 const Map<int, Map<String, String>> _contractPartyLabels = {
@@ -101,7 +101,11 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
     });
 
     if (widget.isEditMode) {
-      _populateForEdit();
+      // إعادة تعيين الـ provider لضمان state نظيف قبل التعديل
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.invalidate(addEntryProvider);
+        _populateForEdit();
+      });
     } else {
       // Set default dates for new entries
       final todayHijri = HijriCalendar.now();
@@ -116,6 +120,32 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
 
     // Sync guardian date with document date
     _documentHijriDateCtrl.addListener(_syncGuardianDate);
+
+    // مراقبة تحميل الحقول الديناميكية لملئها
+    _listenAndPopulateDynamic();
+  }
+
+  void _listenAndPopulateDynamic() {
+    ref.listenManual(addEntryProvider, (previous, next) {
+      if (widget.isEditMode &&
+          next.filteredFields.isNotEmpty &&
+          (previous?.filteredFields.isEmpty ?? true)) {
+        // ملء formData في الـ provider من contract_details بعد تحميل الحقول
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _populateFormDataForEdit();
+        });
+      }
+    });
+  }
+
+  /// ملء formData في الـ provider من بيانات القيد عند التعديل
+  void _populateFormDataForEdit() {
+    final entryFormData = widget.entry?.formData;
+    if (entryFormData == null || entryFormData.isEmpty) return;
+
+    final notifier = ref.read(addEntryProvider.notifier);
+    notifier.setFormData(Map<String, dynamic>.from(entryFormData));
   }
 
   /// Pre-populate all form fields from the existing entry
@@ -172,38 +202,13 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
         );
         notifier.loadSubtypes(_selectedContractTypeId!);
 
-        // ④ ملء الـ controllers الديناميكية بالقيم المحفوظة (بعد تأخير لضمان بناء الحقول)
-        _populateDynamicControllers(entry.formData);
+        // ④ تطبيق تصفية الحقول بحسب الأنواع المحددة مسبقًا
+        notifier.filterFields(
+          subtype1: _selectedSubtype1,
+          subtype2: _selectedSubtype2,
+        );
       });
     }
-  }
-
-  /// ملء controllers الحقول الديناميكية من formData بعد تحميل الحقول
-  void _populateDynamicControllers(Map<String, dynamic>? formData) {
-    if (formData == null || formData.isEmpty) return;
-
-    // تأخير بسيط لضمان أن DynamicFieldBuilder أنشأ الـ controllers
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (!mounted) return;
-      for (final entry in formData.entries) {
-        final controller = _dynamicControllers[entry.key];
-        if (controller != null && entry.value != null) {
-          controller.text = entry.value.toString();
-        }
-      }
-      // محاولة ثانية بتأخير أطول (في حال الحقول لم تُبنى بعد)
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        if (!mounted) return;
-        for (final entry in formData.entries) {
-          final controller = _dynamicControllers[entry.key];
-          if (controller != null &&
-              entry.value != null &&
-              controller.text.isEmpty) {
-            controller.text = entry.value.toString();
-          }
-        }
-      });
-    });
   }
 
   void _syncGuardianDate() {
@@ -303,11 +308,13 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
     if (_selectedSubtype1 != null) data['subtype_1'] = _selectedSubtype1;
     if (_selectedSubtype2 != null) data['subtype_2'] = _selectedSubtype2;
 
-    // Contract-specific fields
     if (_selectedContractTypeId == 8) {
       data['divorce_contract_number'] = _divorceContractNumberCtrl.text;
       data['return_date'] = _returnDateCtrl.text;
     }
+
+    // form_data يتم تجميعها تلقائياً من addEntryProvider.formData
+    // لا حاجة لـ _dynamicControllers — البيانات تُدار عبر الـ provider مباشرة
 
     data.removeWhere((key, value) => value == null || value == '');
 
@@ -327,35 +334,8 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
       if (success) {
         // Refresh entries list
         ref.invalidate(rawEntriesProvider);
-
-        final message = widget.isEditMode
-            ? 'تم تعديل القيد بنجاح'
-            : (_isOnline
-                  ? 'تم حفظ القيد بنجاح'
-                  : 'تم الحفظ محلياً - سيُرفع عند الاتصال');
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.white, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    message,
-                    style: const TextStyle(fontFamily: 'Tajawal'),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
-        Navigator.pop(context);
+        // النجاح يتم التعامل معه في ref.listen في build()
+        // الذي يعرض SnackBar ويقوم بـ Navigator.pop مرة واحدة فقط
       } else {
         // عرض رسالة الخطأ من الـ provider
         final errorState = ref.read(addEntryProvider);
@@ -525,25 +505,12 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
                               // Party fields
                               ..._buildPartyFields(),
 
-                              // Contract-specific fields (divorce/return)
-                              ..._buildContractSpecificFields(),
-
-                              // Dynamic fields
-                              if (state.filteredFields.isNotEmpty ||
-                                  state.isLoadingFields) ...[
+                              // الحقول الديناميكية من FormFieldConfig
+                              if (state.filteredFields.isNotEmpty) ...[
                                 const SizedBox(height: 16),
                                 const Divider(),
                                 const SizedBox(height: 8),
-                                DynamicFieldBuilder(
-                                  fields: state.filteredFields,
-                                  isLoading: state.isLoadingFields,
-                                  controllers: _dynamicControllers,
-                                  onFieldChanged: (entry) {
-                                    ref
-                                        .read(addEntryProvider.notifier)
-                                        .updateFormData(entry.key, entry.value);
-                                  },
-                                ),
+                                ..._buildDynamicFields(state),
                               ],
                             ],
                           ),
@@ -740,10 +707,110 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
     ];
   }
 
-  // ── Contract-specific fields (divorce/return) ──
-  List<Widget> _buildContractSpecificFields() {
-    // Hidden per user request; these are now handled dynamically
-    return [];
+  // ── بناء الحقول الديناميكية من FormFieldConfig ──
+  List<Widget> _buildDynamicFields(AddEntryState state) {
+    final notifier = ref.read(addEntryProvider.notifier);
+    return state.filteredFields.map((field) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: _buildDynamicField(field, state.formData, notifier),
+      );
+    }).toList();
+  }
+
+  Widget _buildDynamicField(
+    Map<String, dynamic> field,
+    Map<String, dynamic> formData,
+    AddEntryNotifier notifier,
+  ) {
+    final type = field['type'];
+    final name = field['name'];
+    final label = field['label'];
+    final required = field['required'] == true;
+    final options = field['options'] as List<dynamic>?;
+
+    switch (type) {
+      case 'textarea':
+        return _buildDynamicTextField(
+          label: label,
+          maxLines: 3,
+          required: required,
+          initialValue: formData[name]?.toString(),
+          onChanged: (v) => notifier.updateFormData(name, v),
+        );
+      case 'number':
+        return _buildDynamicTextField(
+          label: label,
+          keyboardType: TextInputType.number,
+          required: required,
+          initialValue: formData[name]?.toString(),
+          onChanged: (v) => notifier.updateFormData(name, num.tryParse(v)),
+        );
+      case 'select':
+        return DropdownButtonFormField<String>(
+          value: formData[name]?.toString(),
+          decoration: InputDecoration(
+            labelText: '$label${required ? ' *' : ''}',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+          ),
+          items:
+              options
+                  ?.map(
+                    (o) => DropdownMenuItem(
+                      value: o.toString(),
+                      child: Text(o.toString()),
+                    ),
+                  )
+                  .toList() ??
+              [],
+          onChanged: (v) => notifier.updateFormData(name, v),
+        );
+      case 'date':
+        return _buildDynamicTextField(
+          label: label,
+          required: required,
+          hint: 'YYYY-MM-DD',
+          initialValue: formData[name]?.toString(),
+          onChanged: (v) => notifier.updateFormData(name, v),
+        );
+      default:
+        return _buildDynamicTextField(
+          label: label,
+          required: required,
+          initialValue: formData[name]?.toString(),
+          onChanged: (v) => notifier.updateFormData(name, v),
+        );
+    }
+  }
+
+  Widget _buildDynamicTextField({
+    required String label,
+    bool required = false,
+    String? initialValue,
+    String? hint,
+    ValueChanged<String>? onChanged,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+  }) {
+    return TextFormField(
+      initialValue: initialValue,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: '$label${required ? ' *' : ''}',
+        hintText: hint,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
+        ),
+      ),
+      validator: required
+          ? (v) => (v == null || v.isEmpty) ? 'هذا الحقل مطلوب' : null
+          : null,
+      onChanged: onChanged,
+    );
   }
 
   // ── Hijri date picker ──

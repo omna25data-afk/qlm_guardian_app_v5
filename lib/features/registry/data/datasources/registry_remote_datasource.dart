@@ -14,7 +14,10 @@ abstract class RegistryRemoteDataSource {
   });
   Future<void> requestDocumentation(int id);
   Future<List<RegistryEntrySections>> fetchEntries({DateTime? lastSyncedAt});
-  Future<List<RegistryEntrySections>> fetchEntriesFromApi();
+  Future<List<RegistryEntrySections>> fetchEntriesFromApi({
+    int page = 1,
+    int perPage = 15,
+  });
   Future<void> pushEntries(List<RegistryEntrySections> entries);
 }
 
@@ -121,12 +124,13 @@ class RegistryRemoteDataSourceImpl implements RegistryRemoteDataSource {
   }
 
   @override
-  Future<List<RegistryEntrySections>> fetchEntriesFromApi() async {
+  Future<List<RegistryEntrySections>> fetchEntriesFromApi({
+    int page = 1,
+    int perPage = 15,
+  }) async {
     final response = await _client.get(
       ApiEndpoints.registryEntries,
-      queryParameters: {
-        'per_page': 1000,
-      }, // جلب جميع القيود بدلاً من الـ pagination الافتراضي
+      queryParameters: {'page': page, 'per_page': perPage},
     );
     final responseData = response.data;
 

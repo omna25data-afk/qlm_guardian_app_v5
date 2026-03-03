@@ -7,11 +7,47 @@ import 'widgets/advanced_guardian_filter_sheet.dart';
 import 'widgets/guardian_registry_entry_card.dart';
 import 'screens/guardian_entry_details_screen.dart';
 
-class GuardianEntriesListScreen extends ConsumerWidget {
+class GuardianEntriesListScreen extends ConsumerStatefulWidget {
   const GuardianEntriesListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GuardianEntriesListScreen> createState() =>
+      _GuardianEntriesListScreenState();
+}
+
+class _GuardianEntriesListScreenState
+    extends ConsumerState<GuardianEntriesListScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(entryStatusesFilterProvider.notifier).state = [
+        'draft',
+        'pending_documentation',
+        'registered_guardian',
+      ];
+    });
+
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(rawEntriesProvider.notifier).loadMore();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final filteredEntriesAsync = ref.watch(filteredEntriesProvider);
     final selectedStatuses = ref.watch(entryStatusesFilterProvider);
     final sortOption = ref.watch(entrySortProvider);
@@ -303,7 +339,8 @@ class GuardianEntriesListScreen extends ConsumerWidget {
               ),
             ),
             data: (entries) {
-              if (entries.isEmpty) {
+              final entriesState = ref.watch(rawEntriesProvider);
+              if (entries.isEmpty && !entriesState.isLoading) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -326,12 +363,27 @@ class GuardianEntriesListScreen extends ConsumerWidget {
               return RefreshIndicator(
                 color: const Color(0xFF006400),
                 onRefresh: () async {
-                  return ref.refresh(rawEntriesProvider.future);
+                  return ref.read(rawEntriesProvider.notifier).loadInitial();
                 },
                 child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: entries.length,
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  itemCount:
+                      entries.length + (entriesState.isFetchingMore ? 1 : 0),
                   itemBuilder: (context, index) {
+                    if (index == entries.length) {
+                      return const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF006400),
+                          ),
+                        ),
+                      );
+                    }
                     final entry = entries[index];
                     return GuardianRegistryEntryCard(
                       entry: entry,

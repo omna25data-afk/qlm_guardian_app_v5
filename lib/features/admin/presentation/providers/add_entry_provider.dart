@@ -277,7 +277,8 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
         mergedData['form_data'] = state.formData;
       }
 
-      await _repo.storeRegistryEntry(mergedData);
+      final result = await _repo.storeRegistryEntry(mergedData);
+      final isOffline = result['offline'] == true;
 
       // Clear draft on success
       _cacheBox?.delete(_draftKey);
@@ -285,7 +286,9 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
       state = state.copyWith(
         isSubmitting: false,
         hasDraft: false,
-        successMessage: 'تم حفظ القيد بنجاح',
+        successMessage: isOffline
+            ? 'تم حفظ القيد محلياً — سيُرفع عند الاتصال'
+            : 'تم حفظ القيد بنجاح',
         error: null,
       );
       return true;
@@ -367,7 +370,8 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
         mergedData['form_data'] = state.formData;
       }
 
-      await _repo.updateRegistryEntry(entryId, mergedData);
+      final result = await _repo.updateRegistryEntry(entryId, mergedData);
+      final isOffline = result['offline'] == true;
 
       // Clear draft on success
       _cacheBox?.delete(_draftKey);
@@ -375,7 +379,9 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
       state = state.copyWith(
         isSubmitting: false,
         hasDraft: false,
-        successMessage: 'تم تعديل القيد بنجاح',
+        successMessage: isOffline
+            ? 'تم حفظ التعديل محلياً — سيُرفع عند الاتصال'
+            : 'تم تعديل القيد بنجاح',
         error: null,
       );
       return true;

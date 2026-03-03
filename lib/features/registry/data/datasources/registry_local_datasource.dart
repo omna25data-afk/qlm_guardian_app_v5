@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'dart:convert';
 import '../../../../core/database/app_database.dart';
 import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart';
 
@@ -86,7 +87,7 @@ class RegistryLocalDataSourceImpl implements RegistryLocalDataSource {
         createdAt: e.createdAt.toIso8601String(),
         updatedAt: e.lastUpdated?.toIso8601String(),
       ),
-      formData: {}, // DB doesn't store this yet
+      formData: e.formData != null ? jsonDecode(e.formData!) : {},
     );
   }
 
@@ -113,6 +114,9 @@ class RegistryLocalDataSourceImpl implements RegistryLocalDataSource {
           ? Value(
               DateTime.tryParse(entry.metadata.createdAt!) ?? DateTime.now(),
             )
+          : const Value.absent(),
+      formData: entry.formData != null && entry.formData!.isNotEmpty
+          ? Value(jsonEncode(entry.formData))
           : const Value.absent(),
     );
   }

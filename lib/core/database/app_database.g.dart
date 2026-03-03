@@ -185,6 +185,17 @@ class $RegistryEntriesTable extends RegistryEntries
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _formDataMeta = const VerificationMeta(
+    'formData',
+  );
+  @override
+  late final GeneratedColumn<String> formData = GeneratedColumn<String>(
+    'form_data',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _isSyncedMeta = const VerificationMeta(
     'isSynced',
   );
@@ -256,6 +267,7 @@ class $RegistryEntriesTable extends RegistryEntries
     content,
     totalAmount,
     paidAmount,
+    formData,
     isSynced,
     isDeleted,
     lastUpdated,
@@ -383,6 +395,12 @@ class $RegistryEntriesTable extends RegistryEntries
         paidAmount.isAcceptableOrUnknown(data['paid_amount']!, _paidAmountMeta),
       );
     }
+    if (data.containsKey('form_data')) {
+      context.handle(
+        _formDataMeta,
+        formData.isAcceptableOrUnknown(data['form_data']!, _formDataMeta),
+      );
+    }
     if (data.containsKey('is_synced')) {
       context.handle(
         _isSyncedMeta,
@@ -483,6 +501,10 @@ class $RegistryEntriesTable extends RegistryEntries
         DriftSqlType.double,
         data['${effectivePrefix}paid_amount'],
       )!,
+      formData: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}form_data'],
+      ),
       isSynced: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_synced'],
@@ -525,6 +547,7 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
   final String? content;
   final double totalAmount;
   final double paidAmount;
+  final String? formData;
   final bool isSynced;
   final bool isDeleted;
   final DateTime? lastUpdated;
@@ -546,6 +569,7 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
     this.content,
     required this.totalAmount,
     required this.paidAmount,
+    this.formData,
     required this.isSynced,
     required this.isDeleted,
     this.lastUpdated,
@@ -592,6 +616,9 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
     }
     map['total_amount'] = Variable<double>(totalAmount);
     map['paid_amount'] = Variable<double>(paidAmount);
+    if (!nullToAbsent || formData != null) {
+      map['form_data'] = Variable<String>(formData);
+    }
     map['is_synced'] = Variable<bool>(isSynced);
     map['is_deleted'] = Variable<bool>(isDeleted);
     if (!nullToAbsent || lastUpdated != null) {
@@ -639,6 +666,9 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
           : Value(content),
       totalAmount: Value(totalAmount),
       paidAmount: Value(paidAmount),
+      formData: formData == null && nullToAbsent
+          ? const Value.absent()
+          : Value(formData),
       isSynced: Value(isSynced),
       isDeleted: Value(isDeleted),
       lastUpdated: lastUpdated == null && nullToAbsent
@@ -670,6 +700,7 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
       content: serializer.fromJson<String?>(json['content']),
       totalAmount: serializer.fromJson<double>(json['totalAmount']),
       paidAmount: serializer.fromJson<double>(json['paidAmount']),
+      formData: serializer.fromJson<String?>(json['formData']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
       lastUpdated: serializer.fromJson<DateTime?>(json['lastUpdated']),
@@ -696,6 +727,7 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
       'content': serializer.toJson<String?>(content),
       'totalAmount': serializer.toJson<double>(totalAmount),
       'paidAmount': serializer.toJson<double>(paidAmount),
+      'formData': serializer.toJson<String?>(formData),
       'isSynced': serializer.toJson<bool>(isSynced),
       'isDeleted': serializer.toJson<bool>(isDeleted),
       'lastUpdated': serializer.toJson<DateTime?>(lastUpdated),
@@ -720,6 +752,7 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
     Value<String?> content = const Value.absent(),
     double? totalAmount,
     double? paidAmount,
+    Value<String?> formData = const Value.absent(),
     bool? isSynced,
     bool? isDeleted,
     Value<DateTime?> lastUpdated = const Value.absent(),
@@ -745,6 +778,7 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
     content: content.present ? content.value : this.content,
     totalAmount: totalAmount ?? this.totalAmount,
     paidAmount: paidAmount ?? this.paidAmount,
+    formData: formData.present ? formData.value : this.formData,
     isSynced: isSynced ?? this.isSynced,
     isDeleted: isDeleted ?? this.isDeleted,
     lastUpdated: lastUpdated.present ? lastUpdated.value : this.lastUpdated,
@@ -782,6 +816,7 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
       paidAmount: data.paidAmount.present
           ? data.paidAmount.value
           : this.paidAmount,
+      formData: data.formData.present ? data.formData.value : this.formData,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
       lastUpdated: data.lastUpdated.present
@@ -810,6 +845,7 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
           ..write('content: $content, ')
           ..write('totalAmount: $totalAmount, ')
           ..write('paidAmount: $paidAmount, ')
+          ..write('formData: $formData, ')
           ..write('isSynced: $isSynced, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('lastUpdated: $lastUpdated, ')
@@ -819,7 +855,7 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     uuid,
     remoteId,
@@ -836,11 +872,12 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
     content,
     totalAmount,
     paidAmount,
+    formData,
     isSynced,
     isDeleted,
     lastUpdated,
     createdAt,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -861,6 +898,7 @@ class RegistryEntry extends DataClass implements Insertable<RegistryEntry> {
           other.content == this.content &&
           other.totalAmount == this.totalAmount &&
           other.paidAmount == this.paidAmount &&
+          other.formData == this.formData &&
           other.isSynced == this.isSynced &&
           other.isDeleted == this.isDeleted &&
           other.lastUpdated == this.lastUpdated &&
@@ -884,6 +922,7 @@ class RegistryEntriesCompanion extends UpdateCompanion<RegistryEntry> {
   final Value<String?> content;
   final Value<double> totalAmount;
   final Value<double> paidAmount;
+  final Value<String?> formData;
   final Value<bool> isSynced;
   final Value<bool> isDeleted;
   final Value<DateTime?> lastUpdated;
@@ -905,6 +944,7 @@ class RegistryEntriesCompanion extends UpdateCompanion<RegistryEntry> {
     this.content = const Value.absent(),
     this.totalAmount = const Value.absent(),
     this.paidAmount = const Value.absent(),
+    this.formData = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.lastUpdated = const Value.absent(),
@@ -927,6 +967,7 @@ class RegistryEntriesCompanion extends UpdateCompanion<RegistryEntry> {
     this.content = const Value.absent(),
     this.totalAmount = const Value.absent(),
     this.paidAmount = const Value.absent(),
+    this.formData = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.lastUpdated = const Value.absent(),
@@ -949,6 +990,7 @@ class RegistryEntriesCompanion extends UpdateCompanion<RegistryEntry> {
     Expression<String>? content,
     Expression<double>? totalAmount,
     Expression<double>? paidAmount,
+    Expression<String>? formData,
     Expression<bool>? isSynced,
     Expression<bool>? isDeleted,
     Expression<DateTime>? lastUpdated,
@@ -971,6 +1013,7 @@ class RegistryEntriesCompanion extends UpdateCompanion<RegistryEntry> {
       if (content != null) 'content': content,
       if (totalAmount != null) 'total_amount': totalAmount,
       if (paidAmount != null) 'paid_amount': paidAmount,
+      if (formData != null) 'form_data': formData,
       if (isSynced != null) 'is_synced': isSynced,
       if (isDeleted != null) 'is_deleted': isDeleted,
       if (lastUpdated != null) 'last_updated': lastUpdated,
@@ -995,6 +1038,7 @@ class RegistryEntriesCompanion extends UpdateCompanion<RegistryEntry> {
     Value<String?>? content,
     Value<double>? totalAmount,
     Value<double>? paidAmount,
+    Value<String?>? formData,
     Value<bool>? isSynced,
     Value<bool>? isDeleted,
     Value<DateTime?>? lastUpdated,
@@ -1017,6 +1061,7 @@ class RegistryEntriesCompanion extends UpdateCompanion<RegistryEntry> {
       content: content ?? this.content,
       totalAmount: totalAmount ?? this.totalAmount,
       paidAmount: paidAmount ?? this.paidAmount,
+      formData: formData ?? this.formData,
       isSynced: isSynced ?? this.isSynced,
       isDeleted: isDeleted ?? this.isDeleted,
       lastUpdated: lastUpdated ?? this.lastUpdated,
@@ -1075,6 +1120,9 @@ class RegistryEntriesCompanion extends UpdateCompanion<RegistryEntry> {
     if (paidAmount.present) {
       map['paid_amount'] = Variable<double>(paidAmount.value);
     }
+    if (formData.present) {
+      map['form_data'] = Variable<String>(formData.value);
+    }
     if (isSynced.present) {
       map['is_synced'] = Variable<bool>(isSynced.value);
     }
@@ -1109,6 +1157,7 @@ class RegistryEntriesCompanion extends UpdateCompanion<RegistryEntry> {
           ..write('content: $content, ')
           ..write('totalAmount: $totalAmount, ')
           ..write('paidAmount: $paidAmount, ')
+          ..write('formData: $formData, ')
           ..write('isSynced: $isSynced, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('lastUpdated: $lastUpdated, ')
@@ -2882,6 +2931,7 @@ typedef $$RegistryEntriesTableCreateCompanionBuilder =
       Value<String?> content,
       Value<double> totalAmount,
       Value<double> paidAmount,
+      Value<String?> formData,
       Value<bool> isSynced,
       Value<bool> isDeleted,
       Value<DateTime?> lastUpdated,
@@ -2905,6 +2955,7 @@ typedef $$RegistryEntriesTableUpdateCompanionBuilder =
       Value<String?> content,
       Value<double> totalAmount,
       Value<double> paidAmount,
+      Value<String?> formData,
       Value<bool> isSynced,
       Value<bool> isDeleted,
       Value<DateTime?> lastUpdated,
@@ -3029,6 +3080,11 @@ class $$RegistryEntriesTableFilterComposer
 
   ColumnFilters<double> get paidAmount => $composableBuilder(
     column: $table.paidAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get formData => $composableBuilder(
+    column: $table.formData,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3167,6 +3223,11 @@ class $$RegistryEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get formData => $composableBuilder(
+    column: $table.formData,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isSynced => $composableBuilder(
     column: $table.isSynced,
     builder: (column) => ColumnOrderings(column),
@@ -3259,6 +3320,9 @@ class $$RegistryEntriesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get formData =>
+      $composableBuilder(column: $table.formData, builder: (column) => column);
+
   GeneratedColumn<bool> get isSynced =>
       $composableBuilder(column: $table.isSynced, builder: (column) => column);
 
@@ -3345,6 +3409,7 @@ class $$RegistryEntriesTableTableManager
                 Value<String?> content = const Value.absent(),
                 Value<double> totalAmount = const Value.absent(),
                 Value<double> paidAmount = const Value.absent(),
+                Value<String?> formData = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<DateTime?> lastUpdated = const Value.absent(),
@@ -3366,6 +3431,7 @@ class $$RegistryEntriesTableTableManager
                 content: content,
                 totalAmount: totalAmount,
                 paidAmount: paidAmount,
+                formData: formData,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
                 lastUpdated: lastUpdated,
@@ -3389,6 +3455,7 @@ class $$RegistryEntriesTableTableManager
                 Value<String?> content = const Value.absent(),
                 Value<double> totalAmount = const Value.absent(),
                 Value<double> paidAmount = const Value.absent(),
+                Value<String?> formData = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<DateTime?> lastUpdated = const Value.absent(),
@@ -3410,6 +3477,7 @@ class $$RegistryEntriesTableTableManager
                 content: content,
                 totalAmount: totalAmount,
                 paidAmount: paidAmount,
+                formData: formData,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
                 lastUpdated: lastUpdated,
