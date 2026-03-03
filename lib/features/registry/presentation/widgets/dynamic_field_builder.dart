@@ -10,6 +10,7 @@ class DynamicFieldBuilder extends StatefulWidget {
   final bool isLoading;
   final Map<String, TextEditingController> controllers;
   final ValueChanged<MapEntry<String, String>> onFieldChanged;
+  final Map<String, dynamic> initialValues;
 
   const DynamicFieldBuilder({
     super.key,
@@ -17,6 +18,7 @@ class DynamicFieldBuilder extends StatefulWidget {
     required this.isLoading,
     required this.controllers,
     required this.onFieldChanged,
+    this.initialValues = const {},
   });
 
   @override
@@ -95,9 +97,18 @@ class _DynamicFieldBuilderState extends State<DynamicFieldBuilder> {
         field['is_required'] == 1 ||
         field['is_required'] == '1';
 
-    // Ensure controller exists
+    // Ensure controller exists — pre-fill from initialValues if available
     if (!widget.controllers.containsKey(fieldName)) {
-      widget.controllers[fieldName] = TextEditingController();
+      final initialValue = widget.initialValues[fieldName];
+      widget.controllers[fieldName] = TextEditingController(
+        text: initialValue?.toString() ?? '',
+      );
+    } else if (widget.controllers[fieldName]!.text.isEmpty) {
+      // If controller exists but is empty, try to fill from initialValues
+      final initialValue = widget.initialValues[fieldName];
+      if (initialValue != null && initialValue.toString().isNotEmpty) {
+        widget.controllers[fieldName]!.text = initialValue.toString();
+      }
     }
 
     final controller = widget.controllers[fieldName]!;

@@ -583,6 +583,7 @@ class _AdminAddEntryScreenState extends ConsumerState<AdminAddEntryScreen>
                               fields: state.filteredFields,
                               isLoading: state.isLoadingFields,
                               controllers: _dynamicControllers,
+                              initialValues: state.formData,
                               onFieldChanged: (entry) {
                                 ref
                                     .read(addEntryProvider.notifier)

@@ -773,6 +773,7 @@ class _CompactRegistryEntryScreenState
           fields: state.filteredFields,
           isLoading: state.isLoadingFields,
           controllers: _dynamicControllers,
+          initialValues: state.formData,
           onFieldChanged: (entry) {
             ref
                 .read(addEntryProvider.notifier)
