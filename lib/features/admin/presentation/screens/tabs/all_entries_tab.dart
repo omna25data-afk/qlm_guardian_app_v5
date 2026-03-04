@@ -13,6 +13,7 @@ import '../../../../registry/presentation/screens/entry_details_screen.dart';
 import '../admin_add_entry_screen.dart';
 
 import '../../../../admin/presentation/widgets/advanced_all_entries_filter_sheet.dart';
+import '../../../../admin/presentation/widgets/document_entry_sheet.dart';
 
 class AllEntriesState {
   final List<RegistryEntrySections> entries;
@@ -602,11 +603,25 @@ class AllEntriesTab extends ConsumerWidget {
                                 ),
                               ),
                             ).then((_) {
-                              // Refresh entries after returning from edit screen
                               ref
                                   .read(allEntriesProvider.notifier)
                                   .fetchEntries(refresh: true);
                             });
+                          },
+                          onDocument: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => DocumentEntrySheet(
+                                entry: entry,
+                                onSuccess: () {
+                                  ref
+                                      .read(allEntriesProvider.notifier)
+                                      .fetchEntries(refresh: true);
+                                },
+                              ),
+                            );
                           },
                         );
                       },
