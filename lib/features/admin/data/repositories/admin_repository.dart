@@ -389,6 +389,8 @@ class AdminRepository {
     String? hijriDateTo,
     String? recordBookCategory,
     int? recordBookTypeId,
+    String sortBy = 'doc_hijri_date',
+    String sortOrder = 'desc',
   }) async {
     final params = <String, dynamic>{'page': page};
     if (searchQuery != null && searchQuery.isNotEmpty) {
@@ -416,6 +418,10 @@ class AdminRepository {
       params['record_book_category'] = recordBookCategory;
     if (recordBookTypeId != null)
       params['record_book_type_id'] = recordBookTypeId;
+
+    // Sorting
+    params['sort_by'] = sortBy;
+    params['sort_order'] = sortOrder;
 
     final response = await _systemRepository.getRegistryEntries(params);
 

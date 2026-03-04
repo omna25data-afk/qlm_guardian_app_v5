@@ -446,7 +446,11 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
     }
   }
 
-  Future<void> loadFormFields(int contractTypeId) async {
+  Future<void> loadFormFields(
+    int contractTypeId, {
+    String? subtype1,
+    String? subtype2,
+  }) async {
     state = state.copyWith(isLoadingFields: true);
 
     // مفتاح الكاش ومفتاح الـ hash
@@ -468,7 +472,7 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
           filteredFields: [],
           formData: (existingFormData.isNotEmpty) ? existingFormData : {},
         );
-        filterFields();
+        filterFields(subtype1: subtype1, subtype2: subtype2);
       } catch (_) {}
     }
 
@@ -493,7 +497,7 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
           filteredFields: [],
           formData: (existingData.isNotEmpty) ? existingData : {},
         );
-        filterFields();
+        filterFields(subtype1: subtype1, subtype2: subtype2);
       } else {
         // لا تغيير → إيقاف التحميل فقط دون إعادة بناء
         if (state.isLoadingFields) {

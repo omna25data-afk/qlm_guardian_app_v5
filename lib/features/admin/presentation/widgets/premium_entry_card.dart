@@ -88,6 +88,38 @@ class PremiumEntryCard extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              // رقم القيد في سجل التوثيق
+                              if (entry.documentInfo.docEntryNumber !=
+                                  null) ...[
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.08,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: AppColors.primary.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'قيد #${entry.documentInfo.docEntryNumber}',
+                                    style: TextStyle(
+                                      color: AppColors.primary,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Tajawal',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(width: 6),
                               _buildStatusBadge(entry.statusInfo.status),
                             ],
                           ),
@@ -213,7 +245,7 @@ class PremiumEntryCard extends StatelessWidget {
                           ),
 
                           const SizedBox(height: 6),
-                          // Date and Tag Row
+                          // Date and Serial Number Row
                           Row(
                             children: [
                               Icon(
@@ -223,7 +255,9 @@ class PremiumEntryCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                entry.documentInfo.documentHijriDate ?? '---',
+                                entry.documentInfo.docHijriDate ??
+                                    entry.documentInfo.documentHijriDate ??
+                                    '---',
                                 style: TextStyle(
                                   color: Colors.grey[500],
                                   fontSize: 12,
@@ -238,7 +272,7 @@ class PremiumEntryCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '#${entry.basicInfo.serialNumber != 0 ? entry.basicInfo.serialNumber : (entry.basicInfo.registerNumber ?? "---")}',
+                                'تسلسلي: ${entry.basicInfo.serialNumber != 0 ? entry.basicInfo.serialNumber : (entry.basicInfo.registerNumber ?? "---")}',
                                 style: TextStyle(
                                   color: Colors.grey[500],
                                   fontSize: 12,

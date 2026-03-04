@@ -135,9 +135,12 @@ class _CompactRegistryEntryScreenState
         _selectedGuardianId = data.writerInfo.writerId;
       } else if (_writerType == 'documentation') {
         _selectedWriterId = data.writerInfo.writerId;
+      } else if (_writerType == 'external') {
+        _selectedOtherWriterId =
+            data.writerInfo.otherWriterId ?? data.writerInfo.writerId;
       }
 
-      // Financial
+      // Financial — جميع الحقول المالية
       _feeAmountCtrl.text = data.financialInfo.feeAmount?.toString() ?? '0';
       _penaltyAmountCtrl.text =
           data.financialInfo.penaltyAmount?.toString() ?? '0';
@@ -146,6 +149,36 @@ class _CompactRegistryEntryScreenState
       _sustainabilityAmountCtrl.text =
           data.financialInfo.sustainabilityAmount?.toString() ?? '200';
       _totalAmountCtrl.text = data.financialInfo.totalAmount.toString();
+      _receiptNumberCtrl.text = data.financialInfo.receiptNumber ?? '';
+      if (data.financialInfo.exemptionType != null) {
+        _isExempted = true;
+        _exemptionReasonCtrl.text = data.financialInfo.exemptionReason ?? '';
+      }
+
+      // الضريبة والزكاة — من بيانات العقد الفرعي (contract_details)
+      if (data.formData != null) {
+        _taxAmountCtrl.text = data.formData!['tax_amount']?.toString() ?? '';
+        _taxReceiptNumberCtrl.text =
+            data.formData!['tax_receipt_number']?.toString() ?? '';
+        _zakatAmountCtrl.text =
+            data.formData!['zakat_amount']?.toString() ?? '';
+        _zakatReceiptNumberCtrl.text =
+            data.formData!['zakat_receipt_number']?.toString() ?? '';
+      }
+
+      // رسوم المصادقة والانتقال والأخرى — من المبالغ أو الأعلام
+      _hasAuthenticationFee =
+          data.financialInfo.hasAuthenticationFee ||
+          (data.financialInfo.authenticationFeeAmount != null &&
+              data.financialInfo.authenticationFeeAmount! > 0);
+      _hasTransferFee =
+          data.financialInfo.hasTransferFee ||
+          (data.financialInfo.transferFeeAmount != null &&
+              data.financialInfo.transferFeeAmount! > 0);
+      _hasOtherFee =
+          data.financialInfo.hasOtherFee ||
+          (data.financialInfo.otherFeeAmount != null &&
+              data.financialInfo.otherFeeAmount! > 0);
 
       // Documentation Book
       _selectedDocRecordBookId = data.documentInfo.docRecordBookId;
@@ -170,14 +203,50 @@ class _CompactRegistryEntryScreenState
       _guardianGregorianDateCtrl.text =
           data.guardianInfo.guardianGregorianDate ?? '';
 
+      // Subtypes
+      if (data.basicInfo.subtype1 != null) {
+        _selectedSubtype1 = data.basicInfo.subtype1.toString();
+      }
+      if (data.basicInfo.subtype2 != null) {
+        _selectedSubtype2 = data.basicInfo.subtype2.toString();
+      }
+
       // Load specific dependencies (needs notifier)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (_selectedContractTypeId != null) {
           final notifier = ref.read(addEntryProvider.notifier);
-          notifier.loadDocumentationRecordBooks(_selectedContractTypeId!);
-          notifier.loadFormFields(_selectedContractTypeId!);
-          notifier.loadSubtypes(_selectedContractTypeId!);
 
+          // ① تعيين formData أولاً — حتى تُحفظ عند تحميل الحقول
+          if (data.formData != null && data.formData!.isNotEmpty) {
+            notifier.setFormData(data.formData!);
+            // إنشاء controllers للحقول الديناميكية
+            data.formData!.forEach((key, value) {
+              _dynamicControllers[key] = TextEditingController(
+                text: value?.toString() ?? '',
+              );
+            });
+          }
+
+          // ② تحميل البيانات المرتبطة بنوع العقد
+          notifier.loadDocumentationRecordBooks(_selectedContractTypeId!);
+          await notifier.loadSubtypes(_selectedContractTypeId!);
+
+          // ②.١ تحميل الأنواع الفرعية الثانوية إذا كان هناك نوع فرعي أول محدد
+          if (_selectedSubtype1 != null) {
+            await notifier.loadSubtypes(
+              _selectedContractTypeId!,
+              parentCode: _selectedSubtype1,
+            );
+          }
+
+          // ③ تحميل الحقول الديناميكية مع الأنواع الفرعية — formData ستُحفظ لأن loadFormFields يحافظ عليها
+          await notifier.loadFormFields(
+            _selectedContractTypeId!,
+            subtype1: _selectedSubtype1,
+            subtype2: _selectedSubtype2,
+          );
+
+          // ④ تحميل سجلات الأمين إن كان الكاتب أمين
           if (_writerType == 'guardian' && _selectedGuardianId != null) {
             notifier.loadGuardianRecordBooks(
               _selectedContractTypeId!,
@@ -185,32 +254,8 @@ class _CompactRegistryEntryScreenState
             );
           }
 
-          if (data.formData != null) {
-            notifier.setFormData(data.formData!);
-            setState(() {
-              data.formData!.forEach((key, value) {
-                _dynamicControllers[key] = TextEditingController(
-                  text: value?.toString() ?? '',
-                );
-              });
-              if (data.basicInfo.subtype1 != null) {
-                _selectedSubtype1 = data.basicInfo.subtype1.toString();
-              }
-              if (data.basicInfo.subtype2 != null) {
-                _selectedSubtype2 = data.basicInfo.subtype2.toString();
-              }
-            });
-          } else {
-            // Still try to bind subtypes even if formData is null
-            setState(() {
-              if (data.basicInfo.subtype1 != null) {
-                _selectedSubtype1 = data.basicInfo.subtype1.toString();
-              }
-              if (data.basicInfo.subtype2 != null) {
-                _selectedSubtype2 = data.basicInfo.subtype2.toString();
-              }
-            });
-          }
+          // ⑤ إعادة بناء الواجهة بعد اكتمال التحميل
+          if (mounted) setState(() {});
         }
       });
     } else {
@@ -330,6 +375,15 @@ class _CompactRegistryEntryScreenState
         ),
       );
       return;
+    }
+
+    // مزامنة بيانات الحقول الديناميكية من controllers إلى formData قبل الإرسال
+    for (final entry in _dynamicControllers.entries) {
+      if (entry.value.text.isNotEmpty) {
+        ref
+            .read(addEntryProvider.notifier)
+            .updateFormData(entry.key, entry.value.text);
+      }
     }
 
     final data = <String, dynamic>{

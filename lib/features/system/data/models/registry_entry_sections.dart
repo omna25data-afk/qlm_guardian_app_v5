@@ -315,6 +315,9 @@ class RegistryFinancialInfo extends Equatable {
   final double? authenticationFeeAmount;
   final double? transferFeeAmount;
   final double? otherFeeAmount;
+  final bool hasAuthenticationFee;
+  final bool hasTransferFee;
+  final bool hasOtherFee;
   final String? exemptionType;
   final String? exemptionReason;
   final String? receiptNumber;
@@ -329,6 +332,9 @@ class RegistryFinancialInfo extends Equatable {
     this.authenticationFeeAmount,
     this.transferFeeAmount,
     this.otherFeeAmount,
+    this.hasAuthenticationFee = false,
+    this.hasTransferFee = false,
+    this.hasOtherFee = false,
     this.exemptionType,
     this.exemptionReason,
     this.receiptNumber,
@@ -362,6 +368,12 @@ class RegistryFinancialInfo extends Equatable {
       otherFeeAmount: parseDouble(
         json['other_fee_amount'] ?? fees?['other_fee'],
       ),
+      hasAuthenticationFee:
+          json['has_authentication_fee'] == true ||
+          json['has_authentication_fee'] == 1,
+      hasTransferFee:
+          json['has_transfer_fee'] == true || json['has_transfer_fee'] == 1,
+      hasOtherFee: json['has_other_fee'] == true || json['has_other_fee'] == 1,
       exemptionType: json['exemption_type'],
       exemptionReason: json['exemption_reason'],
       receiptNumber: json['receipt_number'] ?? fees?['receipt_number'],
@@ -382,6 +394,9 @@ class RegistryFinancialInfo extends Equatable {
       'authentication_fee_amount': authenticationFeeAmount,
       'transfer_fee_amount': transferFeeAmount,
       'other_fee_amount': otherFeeAmount,
+      'has_authentication_fee': hasAuthenticationFee,
+      'has_transfer_fee': hasTransferFee,
+      'has_other_fee': hasOtherFee,
       'exemption_type': exemptionType,
       'exemption_reason': exemptionReason,
       'receipt_number': receiptNumber,
@@ -399,6 +414,9 @@ class RegistryFinancialInfo extends Equatable {
     authenticationFeeAmount,
     transferFeeAmount,
     otherFeeAmount,
+    hasAuthenticationFee,
+    hasTransferFee,
+    hasOtherFee,
     exemptionType,
     exemptionReason,
     receiptNumber,
