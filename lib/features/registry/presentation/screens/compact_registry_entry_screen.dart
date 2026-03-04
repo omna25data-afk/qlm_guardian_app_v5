@@ -312,6 +312,8 @@ class _CompactRegistryEntryScreenState
   }
 
   // ── Fee Calculation ──
+  /// حساب الرسوم والغرامات تلقائياً
+  /// مطابق لـ FeeCalculator.php في الباكند
   void _calculateFees() {
     if (_selectedContractTypeId == null) return;
 
@@ -327,11 +329,16 @@ class _CompactRegistryEntryScreenState
     }
 
     final contractId = _selectedContractTypeId!;
+    const nonFinancialTypes = [1, 7, 8, 4]; // زواج، طلاق، رجعة، وكالة
+    const financialTypes = [10, 5, 6]; // مبيع، تصرف، قسمة
+
+    // ─── 1. حساب الرسم الأساسي ─────────────────
     double baseFee = 0;
 
-    if ([1, 7, 8, 4].contains(contractId)) {
-      baseFee = 400;
-    } else if ([10, 5, 6].contains(contractId)) {
+    if (nonFinancialTypes.contains(contractId)) {
+      baseFee = 400; // رسم ثابت
+    } else if (financialTypes.contains(contractId)) {
+      // رسم نسبي 0.20% من القيمة
       final formData = ref.read(addEntryProvider).formData;
       final dynamicPrice =
           formData['sale_price'] ?? _dynamicControllers['sale_price']?.text;
@@ -339,27 +346,81 @@ class _CompactRegistryEntryScreenState
       if (dynamicPrice != null) {
         price = double.tryParse(dynamicPrice.toString()) ?? 0;
       }
-      baseFee = price > 0 ? price * 0.002 : 400;
+      baseFee = price > 0 ? (price * 0.002).clamp(400, double.infinity) : 400;
     } else {
-      baseFee = 2000;
+      baseFee = 2000; // توثيق عادي
     }
 
+    // ─── 2. حساب أيام التأخير ──────────────────
+    int delayDays = 0;
+    double penalty = 0;
+
+    // تاريخ التوثيق (الميلادي)
+    final docGregorianStr = _docGregorianDateCtrl.text;
+    // تاريخ المحرر (الميلادي)
+    final documentGregorianStr = _documentGregorianDateCtrl.text;
+
+    if (docGregorianStr.isNotEmpty && documentGregorianStr.isNotEmpty) {
+      try {
+        final docDate = DateTime.parse(docGregorianStr);
+        final documentDate = DateTime.parse(documentGregorianStr);
+        if (docDate.isAfter(documentDate)) {
+          delayDays = docDate.difference(documentDate).inDays;
+        }
+      } catch (_) {}
+    }
+
+    // ─── 3. حساب الغرامة بناءً على التأخير ─────
+    // مطابق لـ FeeCalculator::calculatePenalty()
+    if (delayDays > 0) {
+      // زواج/طلاق/رجعة: غرامة 100% بعد 10 أيام
+      if ([1, 7, 8].contains(contractId)) {
+        if (delayDays > 10) penalty = baseFee * 1.00;
+      }
+      // وكالة: غرامة 100% بعد 30 يوم
+      else if (contractId == 4) {
+        if (delayDays > 30) penalty = baseFee * 1.00;
+      }
+      // تصرف: غرامة 100% بعد 30 يوم
+      else if (contractId == 5) {
+        if (delayDays > 30) penalty = baseFee * 1.00;
+      }
+      // قسمة: غرامة 100% من 61 يوم وأكثر
+      else if (contractId == 6) {
+        if (delayDays >= 61) penalty = baseFee * 1.00;
+      }
+      // مبيع: غرامة تدريجية
+      else if (contractId == 10) {
+        if (delayDays >= 61 && delayDays <= 120) {
+          penalty = baseFee * 0.05; // 5%
+        } else if (delayDays >= 121 && delayDays <= 180) {
+          penalty = baseFee * 0.07; // 7%
+        } else if (delayDays >= 181) {
+          penalty = baseFee * 0.10; // 10%
+        }
+      }
+    }
+
+    // ─── 4. الرسوم الإضافية (400 لكل واحدة) ────
     double extra = 0;
     if (_hasAuthenticationFee) extra += 400;
     if (_hasTransferFee) extra += 400;
     if (_hasOtherFee) extra += 400;
     if (_writerType == 'documentation') extra += 400;
 
-    double totalFee = baseFee + extra;
+    // ─── 5. الدعم (25% من الرسم + الغرامة) ─────
+    double totalFee = baseFee + penalty;
     double support = totalFee * 0.25;
+
+    // ─── 6. تعيين القيم ─────────────────────────
     double sustainability =
         double.tryParse(_sustainabilityAmountCtrl.text) ?? 200;
 
     setState(() {
       _feeAmountCtrl.text = (baseFee + extra).toStringAsFixed(0);
-      _penaltyAmountCtrl.text = '0';
+      _penaltyAmountCtrl.text = penalty.toStringAsFixed(0);
       _supportAmountCtrl.text = support.toStringAsFixed(0);
-      _totalAmountCtrl.text = (totalFee + support + sustainability)
+      _totalAmountCtrl.text = (totalFee + extra + support + sustainability)
           .toStringAsFixed(0);
     });
   }
