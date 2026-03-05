@@ -184,7 +184,7 @@ class _GuardianSectionState extends State<GuardianSection> {
                 textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   labelText: 'رقم القيد',
-                  hintText: 'القيد',
+                  hintText: 'رقم القيد',
                   hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                   prefixIcon: Icon(Icons.tag, size: 20),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -192,14 +192,14 @@ class _GuardianSectionState extends State<GuardianSection> {
                 keyboardType: TextInputType.number,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Expanded(
               child: TextFormField(
                 controller: widget.pageNumberCtrl,
                 textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   labelText: 'رقم الصفحة',
-                  hintText: 'الصفحة',
+                  hintText: 'رقم الصفحة',
                   hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                   prefixIcon: Icon(Icons.description, size: 20),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -207,22 +207,21 @@ class _GuardianSectionState extends State<GuardianSection> {
                 keyboardType: TextInputType.number,
               ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextFormField(
-                controller: widget.recordBookNumberCtrl,
-                readOnly: true,
-                decoration: const InputDecoration(
-                  labelText: 'رقم السجل',
-                  hintText: 'السجل',
-                  hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
-                  prefixIcon: Icon(Icons.menu_book, size: 20),
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                ),
-                keyboardType: TextInputType.number,
-              ),
-            ),
           ],
+        ),
+        const SizedBox(height: 12),
+        // Record Book Number
+        TextFormField(
+          controller: widget.recordBookNumberCtrl,
+          readOnly: true,
+          decoration: const InputDecoration(
+            labelText: 'رقم السجل',
+            hintText: 'يتم سحبه تلقائيا',
+            hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
+            prefixIcon: Icon(Icons.menu_book, size: 20),
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+          ),
+          keyboardType: TextInputType.number,
         ),
         const SizedBox(height: 12),
         // Info message
