@@ -34,6 +34,41 @@ class GuardianSection extends StatefulWidget {
 class _GuardianSectionState extends State<GuardianSection> {
   bool _useDifferentDate = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // الاختيار التلقائي للحاوية المركزية إذا لم يتم اختيار واحدة بعد
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _autoSelectContainer();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant GuardianSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // عند تحديث قائمة السجلات (بعد تحميلها)، اختر الحاوية تلقائياً
+    if (oldWidget.guardianRecordBooks != widget.guardianRecordBooks) {
+      _autoSelectContainer();
+    }
+  }
+
+  /// اختيار الحاوية المركزية تلقائياً
+  /// الحاوية هي السجل ذو book_number == 0 (أو الأول في القائمة)
+  void _autoSelectContainer() {
+    if (widget.guardianRecordBookId != null) return;
+    if (widget.guardianRecordBooks.isEmpty) return;
+
+    // ابحث عن الحاوية المركزية (book_number == 0)
+    final container = widget.guardianRecordBooks.cast<RecordBook?>().firstWhere(
+      (b) => b?.bookNumber == 0,
+      orElse: () => widget.guardianRecordBooks.first,
+    );
+
+    if (container != null) {
+      widget.onRecordBookIdChanged(container.id);
+    }
+  }
+
   Future<void> _selectHijriDate(BuildContext context) async {
     final picked = await showHijriDatePicker(
       context: context,
@@ -62,6 +97,14 @@ class _GuardianSectionState extends State<GuardianSection> {
 
   @override
   Widget build(BuildContext context) {
+    // العثور على الحاوية المختارة
+    final selectedContainer = widget.guardianRecordBookId != null
+        ? widget.guardianRecordBooks.cast<RecordBook?>().firstWhere(
+            (b) => b?.id == widget.guardianRecordBookId,
+            orElse: () => null,
+          )
+        : null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -142,7 +185,8 @@ class _GuardianSectionState extends State<GuardianSection> {
         const SizedBox(height: 16),
         const Divider(),
         const SizedBox(height: 12),
-        // بيانات السجل
+
+        // ══════ بيانات السجل ══════
         const Text(
           'بيانات السجل',
           style: TextStyle(
@@ -152,30 +196,112 @@ class _GuardianSectionState extends State<GuardianSection> {
           ),
         ),
         const SizedBox(height: 8),
-        // Book selector
-        SearchableDropdown<RecordBook>(
-          label: 'سجل قيد محررات الأمين',
-          hint: 'اختر السجل',
-          items: widget.guardianRecordBooks,
-          itemLabelBuilder: (b) => b.compositeName,
-          value: widget.guardianRecordBookId != null
-              ? widget.guardianRecordBooks.cast<RecordBook?>().firstWhere(
-                  (b) => b?.id == widget.guardianRecordBookId,
-                  orElse: () => null,
-                )
-              : null,
-          onChanged: (book) {
-            if (book != null) {
-              widget.recordBookNumberCtrl.text = book.bookNumber.toString();
-              widget.onRecordBookIdChanged(book.id);
-            } else {
-              widget.recordBookNumberCtrl.clear();
-              widget.onRecordBookIdChanged(null);
-            }
-          },
+
+        // ── الحاوية المركزية (تُعيَّن تلقائياً) ──
+        if (selectedContainer != null)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF006400).withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: const Color(0xFF006400).withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF006400).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.folder_open,
+                    color: Color(0xFF006400),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'السجل العام',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey[600],
+                          fontFamily: 'Tajawal',
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        selectedContainer.contractType.isNotEmpty
+                            ? selectedContainer.contractType
+                            : selectedContainer.name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF006400),
+                          fontFamily: 'Tajawal',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.check_circle,
+                  color: Color(0xFF006400),
+                  size: 20,
+                ),
+              ],
+            ),
+          )
+        else if (widget.guardianRecordBooks.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.orange.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.warning_amber, color: Colors.orange, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'لم يتم العثور على سجل أمين لهذا النوع. يرجى التواصل مع المسؤول.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange[800],
+                      fontFamily: 'Tajawal',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        const SizedBox(height: 12),
+
+        // ── رقم الدفتر الفعلي (يُدخل يدوياً) ──
+        TextFormField(
+          controller: widget.recordBookNumberCtrl,
+          textInputAction: TextInputAction.next,
+          decoration: const InputDecoration(
+            labelText: 'رقم الدفتر *',
+            hintText: 'أدخل رقم الدفتر الفعلي',
+            hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
+            prefixIcon: Icon(Icons.menu_book, size: 20),
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+          ),
+          keyboardType: TextInputType.number,
         ),
         const SizedBox(height: 12),
-        // Entry, Page, Book Number
+
+        // Entry, Page numbers
         Row(
           children: [
             Expanded(
@@ -210,20 +336,7 @@ class _GuardianSectionState extends State<GuardianSection> {
           ],
         ),
         const SizedBox(height: 12),
-        // Record Book Number
-        TextFormField(
-          controller: widget.recordBookNumberCtrl,
-          readOnly: true,
-          decoration: const InputDecoration(
-            labelText: 'رقم السجل',
-            hintText: 'يتم سحبه تلقائيا',
-            hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
-            prefixIcon: Icon(Icons.menu_book, size: 20),
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-          ),
-          keyboardType: TextInputType.number,
-        ),
-        const SizedBox(height: 12),
+
         // Info message
         Container(
           padding: const EdgeInsets.all(12),
@@ -238,8 +351,8 @@ class _GuardianSectionState extends State<GuardianSection> {
               SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'سيتم تحديث رقم الصفحة ورقم القيد تلقائياً بما يتوافق مع تسلسل سجلات الأمين.',
-                  style: TextStyle(color: Colors.blue, fontSize: 13),
+                  'أدخل رقم الدفتر الفيزيائي الفعلي الذي تم تسجيل المحرر فيه. السجل العام يُعيَّن تلقائياً بحسب نوع العقد.',
+                  style: TextStyle(color: Colors.blue, fontSize: 12),
                 ),
               ),
             ],
