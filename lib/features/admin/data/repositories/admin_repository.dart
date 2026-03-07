@@ -660,6 +660,33 @@ class AdminRepository {
 
   // ─── Registry Entry Creation ─────────────────────────────
 
+  /// Check if an entry with the given details already exists
+  Future<Map<String, dynamic>> checkDuplicateEntry({
+    required int contractTypeId,
+    required String writerType,
+    required int entryNumber,
+    required String transactionDate,
+    int? guardianId,
+  }) async {
+    try {
+      final data = {
+        'contract_type_id': contractTypeId,
+        'writer_type': writerType,
+        'entry_number': entryNumber,
+        'transaction_date': transactionDate,
+        if (guardianId != null) 'guardian_id': guardianId,
+      };
+      final response = await _systemRepository
+          .postAdminRegistryEntriesCheckDuplicate(data);
+      return response.data;
+    } catch (e) {
+      if (e is DioException && e.response?.statusCode != 500) {
+        return e.response?.data ?? {'success': false, 'message': e.toString()};
+      }
+      rethrow;
+    }
+  }
+
   /// Store a new registry entry (offline-first)
   Future<Map<String, dynamic>> storeRegistryEntry(
     Map<String, dynamic> data,

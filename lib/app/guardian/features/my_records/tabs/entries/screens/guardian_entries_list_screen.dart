@@ -7,7 +7,7 @@ import '../../../../../../../features/registry/presentation/providers/registry_p
 import '../../../../../../../features/registry/presentation/providers/contract_types_provider.dart';
 import '../../../../../../../features/registry/presentation/screens/guardian_entry_screen.dart';
 import '../widgets/advanced_guardian_filter_sheet.dart';
-import '../widgets/guardian_registry_entry_card.dart';
+import '../../../widgets/guardian_entry_card.dart';
 import 'guardian_entry_details_screen.dart';
 
 import '../../../providers/guardian_entries_provider.dart';
@@ -128,7 +128,7 @@ class _GuardianEntriesListScreenState
               );
             }
             final entry = entries[index];
-            return GuardianRegistryEntryCard(
+            return GuardianEntryCard(
               entry: entry,
               onTap: () {
                 Navigator.push(
@@ -467,13 +467,13 @@ class _GuardianEntriesListScreenState
         return 'مسودة';
       case 'pending':
       case 'pending_documentation':
-        return 'قيد المعالجة';
+        return 'بانتظار التوثيق';
       case 'documented':
       case 'approved':
       case 'completed':
-        return 'مكتمل';
+        return 'موثق';
       case 'registered_guardian':
-        return 'جاهز';
+        return 'مقيدة لدى الأمين';
       case 'rejected':
         return 'مرفوض';
       default:

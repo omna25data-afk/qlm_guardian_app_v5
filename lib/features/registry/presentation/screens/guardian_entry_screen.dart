@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:hijri_picker/hijri_picker.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:async';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/searchable_dropdown.dart';
@@ -54,6 +56,7 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
   String? _selectedSubtype2;
   int? _guardianRecordBookId;
   bool _isOnline = true;
+  Timer? _duplicateCheckTimer;
 
   // ── Controllers ──
   final _firstPartyCtrl = TextEditingController();
@@ -120,6 +123,10 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
 
     // Sync guardian date with document date
     _documentHijriDateCtrl.addListener(_syncGuardianDate);
+
+    // Duplicate Check Listeners
+    _guardianEntryNumberCtrl.addListener(_checkDuplicateIfNeeded);
+    _documentHijriDateCtrl.addListener(_checkDuplicateIfNeeded);
 
     // مراقبة تحميل الحقول الديناميكية لملئها
     _listenAndPopulateDynamic();
@@ -195,7 +202,11 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
         _dynamicControllers.clear();
 
         // ③ تحميل الحقول والدفاتر والأنواع الفرعية
-        notifier.loadFormFields(_selectedContractTypeId!);
+        notifier.loadFormFields(
+          _selectedContractTypeId!,
+          subtype1: _selectedSubtype1,
+          subtype2: _selectedSubtype2,
+        );
         notifier.loadGuardianRecordBooks(
           _selectedContractTypeId!,
           _guardianId ?? 0,
@@ -216,9 +227,116 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
     _guardianGregorianDateCtrl.text = _documentGregorianDateCtrl.text;
   }
 
+  void _checkDuplicateIfNeeded() {
+    if (widget.isEditMode) return; // Don't check on edit mode
+
+    final contractTypeId = _selectedContractTypeId;
+    final entryNumberText = _guardianEntryNumberCtrl.text;
+    final hijriDate = _guardianHijriDateCtrl.text;
+
+    if (contractTypeId == null ||
+        entryNumberText.isEmpty ||
+        hijriDate.isEmpty) {
+      return;
+    }
+
+    final entryNumber = int.tryParse(entryNumberText);
+    if (entryNumber == null) return;
+
+    _duplicateCheckTimer?.cancel();
+    _duplicateCheckTimer = Timer(const Duration(milliseconds: 800), () async {
+      final guardianId = _guardianId;
+      if (guardianId == null) return;
+
+      if (!mounted) return;
+
+      final notifier = ref.read(addEntryProvider.notifier);
+      final result = await notifier.checkDuplicateEntry(
+        contractTypeId: contractTypeId,
+        writerType: 'guardian',
+        entryNumber: entryNumber,
+        transactionDate: hijriDate,
+        guardianId: guardianId,
+      );
+
+      if (!mounted) return;
+
+      if (result['is_duplicate'] == true && result['data'] != null) {
+        _showDuplicateDialog(result['data']);
+      }
+    });
+  }
+
+  void _showDuplicateDialog(Map<String, dynamic> duplicateData) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: AppColors.warning),
+            SizedBox(width: 8),
+            Text(
+              'تنبيه: قيد مسجل مسبقاً',
+              style: TextStyle(
+                fontFamily: 'Tajawal',
+                color: AppColors.warning,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'تم العثور على قيد مسجل مسبقاً بنفس نوع المحرر ورقم القيد. هل تريد جلب بياناته لتعديلها؟',
+          style: TextStyle(fontFamily: 'Tajawal', fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+            },
+            child: const Text(
+              'إلغاء',
+              style: TextStyle(
+                fontFamily: 'Tajawal',
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _populateFromDuplicate(duplicateData);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF006400),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text(
+              'نعم، جلب البيانات',
+              style: TextStyle(fontFamily: 'Tajawal'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _populateFromDuplicate(Map<String, dynamic> data) {
+    final entry = RegistryEntrySections.fromJson(data);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => GuardianEntryScreen(entry: entry)),
+    );
+  }
+
   @override
   void dispose() {
+    _duplicateCheckTimer?.cancel();
     _documentHijriDateCtrl.removeListener(_syncGuardianDate);
+    _guardianEntryNumberCtrl.removeListener(_checkDuplicateIfNeeded);
+    _documentHijriDateCtrl.removeListener(_checkDuplicateIfNeeded);
     _fadeController.dispose();
     _firstPartyCtrl.dispose();
     _secondPartyCtrl.dispose();
@@ -959,40 +1077,57 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
             ),
           ),
           const SizedBox(height: 12),
-          // Proof Placeholder
+          // Delivery Proof File Picker
           InkWell(
-            onTap: () {
-              // Placeholder for file picker
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('خاصية إرفاق صورة محضر التسليم ستفعّل لاحقاً'),
-                ),
+            onTap: () async {
+              final picker = ImagePicker();
+              final pickedFile = await picker.pickImage(
+                source: ImageSource.gallery,
               );
+              if (pickedFile != null) {
+                setState(() {
+                  _deliveryProofPath = pickedFile.path;
+                });
+              }
             },
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: Colors.grey.shade400,
+                  color: _deliveryProofPath != null
+                      ? Colors.green
+                      : Colors.grey.shade400,
                   style: BorderStyle.solid,
                 ),
                 borderRadius: BorderRadius.circular(10),
                 color: Colors.grey.shade50,
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.upload_file, color: Colors.blue),
-                  SizedBox(width: 12),
+                  Icon(
+                    _deliveryProofPath != null
+                        ? Icons.check_circle
+                        : Icons.upload_file,
+                    color: _deliveryProofPath != null
+                        ? Colors.green
+                        : Colors.blue,
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'إرفاق صورة محضر التسليم',
+                      _deliveryProofPath != null
+                          ? 'تم إرفاق صورة محضر التسليم'
+                          : 'إرفاق صورة محضر التسليم',
                       style: TextStyle(
                         fontFamily: 'Tajawal',
-                        color: Colors.blue,
+                        color: _deliveryProofPath != null
+                            ? Colors.green
+                            : Colors.blue,
                       ),
                     ),
                   ),
-                  Icon(Icons.add, color: Colors.blue),
+                  if (_deliveryProofPath == null)
+                    const Icon(Icons.add, color: Colors.blue),
                 ],
               ),
             ),

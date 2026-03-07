@@ -264,6 +264,27 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
     }
   }
 
+  Future<Map<String, dynamic>> checkDuplicateEntry({
+    required int contractTypeId,
+    required String writerType,
+    required int entryNumber,
+    required String transactionDate,
+    int? guardianId,
+  }) async {
+    try {
+      final result = await _repo.checkDuplicateEntry(
+        contractTypeId: contractTypeId,
+        writerType: writerType,
+        entryNumber: entryNumber,
+        transactionDate: transactionDate,
+        guardianId: guardianId,
+      );
+      return result;
+    } catch (e) {
+      return {'is_duplicate': false, 'message': e.toString()};
+    }
+  }
+
   Future<bool> submitEntry(Map<String, dynamic> data) async {
     state = state.copyWith(
       isSubmitting: true,

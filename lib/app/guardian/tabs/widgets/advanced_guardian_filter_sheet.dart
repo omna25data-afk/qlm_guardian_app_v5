@@ -117,8 +117,14 @@ class _AdvancedGuardianFilterSheetState
                     children: [
                       _buildStatusChip('موثق', 'documented'),
                       _buildStatusChip('مسودة', 'draft'),
-                      _buildStatusChip('مقيدة', 'registered_guardian'),
-                      _buildStatusChip('بانتظار التوثيق', 'pending_documentation'),
+                      _buildStatusChip(
+                        'مقيدة لدى الأمين',
+                        'registered_guardian',
+                      ),
+                      _buildStatusChip(
+                        'بانتظار التوثيق',
+                        'pending_documentation',
+                      ),
                       _buildStatusChip('مرفوض', 'rejected'),
                     ],
                   ),

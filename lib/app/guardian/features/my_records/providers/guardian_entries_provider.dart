@@ -20,7 +20,7 @@ final guardianEntriesByBookProvider =
 // ─── Filter Providers for Guardian My Entries ─── //
 final guardianEntrySearchQueryProvider = StateProvider<String>((ref) => '');
 final guardianEntryStatusesFilterProvider = StateProvider<List<String>>(
-  (ref) => ['draft', 'pending_documentation', 'registered_guardian'],
+  (ref) => [],
 );
 final guardianEntryContractTypeFilterProvider = StateProvider<int?>(
   (ref) => null,

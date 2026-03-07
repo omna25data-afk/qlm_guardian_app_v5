@@ -626,6 +626,14 @@ class SystemRepository {
     );
   }
 
+  Future<Response> postAdminRegistryEntriesCheckDuplicate(dynamic data) async {
+    return _dio.request(
+      '$_baseUrl/api/admin/registry-entries/check-duplicate',
+      options: Options(method: 'POST'),
+      data: data,
+    );
+  }
+
   Future<Response> getUser(Map<String, dynamic>? queryParams) async {
     return _dio.request(
       '$_baseUrl/api/user',
