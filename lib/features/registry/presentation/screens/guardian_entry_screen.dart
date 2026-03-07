@@ -127,6 +127,9 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
     // Duplicate Check Listeners
     _guardianEntryNumberCtrl.addListener(_checkDuplicateIfNeeded);
     _documentHijriDateCtrl.addListener(_checkDuplicateIfNeeded);
+    _guardianHijriDateCtrl.addListener(_checkDuplicateIfNeeded);
+    _guardianPageNumberCtrl.addListener(_checkDuplicateIfNeeded);
+    _guardianRecordBookNumberCtrl.addListener(_checkDuplicateIfNeeded);
 
     // مراقبة تحميل الحقول الديناميكية لملئها
     _listenAndPopulateDynamic();
@@ -232,7 +235,11 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
 
     final contractTypeId = _selectedContractTypeId;
     final entryNumberText = _guardianEntryNumberCtrl.text;
-    final hijriDate = _guardianHijriDateCtrl.text;
+
+    // Use guardian hijri date if available, otherwise fallback to document hijri date
+    final hijriDate = _guardianHijriDateCtrl.text.isNotEmpty
+        ? _guardianHijriDateCtrl.text
+        : _documentHijriDateCtrl.text;
 
     if (contractTypeId == null ||
         entryNumberText.isEmpty ||
@@ -241,6 +248,11 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
     }
 
     final entryNumber = int.tryParse(entryNumberText);
+
+    debugPrint(
+      'Duplicate Check - ContractType: $contractTypeId, EntryNumText: $entryNumberText, HijriDate: $hijriDate, EntryNum: $entryNumber',
+    );
+
     if (entryNumber == null) return;
 
     _duplicateCheckTimer?.cancel();
@@ -260,10 +272,12 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
         recordCategory: 'guardian_recording',
       );
 
+      debugPrint('Duplicate Check API Result: $result');
+
       if (!mounted) return;
 
-      if (result['is_duplicate'] == true && result['data'] != null) {
-        _showDuplicateDialog(result['data']);
+      if (result['is_duplicate'] == true && result['entry'] != null) {
+        _showDuplicateDialog(result['entry']);
       }
     });
   }
@@ -336,8 +350,11 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
   void dispose() {
     _duplicateCheckTimer?.cancel();
     _documentHijriDateCtrl.removeListener(_syncGuardianDate);
+    _guardianRecordBookNumberCtrl.removeListener(_checkDuplicateIfNeeded);
+    _guardianPageNumberCtrl.removeListener(_checkDuplicateIfNeeded);
     _guardianEntryNumberCtrl.removeListener(_checkDuplicateIfNeeded);
     _documentHijriDateCtrl.removeListener(_checkDuplicateIfNeeded);
+    _guardianHijriDateCtrl.removeListener(_checkDuplicateIfNeeded);
     _fadeController.dispose();
     _firstPartyCtrl.dispose();
     _secondPartyCtrl.dispose();
