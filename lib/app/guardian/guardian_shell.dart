@@ -9,7 +9,7 @@ import '../../features/sync/presentation/sync_status_widget.dart';
 import '../../features/notifications/presentation/widgets/notification_bell_widget.dart';
 
 import 'tabs/guardian_dashboard_tab.dart';
-import 'tabs/my_records_tab.dart';
+import 'features/my_records/screens/my_records_screen.dart';
 import 'tabs/guardian_tools_tab.dart';
 import 'tabs/profile_tab.dart';
 
@@ -28,7 +28,7 @@ class _GuardianShellState extends ConsumerState<GuardianShell> {
   // 4 صفحات فعلية (إضافة = FAB وليست صفحة)
   final List<Widget> _pages = const [
     GuardianDashboardTab(), // 0: الرئيسية
-    MyRecordsTab(), // 1: سجلاتي
+    MyRecordsScreen(), // 1: سجلاتي
     GuardianToolsTab(), // 2: الأدوات (mapped from nav index 3)
     ProfileTab(), // 3: حسابي (mapped from nav index 4)
   ];

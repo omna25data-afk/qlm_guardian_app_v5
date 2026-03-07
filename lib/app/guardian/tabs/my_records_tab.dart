@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../features/records/presentation/providers/records_provider.dart';
-import '../../../features/records/presentation/screens/record_books_screen.dart';
+import '../features/my_records/tabs/physical_records/screens/guardian_record_books_screen.dart';
 import 'guardian_entries_list_screen.dart';
+import '../../../../core/utils/arabic_pluralization.dart';
 
 /// سجلاتي + قيودي — TabBar يبدل بينهما (كما في v4)
 class MyRecordsTab extends ConsumerStatefulWidget {
@@ -182,8 +183,9 @@ class _MyRecordsTabState extends ConsumerState<MyRecordsTab>
                   // حساب عدد الدفاتر والقيود المرتبطة بهذا النوع
                   final matchingBooks = books.where((b) {
                     if (contractTypeId != null &&
-                        b.contractTypeId == contractTypeId)
+                        b.contractTypeId == contractTypeId) {
                       return true;
+                    }
                     if (b.recordBookTypeId == typeId) return true;
                     return false;
                   }).toList();
@@ -234,7 +236,7 @@ class _MyRecordsTabState extends ConsumerState<MyRecordsTab>
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => RecordBookNotebooksScreen(
+              builder: (_) => GuardianRecordBooksScreen(
                 contractTypeId: contractTypeId,
                 contractTypeName: typeName,
               ),
@@ -273,13 +275,13 @@ class _MyRecordsTabState extends ConsumerState<MyRecordsTab>
                     Row(
                       children: [
                         _buildBadge(
-                          '$activeBooks دفتر',
+                          ArabicPluralization.formatRecords(activeBooks),
                           color.withValues(alpha: 0.1),
                           color,
                         ),
                         const SizedBox(width: 8),
                         _buildBadge(
-                          '$totalEntries قيد',
+                          ArabicPluralization.formatEntries(totalEntries),
                           Colors.grey.shade100,
                           Colors.grey.shade700,
                         ),

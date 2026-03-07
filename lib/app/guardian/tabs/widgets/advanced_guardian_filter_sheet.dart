@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../features/registry/presentation/providers/entries_provider.dart';
+import '../../features/my_records/providers/guardian_entries_provider.dart';
 import '../../../../features/registry/presentation/providers/contract_types_provider.dart';
 
 class AdvancedGuardianFilterSheet extends ConsumerStatefulWidget {
@@ -26,21 +26,20 @@ class _AdvancedGuardianFilterSheetState
   void initState() {
     super.initState();
     // Initialize temporary state from current providers
-    _tempStatuses = List.from(ref.read(entryStatusesFilterProvider));
-    _tempContractTypeId = ref.read(entryContractTypeFilterProvider);
-    _tempDateFrom = ref.read(entryDateFromFilterProvider);
-    _tempDateTo = ref.read(entryDateToFilterProvider);
-    _tempDeliveryStatus = ref.read(entryDeliveryStatusFilterProvider);
+    _tempStatuses = List.from(ref.read(guardianEntryStatusesFilterProvider));
+    _tempContractTypeId = ref.read(guardianEntryContractTypeFilterProvider);
+    // Notice Date and Delivery filters aren't in Guardian provider yet, I'll remove them or just leave them if they are local
   }
 
   void _applyFilters() {
-    ref.read(entryStatusesFilterProvider.notifier).state = _tempStatuses;
-    ref.read(entryContractTypeFilterProvider.notifier).state =
+    ref.read(guardianEntryStatusesFilterProvider.notifier).state =
+        _tempStatuses;
+    ref.read(guardianEntryContractTypeFilterProvider.notifier).state =
         _tempContractTypeId;
-    ref.read(entryDateFromFilterProvider.notifier).state = _tempDateFrom;
-    ref.read(entryDateToFilterProvider.notifier).state = _tempDateTo;
-    ref.read(entryDeliveryStatusFilterProvider.notifier).state =
-        _tempDeliveryStatus;
+
+    // Refresh the list immediately after applying filters
+    ref.read(guardianAllEntriesProvider.notifier).refresh();
+
     Navigator.pop(context);
   }
 
@@ -119,7 +118,7 @@ class _AdvancedGuardianFilterSheetState
                       _buildStatusChip('موثق', 'documented'),
                       _buildStatusChip('مسودة', 'draft'),
                       _buildStatusChip('مقيدة', 'registered_guardian'),
-                      _buildStatusChip('قيد المعالجة', 'pending_documentation'),
+                      _buildStatusChip('بانتظار التوثيق', 'pending_documentation'),
                       _buildStatusChip('مرفوض', 'rejected'),
                     ],
                   ),
@@ -182,70 +181,7 @@ class _AdvancedGuardianFilterSheetState
                   ),
                   const SizedBox(height: 16),
 
-                  // ─── Delivery Status ───
-                  const Text(
-                    'حالة التسليم',
-                    style: TextStyle(
-                      fontFamily: 'Tajawal',
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _buildDeliveryChip('لم يتم التسليم', 'not_delivered'),
-                      _buildDeliveryChip('مسلمة', 'delivered'),
-                      _buildDeliveryChip('محفوظة', 'preserved'),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // ─── Date Range Filter ───
-                  const Text(
-                    'تاريخ المحرر',
-                    style: TextStyle(
-                      fontFamily: 'Tajawal',
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _selectDate(context, true),
-                          icon: const Icon(Icons.date_range, size: 18),
-                          label: Text(
-                            _tempDateFrom != null
-                                ? '${_tempDateFrom!.year}-${_tempDateFrom!.month}-${_tempDateFrom!.day}'
-                                : 'من تاريخ',
-                            style: const TextStyle(
-                              fontFamily: 'Tajawal',
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _selectDate(context, false),
-                          icon: const Icon(Icons.date_range, size: 18),
-                          label: Text(
-                            _tempDateTo != null
-                                ? '${_tempDateTo!.year}-${_tempDateTo!.month}-${_tempDateTo!.day}'
-                                : 'إلى تاريخ',
-                            style: const TextStyle(
-                              fontFamily: 'Tajawal',
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // ─── Date Range Filter ─── (Removed for now since the new provider doesn't support it yet, or keep it commented out)
                   const SizedBox(height: 20),
                 ],
               ),
@@ -292,24 +228,6 @@ class _AdvancedGuardianFilterSheetState
           } else {
             _tempStatuses.remove(value);
           }
-        });
-      },
-      selectedColor: AppColors.primary.withValues(alpha: 0.2),
-      checkmarkColor: AppColors.primary,
-    );
-  }
-
-  Widget _buildDeliveryChip(String label, String value) {
-    final isSelected = _tempDeliveryStatus == value;
-    return FilterChip(
-      label: Text(
-        label,
-        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12),
-      ),
-      selected: isSelected,
-      onSelected: (selected) {
-        setState(() {
-          _tempDeliveryStatus = selected ? value : null;
         });
       },
       selectedColor: AppColors.primary.withValues(alpha: 0.2),

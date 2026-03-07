@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/utils/arabic_pluralization.dart';
 import '../../data/models/record_book.dart';
 import '../providers/records_provider.dart';
 import 'record_book_entries_screen.dart';
@@ -169,7 +170,7 @@ class RecordBooksScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '$activeBooks دفتر • $totalEntries قيد',
+                          '${ArabicPluralization.formatRecords(activeBooks)} • ${ArabicPluralization.formatEntries(totalEntries)}',
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey[600],
@@ -277,7 +278,7 @@ class _RecordBookNotebooksScreenState
           : _notebooks.isEmpty
           ? Center(
               child: Text(
-                'لا توجد دفاتر لهذا السجل',
+                'لا توجد سجلات محفوظة من هذا النوع',
                 style: TextStyle(fontSize: 16, fontFamily: 'Tajawal'),
               ),
             )
@@ -339,7 +340,7 @@ class _RecordBookNotebooksScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'الدفتر رقم ${book.bookNumber}',
+                          'سجل رقم ${book.bookNumber}',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -384,6 +385,46 @@ class _RecordBookNotebooksScreenState
               ),
               const SizedBox(height: 8),
               _buildDetailRow(Icons.history, 'السنوات', book.years.join('، ')),
+              const SizedBox(height: 8),
+              _buildDetailRow(
+                Icons.pages,
+                'سعة السجل',
+                'استُخدم ${book.usedPages} من ${book.totalPages} صفحة (${book.usagePercentage}%)',
+              ),
+              const SizedBox(height: 8),
+              if (book.usagePercentage >= 100)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'السجل ممتلئ تماماً',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Tajawal',
+                      ),
+                    ),
+                  ),
+                )
+              else
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: book.totalPages > 0
+                        ? book.usedPages / book.totalPages
+                        : 0,
+                    backgroundColor: Colors.grey[200],
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      book.usagePercentage > 80 ? Colors.orange : Colors.green,
+                    ),
+                    minHeight: 8,
+                  ),
+                ),
             ],
           ),
         ),
@@ -403,15 +444,16 @@ class _RecordBookNotebooksScreenState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoItem(
-              Icons.book,
-              'رقم الدفتر المرجعي',
-              '${notebook.bookNumber}',
-            ),
+            _buildInfoItem(Icons.book, 'رقم السجل', '${notebook.bookNumber}'),
             _buildInfoItem(
               Icons.list_alt,
               'إجمالي عدد القيود',
               '${notebook.entriesCount}',
+            ),
+            _buildInfoItem(
+              Icons.pages,
+              'السعة المتبقية',
+              'استُخدم ${notebook.usedPages} مدخل من أصل ${notebook.totalPages} صفحة',
             ),
             _buildInfoItem(
               Icons.account_balance,

@@ -17,8 +17,15 @@ abstract class RegistryRemoteDataSource {
   Future<List<RegistryEntrySections>> fetchEntriesFromApi({
     int page = 1,
     int perPage = 15,
+    String? search,
+    List<String>? statuses,
+    int? contractTypeId,
   });
   Future<void> pushEntries(List<RegistryEntrySections> entries);
+  Future<List<RegistryEntrySections>> fetchEntriesByBook({
+    required int contractTypeId,
+    required int bookNumber,
+  });
 }
 
 class RegistryRemoteDataSourceImpl implements RegistryRemoteDataSource {
@@ -127,10 +134,20 @@ class RegistryRemoteDataSourceImpl implements RegistryRemoteDataSource {
   Future<List<RegistryEntrySections>> fetchEntriesFromApi({
     int page = 1,
     int perPage = 15,
+    String? search,
+    List<String>? statuses,
+    int? contractTypeId,
   }) async {
+    final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
+    if (search != null && search.isNotEmpty) queryParams['search'] = search;
+    if (statuses != null && statuses.isNotEmpty)
+      queryParams['status[]'] = statuses;
+    if (contractTypeId != null)
+      queryParams['contract_type_id'] = contractTypeId;
+
     final response = await _client.get(
       ApiEndpoints.registryEntries,
-      queryParameters: {'page': page, 'per_page': perPage},
+      queryParameters: queryParams,
     );
     final responseData = response.data;
 
@@ -176,5 +193,44 @@ class RegistryRemoteDataSourceImpl implements RegistryRemoteDataSource {
       ApiEndpoints.mobileSyncPush,
       data: {'registry_entries': flattenedEntries},
     );
+  }
+
+  @override
+  Future<List<RegistryEntrySections>> fetchEntriesByBook({
+    required int contractTypeId,
+    required int bookNumber,
+  }) async {
+    final response = await _client.get(
+      ApiEndpoints.registryEntries,
+      queryParameters: {
+        'contract_type_id': contractTypeId,
+        'book_number': bookNumber,
+        'per_page': 500,
+      },
+    );
+    final responseData = response.data;
+
+    List rawList;
+    if (responseData is List) {
+      rawList = responseData;
+    } else if (responseData is Map) {
+      final inner = responseData['data'];
+      if (inner is List) {
+        rawList = inner;
+      } else if (inner is Map && inner['data'] is List) {
+        rawList = inner['data'] as List;
+      } else {
+        return [];
+      }
+    } else {
+      return [];
+    }
+
+    return rawList
+        .map(
+          (json) =>
+              RegistryEntrySections.fromJson(Map<String, dynamic>.from(json)),
+        )
+        .toList();
   }
 }

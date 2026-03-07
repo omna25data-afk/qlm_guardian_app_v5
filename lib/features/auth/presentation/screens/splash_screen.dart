@@ -86,8 +86,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     if (!mounted) return;
 
-    // Initialize auth
-    await ref.read(authProvider.notifier).init();
+    // Initialize auth with error boundary to prevent splash freeze
+    try {
+      await ref.read(authProvider.notifier).init();
+    } catch (e) {
+      // في حال حدوث أي خطأ غير متوقع أثناء التهيئة (مثل فشل التخزين الآمن)
+      debugPrint('⚠️ خطأ أثناء تهيئة الجلسة: $e');
+    }
 
     if (!mounted) return;
 

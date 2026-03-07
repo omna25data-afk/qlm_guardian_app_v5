@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart';
 import '../../../registry/presentation/providers/registry_provider.dart';
 import '../../../registry/presentation/widgets/registry_entry_card.dart';
+import '../../../../core/utils/arabic_pluralization.dart';
 
 class RecordBookEntriesScreen extends ConsumerStatefulWidget {
   final int contractTypeId;
@@ -38,7 +39,7 @@ class _RecordBookEntriesScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'قيود دفتر رقم ${widget.bookNumber}',
+          'قيود سجل رقم ${widget.bookNumber}',
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontFamily: 'Tajawal',
@@ -84,7 +85,7 @@ class _RecordBookEntriesScreenState
           if (entries.isEmpty) {
             return const Center(
               child: Text(
-                'لا توجد قيود مرتبطة بهذا الدفتر',
+                'لا توجد قيود مرتبطة بهذا السجل',
                 style: TextStyle(fontSize: 16, fontFamily: 'Tajawal'),
               ),
             );
@@ -139,7 +140,9 @@ class _RecordBookEntriesScreenState
                           ),
                           const Spacer(),
                           Text(
-                            '${yearEntries.length} قيد',
+                            ArabicPluralization.formatEntries(
+                              yearEntries.length,
+                            ),
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[600],

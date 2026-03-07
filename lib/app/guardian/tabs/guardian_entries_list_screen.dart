@@ -5,7 +5,7 @@ import '../../../../features/registry/presentation/providers/contract_types_prov
 import '../../../../features/registry/presentation/screens/guardian_entry_screen.dart';
 import 'widgets/advanced_guardian_filter_sheet.dart';
 import 'widgets/guardian_registry_entry_card.dart';
-import 'screens/guardian_entry_details_screen.dart';
+import '../features/my_records/tabs/entries/screens/guardian_entry_details_screen.dart';
 
 class GuardianEntriesListScreen extends ConsumerStatefulWidget {
   const GuardianEntriesListScreen({super.key});

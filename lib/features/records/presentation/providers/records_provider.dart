@@ -23,6 +23,14 @@ final recordBooksProvider =
       return RecordBooksNotifier(repository);
     });
 
+final contractNotebooksProvider = FutureProvider.family<List<RecordBook>, int>((
+  ref,
+  contractTypeId,
+) async {
+  final repository = ref.watch(recordsRepositoryProvider);
+  return repository.getNotebooksByContract(contractTypeId);
+});
+
 class RecordBooksNotifier extends StateNotifier<AsyncValue<List<RecordBook>>> {
   final RecordsRepository _repository;
 

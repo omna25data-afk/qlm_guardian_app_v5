@@ -55,6 +55,41 @@ class RecordsRepository {
     return RecordBook.fromJson(response.data['data'] ?? response.data);
   }
 
+  /// Fetch physical notebooks specifically for a contract type container
+  Future<List<RecordBook>> getNotebooksByContract(int contractTypeId) async {
+    final cacheKey = 'guardian_notebooks_$contractTypeId';
+
+    if (await _networkInfo.isConnected) {
+      try {
+        final response = await _apiClient.get(
+          '/guardian/record-books',
+          queryParameters: {'contract_type_id': contractTypeId},
+        );
+        final data = response.data is List
+            ? response.data
+            : (response.data['data'] ?? []);
+
+        await _cacheBox.put(cacheKey, data);
+
+        return (data as List)
+            .map((e) => RecordBook.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        // Fallback to cache on error
+      }
+    }
+
+    // Load from cache
+    final cachedData = _cacheBox.get(cacheKey);
+    if (cachedData != null && cachedData is List) {
+      return cachedData
+          .map((e) => RecordBook.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+    }
+
+    return [];
+  }
+
   /// Fetch notebooks for a contract type
   Future<List<RecordBook>> getNotebooks(int contractTypeId) async {
     final cacheKey = 'notebooks_$contractTypeId';

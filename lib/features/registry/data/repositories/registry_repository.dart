@@ -32,6 +32,9 @@ class RegistryRepository {
   Future<List<RegistryEntrySections>> getEntries({
     int page = 1,
     int perPage = 15,
+    String? search,
+    List<String>? statuses,
+    int? contractTypeId,
   }) async {
     if (await _networkInfo.isConnected) {
       // 1. Try primary API endpoint
@@ -39,6 +42,9 @@ class RegistryRepository {
         final remoteEntries = await _remoteDataSource.fetchEntriesFromApi(
           page: page,
           perPage: perPage,
+          search: search,
+          statuses: statuses,
+          contractTypeId: contractTypeId,
         );
         // Save to local DB for offline fallback (best-effort)
         for (var entry in remoteEntries) {
@@ -66,6 +72,31 @@ class RegistryRepository {
 
     // 3. Offline fallback: return local data (may have limited fields)
     return _localDataSource.getAllEntries();
+  }
+
+  /// Get entries for a specific record book by contract type and book number
+  Future<List<RegistryEntrySections>> getEntriesByBook({
+    required int contractTypeId,
+    required int bookNumber,
+  }) async {
+    if (await _networkInfo.isConnected) {
+      try {
+        return await _remoteDataSource.fetchEntriesByBook(
+          contractTypeId: contractTypeId,
+          bookNumber: bookNumber,
+        );
+      } catch (e) {
+        debugPrint('Failed to fetch entries by book: $e');
+      }
+    }
+
+    // Offline fallback: filter local entries
+    final allEntries = await _localDataSource.getAllEntries();
+    return allEntries.where((e) {
+      final bookNum = e.guardianInfo.guardianRecordBookNumber;
+      return bookNum == bookNumber &&
+          e.basicInfo.contractTypeId == contractTypeId;
+    }).toList();
   }
 
   Future<List<ContractTypeModel>> getContractTypes() async {

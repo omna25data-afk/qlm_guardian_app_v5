@@ -59,7 +59,10 @@ final entriesByRecordBookProvider =
         // Just match the bookNumber directly for simplicity and robustness.
         // If a guardian has two books across different categories with same number,
         // we attempt to match contract_type_id if available on the entry.
-        final matchesBook = bookNum != null && bookNum == args.bookNumber;
+        bool matchesBook = false;
+        if (bookNum != null) {
+          matchesBook = bookNum == args.bookNumber;
+        }
 
         if (!matchesBook) return false;
 

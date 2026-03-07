@@ -1,5 +1,8 @@
 import 'package:get_it/get_it.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../network/api_client.dart';
 import '../network/network_info.dart';
 import '../sync/sync_service.dart';
@@ -24,6 +27,9 @@ Future<void> initDependencies() async {
   // Open cache box
   final cacheBox = await Hive.openBox('api_cache');
   final syncBox = await Hive.openBox('sync_queue');
+
+  // مسح الكاش تلقائياً عند تثبيت إصدار جديد من التطبيق
+  await _clearCacheIfNewVersion(cacheBox);
 
   // Register boxes
   getIt.registerSingleton<Box<dynamic>>(cacheBox, instanceName: 'cacheBox');
@@ -112,4 +118,38 @@ Future<void> initDependencies() async {
 /// Reset all dependencies (for testing)
 Future<void> resetDependencies() async {
   await getIt.reset();
+}
+
+/// مسح الكاش تلقائياً عند اكتشاف إصدار جديد من التطبيق
+/// يُقارن رقم البنية (buildNumber) المحفوظ مع الرقم الحالي
+/// إذا تغيّر → يعني تم تثبيت تحديث جديد → يُمسح الكاش القديم تلقائياً
+Future<void> _clearCacheIfNewVersion(Box<dynamic> cacheBox) async {
+  const String buildNumberKey = 'last_build_number';
+
+  try {
+    final packageInfo = await PackageInfo.fromPlatform();
+    final currentBuild = packageInfo.buildNumber; // مثلاً: "1", "2", "10"
+    final prefs = await SharedPreferences.getInstance();
+    final savedBuild = prefs.getString(buildNumberKey);
+
+    if (savedBuild != currentBuild) {
+      // إصدار جديد تم اكتشافه — مسح كل كاش الـ SWR
+      final keys = cacheBox.keys
+          .where((key) => key.toString().startsWith('swr_'))
+          .toList();
+      for (final key in keys) {
+        await cacheBox.delete(key);
+        await cacheBox.delete('${key}_time');
+      }
+
+      // حفظ رقم البنية الجديد
+      await prefs.setString(buildNumberKey, currentBuild);
+
+      debugPrint(
+        '🔄 تم مسح الكاش تلقائياً — إصدار جديد: $currentBuild (السابق: $savedBuild)',
+      );
+    }
+  } catch (e) {
+    debugPrint('⚠️ خطأ أثناء فحص إصدار التطبيق: $e');
+  }
 }

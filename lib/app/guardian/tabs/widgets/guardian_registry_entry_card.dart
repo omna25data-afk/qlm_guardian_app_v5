@@ -5,7 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import 'package:qlm_guardian_app_v5/features/system/data/models/registry_entry_sections.dart';
 import 'package:qlm_guardian_app_v5/features/system/data/models/contract_type.dart';
 
-import '../screens/guardian_entry_details_screen.dart';
+import '../../features/my_records/tabs/entries/screens/guardian_entry_details_screen.dart';
 
 class GuardianRegistryEntryCard extends ConsumerWidget {
   final RegistryEntrySections entry;

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
@@ -19,8 +20,18 @@ class AuthLocalDataSource {
   }
 
   /// Get auth token
+  /// محمي ضد فشل فك التشفير بعد إعادة تثبيت التطبيق (Android KeyStore issue)
   Future<String?> getToken() async {
-    return await _storage.read(key: _tokenKey);
+    try {
+      return await _storage.read(key: _tokenKey);
+    } catch (e) {
+      // فشل فك التشفير - غالباً بسبب حذف مفتاح KeyStore بعد إعادة التثبيت
+      // مع بقاء ملفات EncryptedSharedPreferences من النسخة الاحتياطية
+      debugPrint('⚠️ خطأ في قراءة التوكن من التخزين الآمن: $e');
+      debugPrint('🔄 جاري مسح التخزين الآمن التالف...');
+      await _storage.deleteAll();
+      return null;
+    }
   }
 
   /// Clear token
@@ -34,12 +45,14 @@ class AuthLocalDataSource {
   }
 
   /// Get cached user
+  /// محمي ضد فشل فك التشفير وأخطاء تحليل JSON
   Future<UserModel?> getCachedUser() async {
-    final data = await _storage.read(key: _userKey);
-    if (data == null) return null;
     try {
+      final data = await _storage.read(key: _userKey);
+      if (data == null) return null;
       return UserModel.fromJson(jsonDecode(data));
-    } catch (_) {
+    } catch (e) {
+      debugPrint('⚠️ خطأ في قراءة بيانات المستخدم المحلية: $e');
       return null;
     }
   }

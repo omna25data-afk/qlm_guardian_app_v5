@@ -451,8 +451,17 @@ class RegistryGuardianInfo extends Equatable {
     // Handle nested record_book structure for book numbers/pages if present
     // OR flat structure for older/sync APIs.
     final guardianRecordBookId = json['guardian_record_book_id'] ?? book?['id'];
-    final guardianRecordBookNumber =
+
+    // Ensure book number is parsed as int regardless of whether it's int or string in JSON
+    final rawGuardianBookNum =
         json['guardian_record_book_number'] ?? book?['number'];
+    int? guardianRecordBookNumber;
+    if (rawGuardianBookNum is int) {
+      guardianRecordBookNumber = rawGuardianBookNum;
+    } else if (rawGuardianBookNum is String) {
+      guardianRecordBookNumber = int.tryParse(rawGuardianBookNum);
+    }
+
     final guardianPageNumber =
         json['guardian_page_number'] ?? book?['page_number'];
     final guardianEntryNumber =

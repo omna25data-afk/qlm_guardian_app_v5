@@ -1,3 +1,9 @@
+/// [DEPRECATED] هذه الشاشة قديمة وتم استبدالها بشاشة بتصميم احترافي وبطاقي جديدة.
+///
+/// الرجاء استخدام الشاشة الجديدة المتواجدة في المسار التالي:
+/// lib/app/guardian/features/my_records/tabs/entries/screens/guardian_entry_details_screen.dart
+///
+/// تم الإبقاء على هذا الملف لأغراض الأرشفة والرجوع إليه عند الحاجة، ولا يتم استخدامه في التطبيق حالياً.
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
