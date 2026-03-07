@@ -297,7 +297,10 @@ class _GuardianSectionState extends State<GuardianSection> {
             prefixIcon: Icon(Icons.menu_book, size: 20),
             floatingLabelBehavior: FloatingLabelBehavior.always,
           ),
-          keyboardType: TextInputType.number,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) return 'مطلوب';
+            return null;
+          },
         ),
         const SizedBox(height: 12),
 
