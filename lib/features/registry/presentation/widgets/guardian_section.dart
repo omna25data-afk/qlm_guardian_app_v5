@@ -286,22 +286,63 @@ class _GuardianSectionState extends State<GuardianSection> {
 
         const SizedBox(height: 12),
 
-        // ── رقم الدفتر الفعلي (يُدخل يدوياً) ──
-        TextFormField(
-          controller: widget.recordBookNumberCtrl,
-          textInputAction: TextInputAction.next,
-          decoration: const InputDecoration(
-            labelText: 'رقم الدفتر *',
-            hintText: 'أدخل رقم الدفتر الفعلي',
-            hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
-            prefixIcon: Icon(Icons.menu_book, size: 20),
-            floatingLabelBehavior: FloatingLabelBehavior.always,
+        // ── رقم الدفتر الفعلي (قائمة منسدلة) ──
+        if (widget.guardianRecordBooks.where((b) => b.bookNumber != 0).isEmpty)
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.red.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'لا يوجد دفاتر فعلية مفتوحة لهذا السجل. يرجى التواصل مع الإدارة لفتح دفتر جديد.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.red[800],
+                      fontFamily: 'Tajawal',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          DropdownButtonFormField<String>(
+            value: widget.recordBookNumberCtrl.text.isNotEmpty
+                ? widget.recordBookNumberCtrl.text
+                : null,
+            items: widget.guardianRecordBooks
+                .where((b) => b.bookNumber != 0)
+                .map(
+                  (b) => DropdownMenuItem(
+                    value: b.bookNumber.toString(),
+                    child: Text('دفتر رقم ${b.bookNumber}'),
+                  ),
+                )
+                .toList(),
+            decoration: const InputDecoration(
+              labelText: 'رقم الدفتر *',
+              hintText: 'اختر دفتر السجل',
+              hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
+              prefixIcon: Icon(Icons.menu_book, size: 20),
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+            ),
+            onChanged: (value) {
+              if (value != null) {
+                widget.recordBookNumberCtrl.text = value;
+              }
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) return 'يرجى اختيار الدفتر';
+              return null;
+            },
           ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) return 'مطلوب';
-            return null;
-          },
-        ),
         const SizedBox(height: 12),
 
         // Entry, Page numbers

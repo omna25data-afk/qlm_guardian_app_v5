@@ -546,6 +546,8 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
       _selectedContractTypeId = typeId;
       _selectedSubtype1 = null;
       _selectedSubtype2 = null;
+      _guardianRecordBookId = null;
+      _guardianRecordBookNumberCtrl.clear();
     });
     final notifier = ref.read(addEntryProvider.notifier);
     notifier.loadFormFields(typeId);
