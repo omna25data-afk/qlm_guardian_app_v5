@@ -534,7 +534,31 @@ class AdminRepository {
     return response.data;
   }
 
-  // ─── Record Book Actions ────────────────────────────────
+  // ─── Record Books & Containers ────────────────────────────
+
+  /// Get admin record book containers (contract types with stats)
+  Future<List<RecordBook>> getRecordBookContainers({
+    String? category,
+    int? year,
+    String? dateFrom,
+    String? dateTo,
+  }) async {
+    final params = <String, dynamic>{};
+    if (category != null && category != 'all') params['category'] = category;
+    if (year != null) params['hijri_year'] = year;
+    if (dateFrom != null) params['date_from'] = dateFrom;
+    if (dateTo != null) params['date_to'] = dateTo;
+
+    final response = await _apiClient.get(
+      ApiEndpoints.adminRecordBookContainers,
+      queryParameters: params.isNotEmpty ? params : null,
+    );
+
+    return (response.data['data'] as List?)
+            ?.map((e) => RecordBook.fromJson(e))
+            .toList() ??
+        [];
+  }
 
   /// Create a new record book
   Future<void> createRecordBook(Map<String, dynamic> data) async {
@@ -667,6 +691,7 @@ class AdminRepository {
     required int entryNumber,
     required String transactionDate,
     int? guardianId,
+    String? recordCategory,
   }) async {
     try {
       final data = {
@@ -675,6 +700,7 @@ class AdminRepository {
         'entry_number': entryNumber,
         'transaction_date': transactionDate,
         if (guardianId != null) 'guardian_id': guardianId,
+        if (recordCategory != null) 'record_category': recordCategory,
       };
       final response = await _systemRepository
           .postAdminRegistryEntriesCheckDuplicate(data);

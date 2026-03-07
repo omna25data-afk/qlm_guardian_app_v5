@@ -270,6 +270,7 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
     required int entryNumber,
     required String transactionDate,
     int? guardianId,
+    String? recordCategory,
   }) async {
     try {
       final result = await _repo.checkDuplicateEntry(
@@ -278,6 +279,7 @@ class AddEntryNotifier extends StateNotifier<AddEntryState> {
         entryNumber: entryNumber,
         transactionDate: transactionDate,
         guardianId: guardianId,
+        recordCategory: recordCategory,
       );
       return result;
     } catch (e) {

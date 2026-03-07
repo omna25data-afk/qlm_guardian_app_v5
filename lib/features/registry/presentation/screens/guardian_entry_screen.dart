@@ -257,6 +257,7 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
         entryNumber: entryNumber,
         transactionDate: hijriDate,
         guardianId: guardianId,
+        recordCategory: 'guardian_recording',
       );
 
       if (!mounted) return;
@@ -868,7 +869,7 @@ class _GuardianEntryScreenState extends ConsumerState<GuardianEntryScreen>
         );
       case 'select':
         return DropdownButtonFormField<String>(
-          value: formData[name]?.toString(),
+          initialValue: formData[name]?.toString(),
           decoration: InputDecoration(
             labelText: '$label${required ? ' *' : ''}',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

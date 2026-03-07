@@ -48,6 +48,8 @@ class ApiEndpoints {
   static String get adminDashboard => '$baseUrl/admin/dashboard';
   static String get adminGuardians => '$baseUrl/admin/guardians';
   static String get adminRegistryEntries => '$baseUrl/admin/registry-entries';
+  static String get adminRecordBookContainers =>
+      '$baseUrl/admin/record-books/containers';
   static String get adminRecordBooks => '$baseUrl/admin/record-books';
   static String get adminLicenses => '$baseUrl/admin/licenses';
   static String get adminCards => '$baseUrl/admin/cards';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/geographic_areas_screen.dart';
 import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/guardians/admin_guardians_screen.dart';
+import 'package:qlm_guardian_app_v5/features/admin/presentation/screens/tabs/admin_containers_tab.dart';
 
 /// Admin panel home screen — accessible only by رئيس القلم
 class AdminScreen extends StatelessWidget {
@@ -49,7 +50,12 @@ class AdminScreen extends StatelessWidget {
                     title: 'إدارة السجلات',
                     subtitle: 'تعيين ومراجعة السجلات',
                     onTap: () {
-                      // TODO: Navigate to records management
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AdminContainersTab(),
+                        ),
+                      );
                     },
                   ),
                   _buildAdminCard(
