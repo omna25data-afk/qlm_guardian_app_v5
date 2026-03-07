@@ -68,11 +68,33 @@ class MockRegistryRepository extends _i1.Mock
   _i6.Future<List<_i2.RegistryEntrySections>> getEntries({
     int? page = 1,
     int? perPage = 15,
+    String? search,
+    List<String>? statuses,
+    int? contractTypeId,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#getEntries, [], {
               #page: page,
               #perPage: perPage,
+              #search: search,
+              #statuses: statuses,
+              #contractTypeId: contractTypeId,
+            }),
+            returnValue: _i6.Future<List<_i2.RegistryEntrySections>>.value(
+              <_i2.RegistryEntrySections>[],
+            ),
+          )
+          as _i6.Future<List<_i2.RegistryEntrySections>>);
+
+  @override
+  _i6.Future<List<_i2.RegistryEntrySections>> getEntriesByBook({
+    required int? contractTypeId,
+    required int? bookNumber,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#getEntriesByBook, [], {
+              #contractTypeId: contractTypeId,
+              #bookNumber: bookNumber,
             }),
             returnValue: _i6.Future<List<_i2.RegistryEntrySections>>.value(
               <_i2.RegistryEntrySections>[],
@@ -242,6 +264,40 @@ class MockApiClient extends _i1.Mock implements _i9.ApiClient {
                 this,
                 Invocation.method(
                   #put,
+                  [path],
+                  {
+                    #data: data,
+                    #queryParameters: queryParameters,
+                    #options: options,
+                  },
+                ),
+              ),
+            ),
+          )
+          as _i6.Future<_i4.Response<T>>);
+
+  @override
+  _i6.Future<_i4.Response<T>> patch<T>(
+    String? path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    _i4.Options? options,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #patch,
+              [path],
+              {
+                #data: data,
+                #queryParameters: queryParameters,
+                #options: options,
+              },
+            ),
+            returnValue: _i6.Future<_i4.Response<T>>.value(
+              _FakeResponse_3<T>(
+                this,
+                Invocation.method(
+                  #patch,
                   [path],
                   {
                     #data: data,
